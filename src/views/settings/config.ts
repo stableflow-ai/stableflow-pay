@@ -1,0 +1,2 @@
+export const ORGANIZATION_NAME_MAX_LENGTH = 50;
+export const LOGO_URL_MAX_LENGTH = 500;

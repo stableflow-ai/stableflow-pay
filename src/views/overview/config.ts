@@ -1,0 +1,24 @@
+import {
+  OVERVIEW_METRIC,
+  OVERVIEW_RANGE,
+  type OverviewMetric,
+  type OverviewRange,
+} from "@/mocks/overview";
+
+export const OVERVIEW_CHART_COLOR = "#3F8AFB";
+export const OVERVIEW_LINK_CLASS =
+  "font-montserrat text-base font-medium capitalize text-[#3f8afb] hover:text-[#3f8afb]/80";
+export const OVERVIEW_MUTED_LABEL_CLASS =
+  "font-montserrat text-base font-medium capitalize text-[#aaa]";
+export const OVERVIEW_VALUE_CLASS = "font-montserrat text-[26px] font-medium capitalize text-black";
+
+export const OVERVIEW_METRIC_OPTIONS: { value: OverviewMetric; label: string }[] = [
+  { value: OVERVIEW_METRIC.Volume, label: "Volume" },
+  { value: OVERVIEW_METRIC.Transaction, label: "Transaction" },
+];
+
+export const OVERVIEW_RANGE_OPTIONS: { value: OverviewRange; label: string }[] = [
+  { value: OVERVIEW_RANGE.Daily, label: "Daily" },
+  { value: OVERVIEW_RANGE.Weekly, label: "Weekly" },
+  { value: OVERVIEW_RANGE.Monthly, label: "Monthly" },
+];
