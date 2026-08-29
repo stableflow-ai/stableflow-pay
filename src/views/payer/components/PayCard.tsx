@@ -1,3 +1,4 @@
+import { IconRefresh } from "@/components/icons/refresh";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { InputNumber } from "@/components/ui/input-number/InputNumber";
@@ -33,6 +34,9 @@ export function PayCard(props: {
   payLoading: boolean;
   canPay: boolean;
   walletReady: boolean;
+  swapRefreshing: boolean;
+  canRefreshSwap: boolean;
+  onRefreshSwap: () => void;
   onPay: () => void;
 }) {
   const couponAmount = formatCouponAmount(props.amount || "0");
@@ -59,6 +63,20 @@ export function PayCard(props: {
     <CouponShell
       top={
         <>
+          <button
+            type="button"
+            aria-label="Refresh swap"
+            disabled={!props.canRefreshSwap}
+            onClick={props.onRefreshSwap}
+            className="absolute top-3 right-3 inline-flex size-8 cursor-pointer items-center justify-center text-[#909090] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <IconRefresh
+              className={cn(
+                "size-3.5",
+                props.swapRefreshing && "animate-spin [animation-direction:reverse]",
+              )}
+            />
+          </button>
           <h1 className="mx-auto max-w-full truncate text-center font-montserrat text-lg font-medium text-[#606060]">
             <span>Pay </span>
             <span className="font-bold text-black">{props.paymentTitle}</span>

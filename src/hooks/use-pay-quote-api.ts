@@ -1,27 +1,27 @@
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { payQuote, paySwapCheckout, paySwapLink } from "@/api/pay";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { paySwapCheckout, paySwapLink } from "@/api/pay";
 import { queryKeys } from "@/api/query-keys";
-import type { PayQuoteParam, PaySwapParam } from "@/types/pay";
+import type { PaySwapParam } from "@/types/pay";
 
-export function usePayQuote(body: PayQuoteParam | null, options?: { auth?: boolean }) {
+export type PaySwapSource = {
+  kind: "paylink" | "checkout";
+  id: string;
+  body: PaySwapParam | null;
+};
+
+export function usePaySwapQuery(source: PaySwapSource, options?: { auth?: boolean }) {
   const auth = options?.auth ?? true;
+  const enabled = Boolean(source.id && source.body);
   return useQuery({
-    queryKey: queryKeys.pay.quote({ body, auth }),
-    queryFn: () => payQuote(body!, { auth }),
-    enabled: Boolean(body),
-    placeholderData: keepPreviousData,
-    refetchInterval: 60_000,
-  });
-}
-
-export function usePaySwap(options?: { auth?: boolean }) {
-  const auth = options?.auth ?? true;
-  return useMutation({
-    mutationFn: (input: { kind: "paylink" | "checkout"; id: string; body: PaySwapParam }) => {
-      if (input.kind === "checkout") {
-        return paySwapCheckout(input.id, input.body, { auth });
+    queryKey: queryKeys.pay.swap({ kind: source.kind, id: source.id, body: source.body, auth }),
+    queryFn: () => {
+      const body = source.body!;
+      if (source.kind === "checkout") {
+        return paySwapCheckout(source.id, body, { auth });
       }
-      return paySwapLink(input.id, input.body, { auth });
+      return paySwapLink(source.id, body, { auth });
     },
+    enabled,
+    placeholderData: keepPreviousData,
   });
 }

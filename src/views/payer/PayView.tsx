@@ -6,7 +6,7 @@ import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
-import { usePayQuote, usePaySwap } from "@/hooks/use-pay-quote-api";
+import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
@@ -14,7 +14,7 @@ import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens"
 import { PAYER_KIND, usePayerSessionStore } from "@/stores/payer-session";
 import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
-import { PAY_SWAP_TYPE, type PayQuoteParam, type PaySwapParam } from "@/types/pay";
+import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
 import type { ChainKind } from "@/wallet";
@@ -83,7 +83,7 @@ export function PayView() {
   const connectedAddress = paymentWallet.connectedAddress;
   const walletReady = Boolean(connectedAddress);
   const [openAmount, setOpenAmount] = useState("");
-  const [phase, setPhase] = useState<"idle" | "quoting" | "sending">("idle");
+  const [phase, setPhase] = useState<"idle" | "sending">("idle");
 
   useEffect(() => {
     void ensureFresh();
@@ -134,7 +134,7 @@ export function PayView() {
   const debouncedAmountForQuote = useDebouncedValue(amountForQuote, QUOTE_DEBOUNCE_MS);
   const payable = Boolean(payment?.payable);
 
-  const quoteBody = useMemo((): PayQuoteParam | null => {
+  const swapBody = useMemo((): PaySwapParam | null => {
     if (
       !originToken
       || !destToken
@@ -159,6 +159,7 @@ export function PayView() {
       slippageTolerance: QUICK_PAY_SLIPPAGE_TOLERANCE,
       swapType: PAY_SWAP_TYPE.ExactOutput,
       symbol: origin.token,
+      payer: connectedAddress,
     };
   }, [
     originToken,
@@ -170,33 +171,35 @@ export function PayView() {
     payable,
   ]);
 
-  const dryQuoteQuery = usePayQuote(quoteBody, guestAuth);
-  const swapMutation = usePaySwap(guestAuth);
-  const quote = amountForQuote && destinationAddress && destToken ? dryQuoteQuery.data : undefined;
-  const dryQuoteStale = isDryQuoteStale({
+  const swapQuery = usePaySwapQuery(
+    { kind: isCheckout ? "checkout" : "paylink", id: payment?.id ?? "", body: swapBody },
+    guestAuth,
+  );
+  const swap = amountForQuote && destinationAddress && destToken ? swapQuery.data : undefined;
+  const swapStale = isDryQuoteStale({
     amountForQuote,
     debouncedAmountForQuote,
-    isPlaceholderData: dryQuoteQuery.isPlaceholderData,
-    isPending: dryQuoteQuery.isPending,
-    isFetching: dryQuoteQuery.isFetching,
+    isPlaceholderData: swapQuery.isPlaceholderData,
+    isPending: swapQuery.isPending,
+    isFetching: swapQuery.isFetching,
   });
-  const quoteError = dryQuoteQuery.isError ? formatQuoteErrorMessage(dryQuoteQuery.error, 2) : null;
-  const amountInDisplay = quote?.amountInFormatted
-    ? formatAmount(quote.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
+  const quoteError = swapQuery.isError ? formatQuoteErrorMessage(swapQuery.error, 2) : null;
+  const amountInDisplay = swap?.amountInFormatted
+    ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
     : "—";
-  const fiatDisplay = quote?.amountInUsd
-    ? formatAmount(quote.amountInUsd, { maxDecimals: 2 })
+  const fiatDisplay = swap?.amountInUsd
+    ? formatAmount(swap.amountInUsd, { maxDecimals: 2 })
     : "";
-  const feeUsd = quote?.amountInUsd && amountForQuote
-    ? usdFee(quote.amountInUsd, amountForQuote)
+  const feeUsd = swap?.amountInUsd && amountForQuote
+    ? usdFee(swap.amountInUsd, amountForQuote)
     : null;
   const feeDisplay = feeUsd ? formatAmount(feeUsd, { maxDecimals: 2, showDust: true }) : "—";
-  const durationDisplay = quote?.timeEstimate != null ? `~${quote.timeEstimate}s` : "—";
+  const durationDisplay = swap?.timeEstimate != null ? `~${swap.timeEstimate}s` : "—";
   const fetchOneBalance = useTokenBalancesStore((s) => s.fetchOne);
 
   const settleMutation = useMutation({
     mutationFn: async () => {
-      if (!originToken || !destToken || !amountForQuote || !quote || !destinationAddress || !connectedAddress || !payment) {
+      if (!originToken || !destToken || !amountForQuote || !swap || !destinationAddress || !connectedAddress || !payment) {
         throw new Error("Missing payment inputs");
       }
       if (!wallet.isConnected || !wallet.account?.address) {
@@ -204,33 +207,11 @@ export function PayView() {
         throw new Error("Connect your payment wallet first");
       }
       const paymentWalletAddress = wallet.account.address;
-      setPhase("quoting");
-      const origin = payoutNetworkToken(originToken);
-      const dest = payoutNetworkToken(destToken);
-      const swapBody: PaySwapParam = {
-        amount: amountForQuote,
-        destinationAmount: amountForQuote,
-        destinationNetwork: dest.network,
-        destinationSymbol: dest.token,
-        network: origin.network,
-        recipient: destinationAddress,
-        refundTo: paymentWalletAddress,
-        slippageTolerance: QUICK_PAY_SLIPPAGE_TOLERANCE,
-        swapType: PAY_SWAP_TYPE.ExactOutput,
-        symbol: origin.token,
-        payer: paymentWalletAddress,
-      };
-
-      const swapped = await swapMutation.mutateAsync({
-        kind: payment.kind,
-        id: payment.id,
-        body: swapBody,
-      });
-      const depositAddress = swapped.depositAddress?.trim();
+      const depositAddress = swap.depositAddress?.trim();
       if (!depositAddress) {
         throw new Error("Missing deposit address");
       }
-      const amountIn = BigInt(swapped.amountIn || "0");
+      const amountIn = BigInt(swap.amountIn || "0");
 
       const balance = await fetchOneBalance(paymentWalletAddress, originToken);
       if (!balance || balance.status !== "success" || balance.raw == null) {
@@ -247,18 +228,18 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      enqueueQuickPayCommit({ swapId: swapped.swapId, txHash });
-      const youPayAmount = swapped.amountInFormatted
-        ? formatAmount(swapped.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
+      enqueueQuickPayCommit({ swapId: swap.swapId, txHash });
+      const youPayAmount = swap.amountInFormatted
+        ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
         : amountInDisplay;
-      const payoutUsd = swapped.amountInUsd || quote.amountInUsd || "";
+      const payoutUsd = swap.amountInUsd || "";
       const fees = payoutUsd && amountForQuote ? usdFee(payoutUsd, amountForQuote) : null;
       const checkoutSnap = payment.checkout;
       setSession({
         kind: payment.kind,
         paymentId: payment.id,
         depositAddress,
-        swapId: swapped.swapId,
+        swapId: swap.swapId,
         txHash,
         iconUrl: null,
         recipientAddress: destinationAddress,
@@ -272,7 +253,7 @@ export function PayView() {
         amountInUsd: payoutUsd,
         feesUsd: fees ?? "",
         payoutUsd,
-        timeEstimate: swapped.timeEstimate ?? quote.timeEstimate,
+        timeEstimate: swap.timeEstimate,
         paidAt: Date.now(),
         checkout: checkoutSnap
           ? {
@@ -301,20 +282,22 @@ export function PayView() {
     },
   });
 
-  const sending = settleMutation.isPending || phase === "quoting" || phase === "sending";
+  const sending = settleMutation.isPending || phase === "sending";
+  const swapFetching = Boolean(swapBody) && swapQuery.isFetching;
   const quoteLoading = Boolean(amountForQuote && destinationAddress && destToken && originToken && walletReady)
-    && (dryQuoteStale || dryQuoteQuery.isFetching);
+    && (swapStale || swapQuery.isFetching);
   const canPay = Boolean(
     destinationAddress
     && destToken
     && amountForQuote
     && originToken
-    && quote
-    && !dryQuoteStale
+    && swap
+    && !swapStale
     && !quoteError
     && !sending
     && payable,
   );
+  const canRefreshSwap = Boolean(swapBody) && !swapFetching && !sending;
 
   const detailPending = isCheckout ? checkoutQuery.isPending : linkQuery.isPending;
   const missingId = isCheckout ? !sessionId : !linkId;
@@ -375,6 +358,11 @@ export function PayView() {
         payLoading={sending || quoteLoading}
         canPay={canPay}
         walletReady={walletReady}
+        swapRefreshing={swapFetching}
+        canRefreshSwap={canRefreshSwap}
+        onRefreshSwap={() => {
+          void swapQuery.refetch();
+        }}
         onPay={handlePay}
       />
     </PayerLayout>

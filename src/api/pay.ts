@@ -2,7 +2,7 @@ import { http } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { apiNumber, apiText, asRecord } from "@/api/map";
 import { ApiError } from "@/lib/api-error";
-import type { PayQuoteParam, PayQuoteResp, PaySwapParam, PaySwapResp, PaySwapSubmitParam } from "@/types/pay";
+import type { PayQuoteResp, PaySwapParam, PaySwapResp, PaySwapSubmitParam } from "@/types/pay";
 
 function mapQuote(raw: unknown): PayQuoteResp {
   const row = asRecord(raw) ?? {};
@@ -26,14 +26,6 @@ function mapSwap(raw: unknown): PaySwapResp {
     depositAddress: apiText(row.depositAddress ?? row.deposit_address),
     swapId: apiText(row.swapId ?? row.swap_id),
   };
-}
-
-export function payQuote(body: PayQuoteParam, options?: { auth?: boolean }) {
-  return http<unknown>(`${PAY_API_PREFIX}/quote`, {
-    method: "POST",
-    body,
-    auth: options?.auth ?? true,
-  }).then(mapQuote);
 }
 
 export async function paySwapLink(
