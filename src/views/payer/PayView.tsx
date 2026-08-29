@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/api/query-keys";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
@@ -11,7 +12,6 @@ import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
-import { PAYER_KIND, usePayerSessionStore } from "@/stores/payer-session";
 import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
@@ -26,6 +26,8 @@ import {
   CHECKOUT_PATH,
   CHECKOUT_SESSION_QUERY,
   PAYER_CARD_STATE,
+  PAYER_KIND,
+  PAYER_WAITING_STATE,
   QUOTE_DEBOUNCE_MS,
   checkoutWaitingPath,
   payerWaitingPath,
@@ -37,6 +39,7 @@ import {
   isDryQuoteStale,
   parsePositiveDecimal,
   payoutNetworkToken,
+  shouldCheckoutShowForm,
   usdFee,
 } from "./utils";
 
@@ -71,8 +74,8 @@ export function PayView() {
   const token = useAuthStore((state) => state.token);
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
+  const queryClient = useQueryClient();
   useQuickPayCommitQueue();
-  const setSession = usePayerSessionStore((s) => s.setSession);
   const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
@@ -229,51 +232,12 @@ export function PayView() {
         amountIn,
       });
       enqueueQuickPayCommit({ swapId: swap.swapId, txHash });
-      const youPayAmount = swap.amountInFormatted
-        ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
-        : amountInDisplay;
-      const payoutUsd = swap.amountInUsd || "";
-      const fees = payoutUsd && amountForQuote ? usdFee(payoutUsd, amountForQuote) : null;
-      const checkoutSnap = payment.checkout;
-      setSession({
-        kind: payment.kind,
-        paymentId: payment.id,
-        depositAddress,
-        swapId: swap.swapId,
-        txHash,
-        iconUrl: null,
-        recipientAddress: destinationAddress,
-        requestAmount: amountForQuote,
-        destSymbol: destToken.symbol,
-        destNetwork: destToken.blockchain,
-        youPayAmount,
-        originSymbol: originToken.symbol,
-        originNetwork: originToken.blockchain,
-        payerAddress: paymentWalletAddress,
-        amountInUsd: payoutUsd,
-        feesUsd: fees ?? "",
-        payoutUsd,
-        timeEstimate: swap.timeEstimate,
-        paidAt: Date.now(),
-        checkout: checkoutSnap
-          ? {
-              amount: amountForQuote,
-              createdAt: checkoutSnap.createdAt,
-              expiresAt: checkoutSnap.expiresAt,
-              network: checkoutSnap.network,
-              outOrderNo: checkoutSnap.outOrderNo,
-              recipient: checkoutSnap.recipient,
-              sessionId: checkoutSnap.sessionId,
-              symbol: checkoutSnap.symbol,
-              successUrl: checkoutSnap.successUrl,
-            }
-          : undefined,
-      });
-      navigate(
-        payment.kind === PAYER_KIND.Checkout
-          ? checkoutWaitingPath(payment.id)
-          : payerWaitingPath(payment.id),
-      );
+      if (payment.kind === PAYER_KIND.Checkout) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
+        navigate(checkoutWaitingPath(payment.id));
+        return;
+      }
+      navigate(payerWaitingPath(payment.id), { state: PAYER_WAITING_STATE });
     },
     onError: (err) => {
       setPhase("idle");
@@ -331,6 +295,10 @@ export function PayView() {
       return;
     }
     void settleMutation.mutateAsync();
+  }
+
+  if (isCheckout && checkout && !shouldCheckoutShowForm(checkout)) {
+    return <Navigate to={checkoutWaitingPath(checkout.sessionId || sessionId)} replace />;
   }
 
   return (

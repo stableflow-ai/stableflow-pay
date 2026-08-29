@@ -19,6 +19,7 @@ export const queryKeys = {
     volume: (period: string) => [...queryKeys.payout.all, "volume", period] as const,
     recent: ["payout", "recent"] as const,
     payments: (params: unknown) => [...queryKeys.payout.all, "payments", params] as const,
+    payment: (id: string) => [...queryKeys.payout.all, "payment", id] as const,
     singleQuote: (body: unknown) => [...queryKeys.payout.all, "single-quote", body] as const,
     batchQuote: (body: unknown) => [...queryKeys.payout.all, "batch-quote", body] as const,
   },

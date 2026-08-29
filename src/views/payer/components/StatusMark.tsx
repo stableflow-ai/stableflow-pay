@@ -1,3 +1,4 @@
+import { IconAlert } from "@/components/icons/alert";
 import { IconCheck2 } from "@/components/icons/check";
 import { IconClose } from "@/components/icons/close";
 import { IconLoading } from "@/components/icons/loading";
@@ -15,6 +16,13 @@ export function StatusMark(props: { status: PayerWaitStatus }) {
     return (
       <span className="inline-flex size-[54px] items-center justify-center rounded-full bg-danger shadow-[0_0_0_4px_rgba(255,86,86,0.2)]">
         <IconClose className="size-4 text-white" />
+      </span>
+    );
+  }
+  if (props.status === PAYER_WAIT_STATUS.Suspended) {
+    return (
+      <span className="inline-flex size-[54px] items-center justify-center rounded-full bg-[#AAA]">
+        <IconAlert className="size-4 text-white" />
       </span>
     );
   }

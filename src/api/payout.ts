@@ -3,6 +3,7 @@ import { PAY_API_PREFIX } from "@/api/config";
 import { getPayAnalytics } from "@/api/analytics";
 import { apiNumber, apiText, asRecord } from "@/api/map";
 import { ApiError } from "@/lib/api-error";
+import type { PayPaymentDetail } from "@/types/pay";
 import type {
   PayBatchQuoteParam,
   PayBatchQuoteResp,
@@ -154,6 +155,38 @@ export async function getPaymentVolume(period: VolumePeriod): Promise<VolumePoin
     const point = asRecord(item) ?? {};
     return { label: volumeLabel(point, index, period), value: volumeValue(point) };
   });
+}
+
+export function mapPaymentDetail(raw: unknown): PayPaymentDetail {
+  const row = asRecord(raw) ?? {};
+  return {
+    amount: apiText(row.amount),
+    destinationAmount: apiText(row.destination_amount ?? row.destinationAmount),
+    destinationNetwork: apiText(row.destination_network ?? row.destinationNetwork),
+    destinationSymbol: apiText(row.destination_symbol ?? row.destinationSymbol ?? row.destination_token),
+    destinationTxHash: apiText(row.destination_txHash ?? row.destination_tx_hash ?? row.destinationTxHash),
+    id: apiText(row.id),
+    network: apiText(row.network),
+    paidAt: apiText(row.paid_at ?? row.paidAt),
+    payer: apiText(row.payer),
+    paymentsId: apiText(row.payments_id ?? row.paymentsId),
+    recipient: apiText(row.recipient),
+    status: apiText(row.status).toLowerCase(),
+    submittedAt: apiText(row.submitted_at ?? row.submittedAt),
+    symbol: apiText(row.symbol ?? row.token),
+    txHash: apiText(row.tx_hash ?? row.txHash),
+  };
+}
+
+export async function getPayPayment(
+  paymentId: string,
+  options?: { auth?: boolean },
+): Promise<PayPaymentDetail> {
+  return mapPaymentDetail(
+    await http<unknown>(`${PAY_API_PREFIX}/payments/${paymentId}`, {
+      auth: options?.auth ?? true,
+    }),
+  );
 }
 
 export async function getPayments(params: PayPaymentsQuery): Promise<PayPaymentsResp> {

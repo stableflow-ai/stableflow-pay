@@ -1,35 +1,47 @@
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
-import type { PayerSession } from "@/stores/payer-session";
-import { formatAddress, formatAmount, formatDate } from "@/utils";
+import { formatAddress, formatDate } from "@/utils";
 import { formatTokenNetwork } from "@/views/payment-links/utils";
 import { PAYER_WAIT_STATUS, type PayerWaitStatus } from "../config";
+import type { PayerWaitDetails } from "../utils";
 import { CouponShell } from "./CouponShell";
 import { DetailRow, PrivateBadge } from "./DetailRow";
 import { StatusMark } from "./StatusMark";
 import { IconCopy } from "@/components/icons";
 import useToast from "@/hooks/use-toast";
 
+function tokenLine(amount: string, symbol: string, network: string) {
+  if (!amount && !symbol) return "—";
+  const asset = symbol ? formatTokenNetwork(symbol, network) : "";
+  return [amount, asset].filter(Boolean).join(" ");
+}
+
 export function WaitingCard(props: {
   status: PayerWaitStatus;
-  session: PayerSession;
+  details: PayerWaitDetails;
   explorerUrl: string | null;
   redirectIn?: number | null;
   onBack: () => void;
 }) {
-  const { status, session, explorerUrl, redirectIn, onBack } = props;
+  const { status, details, explorerUrl, redirectIn, onBack } = props;
 
   const toast = useToast();
 
   const isSuccess = status === PAYER_WAIT_STATUS.Success;
   const isFailed = status === PAYER_WAIT_STATUS.Failed;
+  const isSuspended = status === PAYER_WAIT_STATUS.Suspended;
   const title = isSuccess
     ? "Payment Successful!"
     : isFailed
       ? "Payment Failed"
-      : "Waiting for Payment...";
-  const subtitle = isSuccess || isFailed ? null : "This can take 0-3 minutes";
-  const tilde = isSuccess ? "" : "~";
+      : isSuspended
+        ? "Payment Suspended"
+        : "Waiting for Payment...";
+  const subtitle = isSuspended
+    ? "This payment has expired."
+    : isSuccess || isFailed
+      ? null
+      : "This can take 0-3 minutes";
 
   const handleCopy = async (value: string) => {
     try {
@@ -64,64 +76,61 @@ export function WaitingCard(props: {
           <div className="mt-6 flex flex-col gap-[22px]">
             <DetailRow
               label="Recipient Address"
-              value={(
+              value={details.recipientAddress ? (
                 <div className="flex items-center gap-2">
                   <div className="shrink-0">
-                    {formatAddress(session.recipientAddress)}
+                    {formatAddress(details.recipientAddress)}
                   </div>
                   <button
                     type="button"
                     className="cursor-pointer text-[#606060] hover:text-[#000]"
                     onClick={() => {
-                      handleCopy(session.recipientAddress);
+                      handleCopy(details.recipientAddress);
                     }}
                   >
                     <IconCopy className="size-3" />
                   </button>
                 </div>
-              )}
+              ) : "—"}
             />
             <DetailRow
               label="Request Payment"
-              value={`${session.requestAmount} ${formatTokenNetwork(session.destSymbol, session.destNetwork)}`}
+              value={tokenLine(details.requestAmount, details.destSymbol, details.destNetwork)}
             />
             <DetailRow
               label="You Pay"
-              value={`${session.youPayAmount} ${formatTokenNetwork(session.originSymbol, session.originNetwork)}`}
+              value={tokenLine(details.youPayAmount, details.originSymbol, details.originNetwork)}
             />
             <DetailRow
               label="Pay from"
               extra={<PrivateBadge />}
-              value={(
+              value={details.payerAddress ? (
                 <div className="flex items-center gap-2">
                   <div className="shrink-0">
-                    {formatAddress(session.payerAddress)}
+                    {formatAddress(details.payerAddress)}
                   </div>
                   <button
                     type="button"
                     className="cursor-pointer text-[#606060] hover:text-[#000]"
                     onClick={() => {
-                      handleCopy(session.payerAddress);
+                      handleCopy(details.payerAddress);
                     }}
                   >
                     <IconCopy className="size-3" />
                   </button>
                 </div>
-              )}
+              ) : "—"}
             />
             <DetailRow label="Route" value="Near intents" />
-            <DetailRow
-              label="Total Fees"
-              value={session.feesUsd ? `${tilde}${formatAmount(session.feesUsd, { maxDecimals: 2, showDust: true })}` : "—"}
-            />
-            <DetailRow
-              label="Total Payout"
-              value={session.payoutUsd ? `${tilde}${formatAmount(session.payoutUsd, { maxDecimals: 2, showDust: true })}` : "—"}
-            />
+            <DetailRow label="Total Fees" value="—" />
+            <DetailRow label="Total Payout" value="—" />
             {isSuccess ? (
               <>
                 <DetailRow label="Status" value="Complete" valueClassName="text-[#84a20f]" />
-                <DetailRow label="Date" value={formatDate(session.paidAt)} />
+                <DetailRow
+                  label="Date"
+                  value={details.paidAt ? formatDate(details.paidAt) : "—"}
+                />
               </>
             ) : null}
           </div>

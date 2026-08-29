@@ -14,6 +14,7 @@ export function useQuickPayCommitQueue() {
     return onQuickPayCommitSuccess(() => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.payout.all });
       void queryClient.invalidateQueries({ queryKey: queryKeys.analytics.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.all });
     });
   }, [queryClient]);
 }

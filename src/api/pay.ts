@@ -2,7 +2,13 @@ import { http } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { apiNumber, apiText, asRecord } from "@/api/map";
 import { ApiError } from "@/lib/api-error";
-import type { PayQuoteResp, PaySwapParam, PaySwapResp, PaySwapSubmitParam } from "@/types/pay";
+import type {
+  PayQuoteResp,
+  PaySwapParam,
+  PaySwapResp,
+  PaySwapSubmitParam,
+  PaySwapSubmitResp,
+} from "@/types/pay";
 
 function mapQuote(raw: unknown): PayQuoteResp {
   const row = asRecord(raw) ?? {};
@@ -64,10 +70,23 @@ export async function paySwapCheckout(
   return swapped;
 }
 
-export function paySwapSubmit(body: PaySwapSubmitParam, options?: { auth?: boolean }) {
-  return http<string>(`${PAY_API_PREFIX}/swap/submit`, {
-    method: "POST",
-    body,
-    auth: options?.auth ?? true,
-  });
+function mapSwapSubmit(raw: unknown): PaySwapSubmitResp {
+  const row = asRecord(raw) ?? {};
+  return {
+    paymentsId: apiText(row.payments_id ?? row.paymentsId),
+    status: apiText(row.status),
+  };
+}
+
+export async function paySwapSubmit(
+  body: PaySwapSubmitParam,
+  options?: { auth?: boolean },
+): Promise<PaySwapSubmitResp> {
+  return mapSwapSubmit(
+    await http<unknown>(`${PAY_API_PREFIX}/swap/submit`, {
+      method: "POST",
+      body,
+      auth: options?.auth ?? true,
+    }),
+  );
 }

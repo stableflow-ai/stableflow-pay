@@ -24,7 +24,11 @@ interface TaskMeta {
 
 const taskMetaMap = new Map<string, TaskMeta>();
 
-type CommitSuccessListener = () => void;
+export type QuickPayCommitSuccess = {
+  paymentsId: string;
+};
+
+type CommitSuccessListener = (result: QuickPayCommitSuccess) => void;
 const successListeners = new Set<CommitSuccessListener>();
 
 export function onQuickPayCommitSuccess(listener: CommitSuccessListener): () => void {
@@ -34,10 +38,10 @@ export function onQuickPayCommitSuccess(listener: CommitSuccessListener): () => 
   };
 }
 
-function notifySuccessListeners() {
+function notifySuccessListeners(result: QuickPayCommitSuccess) {
   for (const listener of successListeners) {
     try {
-      listener();
+      listener(result);
     } catch {
       // ignore listener errors
     }
@@ -84,13 +88,13 @@ async function processCommit(id: string, item: QuickPayCommitItem, retryCount = 
   try {
     const { paySwapSubmit } = await import("@/api/pay");
     const { useAuthStore } = await import("@/stores/auth");
-    await paySwapSubmit(
+    const submitted = await paySwapSubmit(
       { swapId: item.swapId, txHash: item.txHash },
       { auth: Boolean(useAuthStore.getState().token) },
     );
     useQuickPayCommitQueueStore.getState().remove(id);
     clearTaskMeta(id);
-    notifySuccessListeners();
+    notifySuccessListeners({ paymentsId: submitted.paymentsId.trim() });
   } catch {
     taskMetaMap.set(id, {
       ...(taskMetaMap.get(id) ?? {}),

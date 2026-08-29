@@ -11,6 +11,7 @@ export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
     expiresAt: apiText(row.expires_at ?? row.expiresAt),
     network: apiText(row.network),
     outOrderNo: apiText(row.out_order_no ?? row.outOrderNo),
+    paymentsId: apiText(row.payments_id ?? row.paymentsId),
     recipient: apiText(row.recipient),
     sessionId: apiText(row.session_id ?? row.sessionId),
     status: apiText(row.status),

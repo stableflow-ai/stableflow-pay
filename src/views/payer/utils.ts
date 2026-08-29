@@ -1,14 +1,26 @@
 import { ApiError } from "@/lib/api-error";
-import type { PayerCheckoutSnapshot } from "@/stores/payer-session";
 import type { IntentsToken } from "@/stores/intents-tokens";
-import type { PayCheckoutSession } from "@/types/pay";
+import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import { Big, formatAmount } from "@/utils";
 import {
   CHECKOUT_SUCCESS_STATUS,
-  ONE_CLICK_STATUS,
+  PAY_CHECKOUT_SESSION_STATUS,
+  PAY_PAYMENT_STATUS,
   type PayerWaitStatus,
   PAYER_WAIT_STATUS,
 } from "./config";
+
+export interface PayerWaitDetails {
+  destNetwork: string;
+  destSymbol: string;
+  originNetwork: string;
+  originSymbol: string;
+  paidAt: string;
+  payerAddress: string;
+  recipientAddress: string;
+  requestAmount: string;
+  youPayAmount: string;
+}
 
 const USER_REJECTED_PATTERNS = [
   "user rejected",
@@ -117,45 +129,75 @@ export function usdFee(amountInUsd: string, destAmount: string): string | null {
   }
 }
 
-export function waitStatusFromOneClick(status: string | undefined): PayerWaitStatus {
-  const value = String(status || "").toUpperCase();
-  if (value === ONE_CLICK_STATUS.Success) return PAYER_WAIT_STATUS.Success;
-  if (
-    value === ONE_CLICK_STATUS.Failed
-    || value === ONE_CLICK_STATUS.Refunded
-    || value === ONE_CLICK_STATUS.IncompleteDeposit
-  ) {
-    return PAYER_WAIT_STATUS.Failed;
-  }
+export function waitStatusFromPayment(status: string | undefined): PayerWaitStatus {
+  const value = String(status || "").trim().toLowerCase();
+  if (value === PAY_PAYMENT_STATUS.Completed) return PAYER_WAIT_STATUS.Success;
+  if (value === PAY_PAYMENT_STATUS.Failed) return PAYER_WAIT_STATUS.Failed;
   return PAYER_WAIT_STATUS.Pending;
 }
-
-const CHECKOUT_UNAVAILABLE_STATUS = new Set([
-  "paid",
-  "expired",
-  "canceled",
-  "cancelled",
-  "failed",
-  "complete",
-  "completed",
-  "success",
-]);
 
 export function isCheckoutOpenAmount(session: Pick<PayCheckoutSession, "amount">) {
   return !session.amount.trim();
 }
 
-export function isCheckoutPayable(session: PayCheckoutSession) {
-  const status = session.status.trim().toLowerCase();
-  if (status && CHECKOUT_UNAVAILABLE_STATUS.has(status)) return false;
+function isCheckoutExpired(session: Pick<PayCheckoutSession, "expiresAt">) {
   const expiresAt = session.expiresAt.trim();
-  if (!expiresAt) return true;
+  if (!expiresAt) return false;
   const expiresMs = Date.parse(expiresAt);
-  if (!Number.isFinite(expiresMs)) return true;
-  return expiresMs > Date.now();
+  if (!Number.isFinite(expiresMs)) return false;
+  return expiresMs <= Date.now();
 }
 
-export function buildCheckoutSuccessUrl(snapshot: PayerCheckoutSnapshot): string | null {
+export function isCheckoutPayable(session: PayCheckoutSession) {
+  if (session.paymentsId.trim()) return false;
+  const status = session.status.trim().toLowerCase();
+  if (status && status !== PAY_CHECKOUT_SESSION_STATUS.Created) return false;
+  return !isCheckoutExpired(session);
+}
+
+export function shouldCheckoutShowForm(session: PayCheckoutSession) {
+  return isCheckoutPayable(session);
+}
+
+export function isCheckoutSuspended(session: PayCheckoutSession) {
+  const status = session.status.trim().toLowerCase();
+  if (status === PAY_CHECKOUT_SESSION_STATUS.Expired) return true;
+  if (session.paymentsId.trim()) return false;
+  return isCheckoutExpired(session);
+}
+
+export function isCheckoutFailedWithoutPayment(session: PayCheckoutSession) {
+  if (session.paymentsId.trim()) return false;
+  return session.status.trim().toLowerCase() === PAY_CHECKOUT_SESSION_STATUS.Failed;
+}
+
+export function payerWaitDetailsFromSources(input: {
+  checkout?: PayCheckoutSession | null;
+  payment?: PayPaymentDetail | null;
+  fallbackRecipient?: string;
+  fallbackAmount?: string;
+  fallbackSymbol?: string;
+  fallbackNetwork?: string;
+}): PayerWaitDetails {
+  const checkout = input.checkout;
+  const payment = input.payment;
+  return {
+    recipientAddress: payment?.recipient.trim() || checkout?.recipient.trim() || input.fallbackRecipient?.trim() || "",
+    requestAmount: payment?.destinationAmount.trim()
+      || checkout?.amount.trim()
+      || input.fallbackAmount?.trim()
+      || "",
+    destSymbol: payment?.destinationSymbol.trim() || checkout?.symbol.trim() || input.fallbackSymbol?.trim() || "",
+    destNetwork: payment?.destinationNetwork.trim() || checkout?.network.trim() || input.fallbackNetwork?.trim() || "",
+    youPayAmount: payment?.amount.trim() || "",
+    originSymbol: payment?.symbol.trim() || "",
+    originNetwork: payment?.network.trim() || "",
+    payerAddress: payment?.payer.trim() || "",
+    paidAt: payment?.paidAt.trim() || "",
+  };
+}
+
+export function buildCheckoutSuccessUrl(snapshot: PayCheckoutSession): string | null {
   const base = snapshot.successUrl.trim();
   if (!base) return null;
   try {

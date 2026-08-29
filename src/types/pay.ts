@@ -42,15 +42,39 @@ export interface PaySwapSubmitParam {
   txHash: string;
 }
 
+export interface PaySwapSubmitResp {
+  paymentsId: string;
+  status: string;
+}
+
 export interface PayCheckoutSession {
   amount: string;
   createdAt: string;
   expiresAt: string;
   network: string;
   outOrderNo: string;
+  paymentsId: string;
   recipient: string;
   sessionId: string;
   status: string;
   successUrl: string;
   symbol: string;
+}
+
+export interface PayPaymentDetail {
+  amount: string;
+  destinationAmount: string;
+  destinationNetwork: string;
+  destinationSymbol: string;
+  destinationTxHash: string;
+  id: string;
+  network: string;
+  paidAt: string;
+  payer: string;
+  paymentsId: string;
+  recipient: string;
+  status: string;
+  submittedAt: string;
+  symbol: string;
+  txHash: string;
 }
