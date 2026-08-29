@@ -38,7 +38,7 @@ export function PaymentsChart({ chart }: { chart: OverviewChartPoint[] }) {
   const lastPoint = data[data.length - 1];
 
   return (
-    <Card className="flex min-h-[404px] flex-col p-5 md:p-6">
+    <Card className="flex min-h-[404px] flex-col p-4 md:p-6">
       <div className="flex flex-wrap items-center gap-3">
         <p className="mr-auto font-montserrat text-base font-medium capitalize text-black">
           Payments

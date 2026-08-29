@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
-import { usePaymentLink } from "@/hooks/use-payment-link";
+import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { useSinglePayQuote, useSinglePaySwap } from "@/hooks/use-single-payout-api";
@@ -17,10 +17,7 @@ import type { PaySingleQuoteParam, PaySingleSwapParam } from "@/types/payout";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
 import type { ChainKind } from "@/wallet";
-import {
-  PAYMENT_LINK_STATUS,
-  PAYMENT_LINK_TYPE,
-} from "@/mocks/payment-links";
+import { isPaymentLinkActive, isPaymentLinkOpen } from "@/views/payment-links/utils";
 import { PayerLayout } from "./components/PayerLayout";
 import { PayCard } from "./components/PayCard";
 import {
@@ -54,9 +51,10 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
 }
 
 export function PayView() {
-  const { id: idParam } = useParams();
+  const { linkId: idParam } = useParams();
   const linkId = idParam?.trim() || "";
-  const link = usePaymentLink(linkId);
+  const linkQuery = usePaymentLinkQuery(linkId);
+  const link = linkQuery.data;
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const guestAuth = { auth: Boolean(token) };
@@ -79,19 +77,19 @@ export function PayView() {
     void ensureFresh();
   }, [ensureFresh]);
 
-  const isOpenAmount = link?.type === PAYMENT_LINK_TYPE.Open;
+  const isOpenAmount = Boolean(link && isPaymentLinkOpen(link));
   const amountInput = isOpenAmount ? openAmount : (link?.amount ?? "");
   const destToken = useMemo(() => {
     if (!link) return null;
-    const symbol = normalizeSymbol(link.token);
+    const symbol = normalizeSymbol(link.symbol);
     if (!symbol) return null;
     return findByChainAndSymbol(link.network, symbol) ?? null;
   }, [findByChainAndSymbol, link, tokens]);
 
-  const destinationAddress = link?.recipientAddress.trim() ?? "";
+  const destinationAddress = link?.recipient.trim() ?? "";
   const amountForQuote = parsePositiveDecimal(amountInput, AMOUNT_MAX_DECIMALS);
   const debouncedAmountForQuote = useDebouncedValue(amountForQuote, QUOTE_DEBOUNCE_MS);
-  const linkPayable = Boolean(link && link.status === PAYMENT_LINK_STATUS.Active);
+  const linkPayable = Boolean(link && isPaymentLinkActive(link.status));
 
   const quoteBody = useMemo((): PaySingleQuoteParam | null => {
     if (
@@ -212,7 +210,7 @@ export function PayView() {
         depositAddress,
         orderId: swapped.orderId,
         txHash,
-        iconUrl: link.iconUrl,
+        iconUrl: null,
         recipientAddress: destinationAddress,
         requestAmount: amountForQuote,
         destSymbol: destToken.symbol,
@@ -252,7 +250,10 @@ export function PayView() {
   );
 
   const cardState = (() => {
-    if (!linkId || !link || link.status !== PAYMENT_LINK_STATUS.Active) {
+    if (!linkId || linkQuery.isPending) {
+      return PAYER_CARD_STATE.Loading;
+    }
+    if (!link || !isPaymentLinkActive(link.status)) {
       return PAYER_CARD_STATE.Unavailable;
     }
     return PAYER_CARD_STATE.Pay;
@@ -271,10 +272,10 @@ export function PayView() {
   }
 
   return (
-    <PayerLayout iconUrl={link?.iconUrl}>
+    <PayerLayout>
       <PayCard
         state={cardState}
-        paymentTitle={link?.name ?? ""}
+        paymentTitle={link?.title ?? ""}
         isOpenAmount={isOpenAmount}
         amount={amountInput}
         onAmountChange={setOpenAmount}

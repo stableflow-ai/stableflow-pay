@@ -60,7 +60,7 @@ export function AddWebhookDialog(props: AddWebhookDialogProps) {
       title="Add Endpoint"
       titleClassName="text-[18px]"
       closeOnMaskClick={!submitting}
-      cardClassName="w-[min(100%,600px)] px-[30px] py-7 md:w-[600px]"
+      cardClassName="w-[min(100%,600px)] px-4 md:px-[30px] py-4 md:py-7 md:w-[600px]"
     >
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-5">

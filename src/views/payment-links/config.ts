@@ -1,10 +1,3 @@
-import {
-  PAYMENT_LINK_STATUS,
-  PAYMENT_LINK_TYPE,
-  type PaymentLinkStatus,
-  type PaymentLinkType,
-} from "@/mocks/payment-links";
-
 export const PAYMENT_LINKS_PATH = "/payment-links";
 export const CREATE_PAYMENT_LINK_PATH = "/payment-links/create";
 export const CREATE_PAYMENT_LINK_PREVIEW_PATH = "/payment-links/create/preview";
@@ -22,14 +15,27 @@ export type CreatePaymentLinkStep =
   (typeof CREATE_PAYMENT_LINK_STEP)[keyof typeof CREATE_PAYMENT_LINK_STEP];
 
 export type CreatePaymentLinkPreviewState = {
-  id: string;
+  linkId: string;
 };
 
 export const PAYMENT_TITLE_MAX_LENGTH = 50;
 export const PAYMENT_DESCRIPTION_MAX_LENGTH = 200;
-export const PAYMENT_ICON_URL_MAX_LENGTH = 500;
 export const CREATE_LINK_AMOUNT_MAX_DECIMALS = 6;
 export const CREATE_LINK_QR_SIZE_PX = 147;
+
+export const PAYMENT_LINK_TYPE = {
+  Fixed: "fixed",
+  Open: "open",
+} as const;
+
+export type PaymentLinkType = (typeof PAYMENT_LINK_TYPE)[keyof typeof PAYMENT_LINK_TYPE];
+
+export const PAYMENT_LINK_STATUS = {
+  Active: "active",
+  Inactive: "inactive",
+} as const;
+
+export type PaymentLinkStatus = (typeof PAYMENT_LINK_STATUS)[keyof typeof PAYMENT_LINK_STATUS];
 
 export const PAYMENT_LINK_TYPE_LABEL: Record<PaymentLinkType, string> = {
   [PAYMENT_LINK_TYPE.Fixed]: "Fixed Amount",

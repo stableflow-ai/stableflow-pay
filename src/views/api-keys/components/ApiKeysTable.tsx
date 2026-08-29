@@ -36,7 +36,7 @@ export function ApiKeysTable({
   onDelete: (row: PayPartnerKey) => void;
 }) {
   return (
-    <Table columns={API_KEY_TABLE_COLUMNS} className="w-full p-5">
+    <Table columns={API_KEY_TABLE_COLUMNS} className="w-full p-4 md:p-5">
       <TableHeader>
         <TableHead>Label</TableHead>
         <TableHead>Key</TableHead>

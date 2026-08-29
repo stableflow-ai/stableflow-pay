@@ -18,11 +18,11 @@ import { RedirectIfAuthed, RequireAuth } from "./guards";
 
 export const router = createBrowserRouter([
   {
-    path: "/p/:id",
+    path: "/paylink/:linkId",
     element: <PayView />,
   },
   {
-    path: "/p/:id/waiting",
+    path: "/paylink/:linkId/waiting",
     element: <WaitingView />,
   },
   {
@@ -52,9 +52,14 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <OverviewView /> },
-          { path: "/payment-links", element: <PaymentLinksView /> },
-          { path: "/payment-links/create", element: <CreatePaymentLinkView /> },
-          { path: "/payment-links/create/preview", element: <CreatePaymentLinkPreviewView /> },
+          {
+            path: "/payment-links",
+            element: <PaymentLinksView />,
+            children: [
+              { path: "create", element: <CreatePaymentLinkView /> },
+              { path: "create/preview", element: <CreatePaymentLinkPreviewView /> },
+            ],
+          },
           { path: "/api-keys", element: <ApiKeysView /> },
           { path: "/settings", element: <SettingsView /> },
           { path: "/webhooks", element: <Navigate to="/settings" replace /> },

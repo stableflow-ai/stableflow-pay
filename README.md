@@ -47,16 +47,16 @@ pnpm preview
 | `/login`, `/register` | guest | Email + password |
 | `/howitworks` | public | Marketing |
 | `/` | merchant | Overview (mock until the overview API exists) |
-| `/payment-links` | merchant | Link list (mock) |
-| `/payment-links/create` | merchant | Create + preview (mock) |
-| `/paylink/:pl_xxx` | payer | Checkout; no login, no sidebar |
+| `/payment-links` | merchant | Link list API |
+| `/payment-links/create` | merchant | Create + preview |
+| `/paylink/:linkId` | payer | Checkout; no login, no sidebar |
 | `/checkout?sessionId=cs_xxx` | payer | Checkout; no login, no sidebar |
 | `/api-keys` | merchant | Partner keys API |
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
 | `/terms`, `/docs` | merchant | Placeholder |
 
-Overview and Payment Links still use fixtures in `src/mocks/` until those backend contracts exist. API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.
+Overview still uses fixtures in `src/mocks/` until that backend contract exists. Payment Links, API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.
 
 ## Docs for contributors
 

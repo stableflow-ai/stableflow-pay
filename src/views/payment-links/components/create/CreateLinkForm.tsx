@@ -8,9 +8,9 @@ import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { InputNumber } from "@/components/ui/input-number/InputNumber";
 import { Switch } from "@/components/ui/switch/Switch";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
-import { useCreatePaymentLink } from "@/hooks/use-payment-links";
+import { usePaymentLinkMutations } from "@/hooks/use-payment-links-api";
+import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { PAYMENT_LINK_TYPE } from "@/mocks/payment-links";
 import { useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
 import { isAddressValid } from "@/utils";
 import {
@@ -18,12 +18,10 @@ import {
   CREATE_PAYMENT_LINK_PREVIEW_PATH,
   CREATE_PAYMENT_LINK_STEP,
   PAYMENT_DESCRIPTION_MAX_LENGTH,
-  PAYMENT_ICON_URL_MAX_LENGTH,
   PAYMENT_TITLE_MAX_LENGTH,
   type CreatePaymentLinkPreviewState,
 } from "../../config";
-import { isPositiveAmount } from "../../utils";
-import { CreateLinkCard } from "./CreateLinkCard";
+import { isPositiveAmount, paymentLinksError } from "../../utils";
 import { CreateLinkStepper } from "./CreateLinkStepper";
 import { TokenSelectButton } from "./TokenSelectButton";
 
@@ -32,12 +30,12 @@ const FIELD_INPUT_CLASS =
 
 export function CreateLinkForm() {
   const navigate = useNavigate();
-  const { create } = useCreatePaymentLink();
+  const toast = useToast();
+  const { createMutation } = usePaymentLinkMutations();
   const ensureFresh = useIntentsTokensStore((state) => state.ensureFresh);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [iconUrl, setIconUrl] = useState("");
   const [amount, setAmount] = useState("");
   const [openAmount, setOpenAmount] = useState(false);
   const [token, setToken] = useState<IntentsToken | null>(null);
@@ -72,31 +70,30 @@ export function CreateLinkForm() {
     setToken(next);
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (!canSubmit || !token) {
       setShowErrors(true);
       return;
     }
-    const created = create({
-      name: title.trim(),
-      description: description.trim() || null,
-      iconUrl: iconUrl.trim() || null,
-      type: openAmount ? PAYMENT_LINK_TYPE.Open : PAYMENT_LINK_TYPE.Fixed,
-      amount: openAmount ? null : amount,
-      token: token.symbol,
-      network: token.blockchain,
-      recipientAddress: address.trim(),
-    });
-    const state: CreatePaymentLinkPreviewState = { id: created.id };
-    navigate(CREATE_PAYMENT_LINK_PREVIEW_PATH, { state });
+    try {
+      const created = await createMutation.mutateAsync({
+        title: title.trim(),
+        description: description.trim(),
+        amount: openAmount ? "" : amount,
+        symbol: token.symbol,
+        network: token.blockchain,
+        recipient: address.trim(),
+      });
+      const state: CreatePaymentLinkPreviewState = { linkId: created.linkId };
+      navigate(CREATE_PAYMENT_LINK_PREVIEW_PATH, { state });
+    } catch (error) {
+      toast.fail({ title: paymentLinksError(error, "Could not create payment link") });
+    }
   }
 
   return (
     <>
-      <CreateLinkCard>
-        <h2 className="text-center font-montserrat text-[26px] font-semibold leading-normal text-black">
-          Create Payment Link
-        </h2>
+      <div>
         <CreateLinkStepper step={CREATE_PAYMENT_LINK_STEP.Form} />
         <div className="mt-6 h-px w-full bg-[#e3e3e3]" />
 
@@ -135,25 +132,6 @@ export function CreateLinkForm() {
           maxLength={PAYMENT_DESCRIPTION_MAX_LENGTH}
           placeholder="e.g. detail of invoice or attachment link"
           onChange={(event) => setDescription(event.target.value)}
-          className={cn(FIELD_INPUT_CLASS, "mt-2.5 border-[#e3e3e3] text-black")}
-        />
-
-        <div className="mt-5 flex items-center gap-2">
-          <label
-            htmlFor="payment-icon-url"
-            className="font-montserrat text-sm font-medium capitalize text-[#606060]"
-          >
-            Icon URL
-          </label>
-          <span className="font-montserrat text-sm font-medium capitalize text-[#aaa]">Optional</span>
-        </div>
-        <input
-          id="payment-icon-url"
-          type="text"
-          value={iconUrl}
-          maxLength={PAYMENT_ICON_URL_MAX_LENGTH}
-          placeholder="URL of the product icon image"
-          onChange={(event) => setIconUrl(event.target.value)}
           className={cn(FIELD_INPUT_CLASS, "mt-2.5 border-[#e3e3e3] text-black")}
         />
 
@@ -226,10 +204,15 @@ export function CreateLinkForm() {
           ) : null}
         </div>
 
-        <Button size={BUTTON_SIZE.Xl} className="mt-8 w-full" onClick={handleGenerate}>
+        <Button
+          size={BUTTON_SIZE.Xl}
+          className="mt-8 w-full"
+          loading={createMutation.isPending}
+          onClick={() => void handleGenerate()}
+        >
           Generate Payment Link
         </Button>
-      </CreateLinkCard>
+      </div>
 
       <TokenSelectDialog
         open={tokenDialogOpen}

@@ -9,7 +9,7 @@ import { PAYER_WAIT_STATUS, payerPath } from "./config";
 import { waitStatusFromOneClick } from "./utils";
 
 export function WaitingView() {
-  const { id: idParam } = useParams();
+  const { linkId: idParam } = useParams();
   const linkId = idParam?.trim() || "";
   const navigate = useNavigate();
   const session = usePayerSessionStore((s) => s.session);

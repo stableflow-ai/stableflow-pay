@@ -1,4 +1,4 @@
-export const PAYER_PATH_PREFIX = "/p";
+export const PAYER_PATH_PREFIX = "/paylink";
 
 export const AMOUNT_MAX_DECIMALS = 6;
 export const QUOTE_DEBOUNCE_MS = 900;

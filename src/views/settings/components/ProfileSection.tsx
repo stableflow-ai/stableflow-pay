@@ -24,7 +24,7 @@ export function ProfileSection(props: {
   const { name, slug, logo, saving, onNameChange, onSlugChange, onLogoChange, onSave } = props;
 
   return (
-    <Card className="flex flex-col gap-6 px-6 py-6 md:px-7 md:py-6">
+    <Card className="flex flex-col gap-6 px-4 py-4 md:px-7 md:py-6">
       <div>
         <h2 className="font-montserrat text-xl font-medium capitalize text-black">Profile</h2>
         <p className="mt-2 font-montserrat text-sm font-normal text-[#909090]">

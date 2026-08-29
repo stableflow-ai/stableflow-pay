@@ -1,13 +1,14 @@
-import { getPaymentLinkById } from "@/mocks/payment-links";
+import { useQuery } from "@tanstack/react-query";
+import { getPaymentLink } from "@/api/payment-links";
+import { queryKeys } from "@/api/query-keys";
+import { useAuthStore } from "@/stores/auth";
 
-// TODO(api): replace mock read with TanStack Query when the backend contract is ready.
-// 1. Add types in src/types/payment-links.ts from the real API (do not reuse mock-local types blindly).
-// 2. Add src/api/payment-links.ts using http() and append the endpoint table in doc/api.md.
-// 3. Add queryKeys.paymentLinks in src/api/query-keys.ts.
-// 4. Switch this hook to useQuery ({ queryFn: real api }). Public payer pages do not require a session.
-// 5. Set MOCK_ENABLED.paymentLinks = false and delete src/mocks/payment-links.ts.
-
-export function usePaymentLink(id: string | undefined) {
-  if (!id) return null;
-  return getPaymentLinkById(id);
+export function usePaymentLinkQuery(linkId: string | undefined) {
+  const token = useAuthStore((state) => state.token);
+  const id = linkId?.trim() ?? "";
+  return useQuery({
+    queryKey: queryKeys.paymentLinks.detail(id),
+    queryFn: () => getPaymentLink(id, { auth: Boolean(token) }),
+    enabled: Boolean(id),
+  });
 }

@@ -35,6 +35,11 @@ export const queryKeys = {
     withdrawCount: ["request", "withdraw-count"] as const,
     detail: (id: number) => [...queryKeys.request.all, "detail", id] as const,
   },
+  paymentLinks: {
+    all: ["payment-links"] as const,
+    list: ["payment-links", "list"] as const,
+    detail: (id: string) => [...queryKeys.paymentLinks.all, "detail", id] as const,
+  },
   organization: {
     all: ["organization"] as const,
     current: ["organization", "current"] as const,

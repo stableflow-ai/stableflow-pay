@@ -8,7 +8,7 @@ export function StatsRow({ stats }: { stats: OverviewStats }) {
   const revenue = splitUsdAmount(stats.totalRevenue);
 
   return (
-    <Card className="grid gap-8 p-5 md:grid-cols-4 md:gap-6 md:px-7 md:py-7">
+    <Card className="grid gap-8 p-4 md:grid-cols-4 md:gap-6 md:px-7 md:py-7">
       <div>
         <p className="font-montserrat text-base font-medium capitalize text-black">Total Revenue</p>
         <p className={`${OVERVIEW_VALUE_CLASS} mt-2`}>

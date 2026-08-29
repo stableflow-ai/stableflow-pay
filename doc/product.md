@@ -11,9 +11,9 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Auth | `/login`, `/register` | shipped | Email + password. Same API as v2. Guest forgot password in a dialog. Authed users change password from the sidebar account menu. |
 | Marketing | `/howitworks` | shipped | Public. Linked from the auth shell. |
 | Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. |
-| Payment Links | `/payment-links` | shipped (mock) | Merchant payment-link list (stats, search, copy / toggle / delete). View opens a payments drawer. Data from `src/mocks/payment-links.ts` until the API contract exists. |
-| Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped (mock) | Form then preview. Sidebar stays on Payment Links. Overview header CTA goes here. Create is mocked until the merchant-link API exists. |
-| Public payer | `/p/:id`, `/p/:id/waiting` | shipped (mock detail) | No login, no sidebar. Opening a payment-link URL. Link detail from `src/mocks/payment-links.ts`. Quote / swap / submit and 1Click status are real APIs (guest `auth: Boolean(token)`). |
+| Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). View opens a payments drawer (transactions empty until that API exists). Uses `/v1/pay/links`. |
+| Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
+| Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}` (`auth` only when a session exists). Quote / swap / submit and 1Click status are real APIs. |
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/partner/keys` directly; no Partner registration. |
 | Reports | `/reports` | shipped | Partner analytics stats and charts (`GET /v1/pay/partner/analytics`) plus a paginated usage table (`GET /v1/pay/partner/payments`). No Partner registration. |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
@@ -37,7 +37,7 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, and `/p/:id` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, and `/paylink/:linkId` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
 
 The sidebar user chip shows `user.name` and a three-dot control. That control opens an upward floating menu (same pattern as v2, `side="top"`): Change Password, Settings, Log out. Settings goes to `/settings`. Change Password opens `ResetPasswordDialog` (`variant="authed"`).
 
@@ -49,11 +49,11 @@ One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this 
 
 ## Payment Links
 
-Authenticated `/payment-links` is mocked until the merchant-link API exists. Follow [mocks.md](mocks.md). Do not invent `src/types/payment-links.ts` or query keys in this phase. Create Payment Link is `/payment-links/create` (form) then `/payment-links/create/preview` (generated URL + QR).
+Authenticated `/payment-links` lists merchant links from `GET /v1/pay/links`. Create is a nested overlay at `/payment-links/create` (form) then `/payment-links/create/preview` (generated URL + QR): 600px right drawer on desktop, bottom drawer below 768px. Toggle uses enable / disable. Revenue and per-link payments are placeholders until those APIs exist.
 
 ## Public payer
 
-`/p/:id` is the guest checkout for a payment link. It does **not** use `AppLayout` and does **not** require login. Fixed links show a read-only amount; Open Amount links let the payer edit the amount (max 6 decimals). After swap + on-chain transfer, `/p/:id/waiting` polls `GET /v1/nearintents/status` until success or failure.
+`/paylink/:linkId` is the guest checkout for a payment link. It does **not** use `AppLayout` and does **not** require login. Fixed links show a read-only amount; Open Amount links (empty `amount`) let the payer edit the amount (max 6 decimals). After swap + on-chain transfer, `/paylink/:linkId/waiting` polls `GET /v1/nearintents/status` until success or failure.
 
 ## API Keys
 

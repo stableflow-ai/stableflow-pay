@@ -1,8 +1,33 @@
 import { FIXED_CHAINS } from "@/config/chains";
-import { Big, formatAmount, formatDate, stampDownloadFilename } from "@/utils";
-import { PAYMENT_LINK_TYPE } from "@/mocks/payment-links";
-import type { PaymentLink, PaymentLinkTransaction } from "@/mocks/payment-links";
-import { CREATE_LINK_QR_SIZE_PX } from "./config";
+import { Big, formatAmount, stampDownloadFilename } from "@/utils";
+import type { PayPaymentLink } from "@/types/payment-links";
+import {
+  CREATE_LINK_QR_SIZE_PX,
+  PAYMENT_LINK_STATUS,
+  PAYMENT_LINK_STATUS_LABEL,
+  PAYMENT_LINK_TYPE,
+  type PaymentLinkStatus,
+} from "./config";
+
+export function isPaymentLinkOpen(link: PayPaymentLink) {
+  return !link.amount.trim();
+}
+
+export function isPaymentLinkActive(status: string) {
+  const value = status.trim().toLowerCase();
+  return value === "active" || value === "enabled";
+}
+
+export function paymentLinkType(link: PayPaymentLink) {
+  return isPaymentLinkOpen(link) ? PAYMENT_LINK_TYPE.Open : PAYMENT_LINK_TYPE.Fixed;
+}
+
+export function paymentLinkStatusLabel(status: string) {
+  const key: PaymentLinkStatus = isPaymentLinkActive(status)
+    ? PAYMENT_LINK_STATUS.Active
+    : PAYMENT_LINK_STATUS.Inactive;
+  return PAYMENT_LINK_STATUS_LABEL[key];
+}
 
 export function splitUsdAmount(value: number): { whole: string; fraction: string } {
   const formatted = formatAmount(value, { maxDecimals: 2, padDecimals: true });
@@ -11,17 +36,17 @@ export function splitUsdAmount(value: number): { whole: string; fraction: string
   return { whole: formatted.slice(0, dot), fraction: formatted.slice(dot) };
 }
 
-export function buildPaymentLinkUrl(origin: string, id: string): string {
-  return `${origin.replace(/\/+$/, "")}/p/${id}`;
+export function buildPaymentLinkUrl(origin: string, linkId: string): string {
+  return `${origin.replace(/\/+$/, "")}/paylink/${linkId}`;
 }
 
 export function formatTokenNetwork(token: string, network: string): string {
   return `${token} · ${chainDisplayName(network)}`;
 }
 
-export function formatLinkAmount(link: PaymentLink): string {
-  const asset = formatTokenNetwork(link.token, link.network);
-  if (link.type === PAYMENT_LINK_TYPE.Open || !link.amount) return asset;
+export function formatLinkAmount(link: PayPaymentLink): string {
+  const asset = formatTokenNetwork(link.symbol, link.network);
+  if (isPaymentLinkOpen(link)) return asset;
   return `${link.amount} ${asset}`;
 }
 
@@ -30,44 +55,6 @@ export function chainDisplayName(network: string): string {
     (entry) => entry.blockchain === network || entry.chainName === network,
   );
   return chain?.chainName ?? network;
-}
-
-export function transactionExplorerUrl(row: PaymentLinkTransaction): string | null {
-  if (!row.txHash) return null;
-  const chain = FIXED_CHAINS.find(
-    (entry) => entry.blockchain === row.network || entry.chainName === row.network,
-  );
-  if (!chain) return null;
-  return `${chain.txExplorer}${row.txHash}`;
-}
-
-export function downloadLinkTransactionsCsv(link: PaymentLink, now = new Date()) {
-  const header = ["Time", "Paid by", "Paid", "Asset", "Paid Value", "Status"];
-  const lines = [
-    header.join(","),
-    ...link.transactions.map((row) =>
-      [
-        csvCell(formatDate(row.paidAt)),
-        csvCell(row.payer),
-        csvCell(row.paid),
-        csvCell(formatTokenNetwork(row.token, row.network)),
-        csvCell(formatAmount(row.paidValue, { maxDecimals: 2 })),
-        "Complete",
-      ].join(","),
-    ),
-  ];
-  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = stampDownloadFilename(`payment-link-${link.id}-transactions.csv`, now);
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
-function csvCell(value: string): string {
-  if (/[",\n]/.test(value)) return `"${value.replaceAll('"', '""')}"`;
-  return value;
 }
 
 export function isPositiveAmount(value: string): boolean {
@@ -92,4 +79,9 @@ export function downloadPaymentLinkQr(dataUrl: string, linkId: string, now = new
   anchor.href = dataUrl;
   anchor.download = stampDownloadFilename(`payment-link-${linkId}-qr.png`, now);
   anchor.click();
+}
+
+export function paymentLinksError(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
 }

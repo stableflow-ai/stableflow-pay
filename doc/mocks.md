@@ -56,7 +56,6 @@ Every mock reader must include this comment:
 | Domain | Mock file | Reader hook | Notes |
 | --- | --- | --- | --- |
 | `overview` | `src/mocks/overview.ts` | `src/hooks/use-overview-dashboard.ts` | Overview dashboard at `/` until `/v1/pay` overview exists. |
-| `paymentLinks` | `src/mocks/payment-links.ts` | `src/hooks/use-payment-links.ts`, `src/hooks/use-payment-link.ts` | Payment Links list, per-link transactions, create-link, and public payer detail at `/p/:id` until the merchant-link API exists. |
 
 ## Constraints
 

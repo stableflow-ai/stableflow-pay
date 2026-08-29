@@ -6,7 +6,6 @@ import { IconOverview } from "@/components/icons/overview";
 import { IconRecords, IconRecords2 } from "@/components/icons/records";
 import { IconSettings } from "@/components/icons/settings";
 import type { IconProps } from "@/components/icons/types";
-import { isCreatePaymentLinkPath } from "@/views/payment-links/config";
 
 export const SIDEBAR_WIDTH_PX = 220;
 export const SIDEBAR_NAV_ACTIVE_COLOR = "#3F8AFB";
@@ -37,7 +36,6 @@ export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
 export const PLACEHOLDER_ROUTES = ["/terms", "/docs"] as const;
 
 export function pageTitleForPath(pathname: string): string {
-  if (isCreatePaymentLinkPath(pathname)) return "Create Payment Link";
   const item = [...SIDEBAR_NAV_ITEMS, ...SIDEBAR_FOOTER_ITEMS].find((entry) => {
     if (entry.end || entry.to === "/") return pathname === entry.to;
     return pathname === entry.to || pathname.startsWith(`${entry.to}/`);

@@ -11,17 +11,16 @@ import {
   type CreatePaymentLinkPreviewState,
 } from "../../config";
 import { buildPaymentLinkUrl, downloadPaymentLinkQr, paymentLinkQrDataUrl } from "../../utils";
-import { CreateLinkCard } from "./CreateLinkCard";
 import { CreateLinkStepper } from "./CreateLinkStepper";
 
 export function CreateLinkPreview() {
   const navigate = useNavigate();
   const toast = useToast();
   const location = useLocation();
-  const id = (location.state as CreatePaymentLinkPreviewState | null)?.id;
+  const linkId = (location.state as CreatePaymentLinkPreviewState | null)?.linkId;
   const [qrSrc, setQrSrc] = useState<string | null>(null);
 
-  const url = id ? buildPaymentLinkUrl(window.location.origin, id) : "";
+  const url = linkId ? buildPaymentLinkUrl(window.location.origin, linkId) : "";
 
   useEffect(() => {
     if (!url) return;
@@ -34,11 +33,11 @@ export function CreateLinkPreview() {
     };
   }, [url]);
 
-  if (!id) {
+  if (!linkId) {
     return <Navigate to={CREATE_PAYMENT_LINK_PATH} replace />;
   }
 
-  const linkId = id;
+  const previewLinkId = linkId;
 
   async function copyLink() {
     try {
@@ -51,14 +50,11 @@ export function CreateLinkPreview() {
 
   function saveQr() {
     if (!qrSrc) return;
-    downloadPaymentLinkQr(qrSrc, linkId);
+    downloadPaymentLinkQr(qrSrc, previewLinkId);
   }
 
   return (
-    <CreateLinkCard>
-      <h2 className="text-center font-montserrat text-[26px] font-semibold leading-normal text-black">
-        Create Payment Link
-      </h2>
+    <div>
       <CreateLinkStepper step={CREATE_PAYMENT_LINK_STEP.Preview} />
       <div className="mt-6 h-px w-full bg-[#e3e3e3]" />
 
@@ -103,7 +99,7 @@ export function CreateLinkPreview() {
           Copy Link
         </Button>
       </div>
-    </CreateLinkCard>
+    </div>
   );
 }
 
