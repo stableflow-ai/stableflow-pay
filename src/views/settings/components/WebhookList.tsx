@@ -1,34 +1,31 @@
 import { IconDelete } from "@/components/icons/delete";
 import { IconFlask } from "@/components/icons/flask";
 import { IconResetPassword } from "@/components/icons/reset-password";
-import { Card } from "@/components/ui/card/Card";
 import { Switch } from "@/components/ui/switch/Switch";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
-import type { WebhookEndpoint } from "@/mocks/webhooks";
-import { formatWebhookEvents } from "../utils";
+import type { PayWebhook } from "@/types/webhooks";
+import { formatWebhookEvents, isWebhookEnabled } from "../utils";
 
 export function WebhookList(props: {
-  endpoints: WebhookEndpoint[];
+  endpoints: PayWebhook[];
   pendingId: string | null;
   onAdd: () => void;
-  onToggle: (endpoint: WebhookEndpoint, enabled: boolean) => void;
-  onRotate: (endpoint: WebhookEndpoint) => void;
-  onSendTest: (endpoint: WebhookEndpoint) => void;
-  onDelete: (endpoint: WebhookEndpoint) => void;
+  onToggle: (endpoint: PayWebhook, enabled: boolean) => void;
+  onRotate: (endpoint: PayWebhook) => void;
+  onSendTest: (endpoint: PayWebhook) => void;
+  onDelete: (endpoint: PayWebhook) => void;
 }) {
   const { endpoints, pendingId, onAdd, onToggle, onRotate, onSendTest, onDelete } = props;
 
   if (endpoints.length === 0) {
     return (
-      <Card className="px-5 py-16">
-        <p className="text-center font-montserrat text-sm font-medium text-[#aaa]">
-          No webhook endpoints yet.{" "}
-          <button type="button" className="cursor-pointer text-black" onClick={onAdd}>
-            Add Endpoint
-          </button>
-          .
-        </p>
-      </Card>
+      <p className="font-montserrat text-sm font-medium text-[#aaa]">
+        No webhook endpoints yet.{" "}
+        <button type="button" className="cursor-pointer text-black" onClick={onAdd}>
+          Add Endpoint
+        </button>
+        .
+      </p>
     );
   }
 
@@ -36,9 +33,9 @@ export function WebhookList(props: {
     <div className="flex flex-col gap-3">
       {endpoints.map((endpoint) => (
         <WebhookRow
-          key={endpoint.id}
+          key={endpoint.webhookId}
           endpoint={endpoint}
-          pending={pendingId === endpoint.id}
+          pending={pendingId === endpoint.webhookId}
           onToggle={(enabled) => onToggle(endpoint, enabled)}
           onRotate={() => onRotate(endpoint)}
           onSendTest={() => onSendTest(endpoint)}
@@ -50,7 +47,7 @@ export function WebhookList(props: {
 }
 
 function WebhookRow(props: {
-  endpoint: WebhookEndpoint;
+  endpoint: PayWebhook;
   pending: boolean;
   onToggle: (enabled: boolean) => void;
   onRotate: () => void;
@@ -58,20 +55,21 @@ function WebhookRow(props: {
   onDelete: () => void;
 }) {
   const { endpoint, pending, onToggle, onRotate, onSendTest, onDelete } = props;
-  const switchLabel = endpoint.enabled ? "Disable webhook" : "Enable webhook";
+  const enabled = isWebhookEnabled(endpoint.status);
+  const switchLabel = enabled ? "Disable webhook" : "Enable webhook";
 
   return (
-    <Card className="flex flex-col gap-3 px-5 py-[18px] md:flex-row md:items-center md:gap-6">
-      <p className="shrink-0 font-montserrat text-sm font-medium text-[#606060] md:w-[160px]">
-        {formatWebhookEvents(endpoint.events)}
-      </p>
-      <p className="min-w-0 flex-1 truncate font-montserrat text-sm font-medium text-[#606060]">
-        {endpoint.url}
-      </p>
+    <div className="flex flex-col gap-3 rounded-[20px] border border-white bg-[#fdfdfd] px-5 py-[18px] shadow-[0_0_20px_0_rgba(0,0,0,0.06)] md:flex-row md:items-center md:gap-6">
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-montserrat text-base font-medium text-black">{endpoint.url}</p>
+        <p className="mt-1.5 font-montserrat text-xs font-medium text-[#606060]">
+          {formatWebhookEvents(endpoint.events)}
+        </p>
+      </div>
       <div className="flex shrink-0 items-center gap-4 self-end md:self-auto">
         <Tooltip content={switchLabel}>
           <Switch
-            checked={endpoint.enabled}
+            checked={enabled}
             disabled={pending}
             onCheckedChange={onToggle}
             aria-label={switchLabel}
@@ -104,13 +102,13 @@ function WebhookRow(props: {
             type="button"
             disabled={pending}
             aria-label="Delete"
-            className="cursor-pointer text-[#aaa] hover:text-black disabled:pointer-events-none disabled:opacity-30"
+            className="cursor-pointer text-[#aaa] hover:text-danger disabled:pointer-events-none disabled:opacity-30"
             onClick={onDelete}
           >
             <IconDelete className="size-3.5" />
           </button>
         </Tooltip>
       </div>
-    </Card>
+    </div>
   );
 }

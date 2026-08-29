@@ -57,7 +57,6 @@ Every mock reader must include this comment:
 | --- | --- | --- | --- |
 | `overview` | `src/mocks/overview.ts` | `src/hooks/use-overview-dashboard.ts` | Overview dashboard at `/` until `/v1/pay` overview exists. |
 | `paymentLinks` | `src/mocks/payment-links.ts` | `src/hooks/use-payment-links.ts`, `src/hooks/use-payment-link.ts` | Payment Links list, per-link transactions, create-link, and public payer detail at `/p/:id` until the merchant-link API exists. |
-| `webhooks` | `src/mocks/webhooks.ts` | `src/hooks/use-webhooks.ts` | Webhooks list, event logs, rotate-secret, send-test, and add-endpoint at `/webhooks` until the merchant webhook API exists. |
 
 ## Constraints
 

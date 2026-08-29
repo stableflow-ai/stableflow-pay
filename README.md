@@ -52,11 +52,11 @@ pnpm preview
 | `/paylink/:pl_xxx` | payer | Checkout; no login, no sidebar |
 | `/checkout?sessionId=cs_xxx` | payer | Checkout; no login, no sidebar |
 | `/api-keys` | merchant | Partner keys API |
-| `/webhooks` | merchant | Endpoints + logs (mock) |
+| `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
-| `/support`, `/terms`, `/docs` | merchant | Placeholder |
+| `/terms`, `/docs` | merchant | Placeholder |
 
-Overview, Payment Links, and Webhooks still use fixtures in `src/mocks/` until those backend contracts exist. API Keys and Reports call the live API.
+Overview and Payment Links still use fixtures in `src/mocks/` until those backend contracts exist. API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.
 
 ## Docs for contributors
 

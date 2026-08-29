@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { Dialog } from "@/components/ui/dialog/Dialog";
 import useToast from "@/hooks/use-toast";
-import type { WebhookEventType } from "@/mocks/webhooks";
-import { WEBHOOK_EVENT_OPTIONS } from "../config";
-import { webhooksError } from "../utils";
+import type { WebhookEventType } from "@/types/webhooks";
+import { WEBHOOK_EVENT_OPTIONS, WEBHOOK_URL_MAX_LENGTH } from "../config";
+import { settingsError } from "../utils";
 
 type AddWebhookDialogProps = {
   open: boolean;
   onClose: () => void;
-  onAdd: (url: string, events: WebhookEventType[]) => Promise<string>;
+  onAdd: (url: string, events: WebhookEventType[]) => Promise<void>;
 };
 
 export function AddWebhookDialog(props: AddWebhookDialogProps) {
@@ -48,29 +48,37 @@ export function AddWebhookDialog(props: AddWebhookDialogProps) {
     try {
       await onAdd(nextUrl, events);
     } catch (error) {
-      toast.fail({ title: webhooksError(error, "Could not add webhook") });
+      toast.fail({ title: settingsError(error, "Could not add webhook") });
       setSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} title="Add Webhook Endpoint" closeOnMaskClick={!submitting}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Add Endpoint"
+      titleClassName="text-[18px]"
+      closeOnMaskClick={!submitting}
+      cardClassName="w-[min(100%,600px)] px-[30px] py-7 md:w-[600px]"
+    >
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col">
             <label htmlFor="webhook-endpoint-url" className="font-montserrat text-sm font-medium text-[#606060]">
-              Endpoint URL
+              Webhooks
             </label>
             <input
               id="webhook-endpoint-url"
               type="url"
               value={url}
               onChange={(event) => setUrl(event.target.value)}
-              placeholder="http://your-server.com/webhook"
-              className="h-9 w-full rounded-[6px] border border-[#e3e3e3] bg-[#f6f6f6] px-3 font-montserrat text-sm font-medium text-black outline-none placeholder:text-black/30 focus:border-[#c8c8c8]"
+              placeholder="https://your-server.com/webhook"
+              maxLength={WEBHOOK_URL_MAX_LENGTH}
+              className="mt-2.5 h-10 w-full rounded-[6px] border border-[#e3e3e3] bg-[#f6f6f6] px-3 font-montserrat text-sm font-medium text-black outline-none placeholder:text-black/30"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2.5">
             <p className="font-montserrat text-sm font-medium text-[#606060]">Events to Listen</p>
             <div className="flex flex-col gap-2.5">
               {WEBHOOK_EVENT_OPTIONS.map((option) => {
@@ -78,7 +86,7 @@ export function AddWebhookDialog(props: AddWebhookDialogProps) {
                 return (
                   <label
                     key={option.value}
-                    className="flex h-9 cursor-pointer items-center gap-2.5 rounded-[6px] border border-[#e3e3e3] bg-white px-3"
+                    className="flex h-10 cursor-pointer items-center gap-2.5 rounded-[6px] border border-[#e3e3e3] bg-white px-3"
                   >
                     <Checkbox
                       checked={selected}

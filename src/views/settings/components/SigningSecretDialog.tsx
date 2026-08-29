@@ -27,29 +27,32 @@ export function SigningSecretDialog(props: SigningSecretDialogProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} title="Webhook Signing Secret">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Webhook Signing Secret"
+      titleClassName="text-[18px]"
+      cardClassName="w-[min(100%,420px)] px-6 py-7 md:w-[420px]"
+    >
       <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-8">
           <p className="font-montserrat text-sm font-medium text-[#606060]">
             {WEBHOOK_SIGNING_SECRET_SUBTITLE}
           </p>
-          <div className="relative">
-            <input
-              readOnly
-              value={value}
-              aria-label="Webhook signing secret"
-              className="h-9 w-full rounded-[6px] border border-[#e3e3e3] bg-[#f6f6f6] pr-10 pl-3 font-montserrat text-sm font-medium text-black outline-none"
-            />
-            <button
-              type="button"
-              aria-label="Copy"
-              className="absolute top-1/2 right-2 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center text-[#909090] hover:text-black"
+          <div className="flex items-center gap-3 rounded-[20px] border border-white bg-[#fdfdfd] px-4 py-4 shadow-[0_0_20px_0_rgba(0,0,0,0.06)]">
+            <p className="min-w-0 flex-1 truncate font-montserrat text-base font-medium text-black">
+              {value}
+            </p>
+            <Button
+              size={BUTTON_SIZE.Sm}
+              className="h-[30px] shrink-0 rounded-[8px] px-3 text-sm md:h-[30px] md:text-sm"
               onClick={() => {
                 void copySecret();
               }}
             >
-              <IconCopy className="size-3" />
-            </button>
+              <IconCopy className="size-3.5" />
+              Copy
+            </Button>
           </div>
         </div>
         <Button size={BUTTON_SIZE.Lg} className="w-full" onClick={onClose}>

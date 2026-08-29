@@ -9,10 +9,8 @@ import {
 } from "./config";
 
 export function AppSidebar({
-  onOpenSettings,
   onNavigate,
 }: {
-  onOpenSettings: () => void;
   onNavigate?: () => void;
 }) {
   return (
@@ -31,7 +29,7 @@ export function AppSidebar({
         ))}
       </div>
       <div className="px-[23px] pb-[23px]">
-        <AccountMenu onOpenSettings={onOpenSettings} />
+        <AccountMenu />
       </div>
     </aside>
   );

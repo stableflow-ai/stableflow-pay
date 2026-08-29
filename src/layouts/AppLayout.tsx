@@ -1,35 +1,28 @@
 import { useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { SettingsDialog } from "@/views/settings/SettingsDialog";
 import { IconChevron, IconMenu } from "@/components/icons";
 import {
   PAYMENT_LINKS_PATH,
   isCreatePaymentLinkPath,
 } from "@/views/payment-links/config";
 
-export type AppLayoutContextValue = {
-  openSettings: () => void;
-};
-
 export function AppLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const title = pageTitleForPath(pathname);
-  const openSettings = () => setSettingsOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <div className="flex h-svh overflow-hidden bg-[#f6f6f6]">
-      {isDesktop ? <AppSidebar onOpenSettings={openSettings} /> : null}
+      {isDesktop ? <AppSidebar /> : null}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 items-center gap-3 px-3 pt-[18px] pr-4 pb-2 md:px-10">
           {isCreatePaymentLinkPath(pathname) ? (
@@ -59,8 +52,16 @@ export function AppLayout() {
           )}
         </header>
         <main className="min-h-0 flex-1 overflow-auto px-3 py-4 md:px-10 md:py-5">
-          <Outlet context={{ openSettings } satisfies AppLayoutContextValue} />
+          <Outlet />
         </main>
+        <footer className="flex shrink-0 justify-end px-3 py-2 md:px-10 md:py-3">
+          <Link
+            to="/terms"
+            className="font-montserrat text-sm font-normal text-[#606060] hover:text-black"
+          >
+            Terms of Service
+          </Link>
+        </footer>
       </div>
       {isDesktop ? null : (
         <Drawer
@@ -71,10 +72,9 @@ export function AppLayout() {
           cardClassName="h-full w-[220px] gap-0 rounded-r-none p-0 [&>div:first-child]:hidden"
           contentClassName="overflow-x-hidden"
         >
-          <AppSidebar onOpenSettings={openSettings} onNavigate={closeSidebar} />
+          <AppSidebar onNavigate={closeSidebar} />
         </Drawer>
       )}
-      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

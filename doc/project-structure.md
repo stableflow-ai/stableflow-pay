@@ -41,9 +41,8 @@ src/
     overview/             # Authenticated home at /
     payment-links/        # Merchant payment-link list and create
     payer/                # Public /p/:id checkout and waiting (no login)
-    settings/             # Global organization SettingsDialog
+    settings/             # Settings page at /settings (profile + webhooks)
     api-keys/             # Merchant API-key list at /api-keys
-    webhooks/             # Merchant webhooks at /webhooks (mock)
     reports/              # Merchant reports at /reports
     placeholder/          # Sidebar routes without product UI yet
   layouts/                # AppLayout (sidebar + title + outlet)

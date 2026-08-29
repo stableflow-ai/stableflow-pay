@@ -4,13 +4,9 @@ import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Dialog } from "@/components/ui/dialog/Dialog";
 import { Dropdown } from "@/components/ui/dropdown/Dropdown";
 import useToast from "@/hooks/use-toast";
-import {
-  TEST_PAYLOADS,
-  WEBHOOK_EVENT_TYPE,
-  type WebhookEventType,
-} from "@/mocks/webhooks";
-import { WEBHOOK_EVENT_OPTIONS } from "../config";
-import { stringifyPayload, webhooksError } from "../utils";
+import { WEBHOOK_EVENT_TYPE, type WebhookEventType } from "@/types/webhooks";
+import { TEST_PAYLOADS, WEBHOOK_EVENT_OPTIONS } from "../config";
+import { settingsError, stringifyPayload } from "../utils";
 
 type SendTestDialogProps = {
   open: boolean;
@@ -48,7 +44,7 @@ export function SendTestDialog(props: SendTestDialogProps) {
       }
       payload = parsed as Record<string, unknown>;
     } catch (error) {
-      toast.fail({ title: webhooksError(error, "Invalid JSON") });
+      toast.fail({ title: settingsError(error, "Invalid JSON") });
       return;
     }
     setSubmitting(true);
@@ -57,7 +53,7 @@ export function SendTestDialog(props: SendTestDialogProps) {
       toast.success({ title: "Test webhook sent successfully" });
       onClose();
     } catch (error) {
-      toast.fail({ title: webhooksError(error, "Could not send test webhook") });
+      toast.fail({ title: settingsError(error, "Could not send test webhook") });
     } finally {
       setSubmitting(false);
     }

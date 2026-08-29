@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Dialog } from "@/components/ui/dialog/Dialog";
-import type { WebhookEndpoint } from "@/mocks/webhooks";
+import type { PayWebhook } from "@/types/webhooks";
 
 export function DeleteWebhookDialog(props: {
   open: boolean;
   onClose: () => void;
-  endpoint: WebhookEndpoint | null;
+  endpoint: PayWebhook | null;
   onConfirm: () => void;
+  loading?: boolean;
 }) {
-  const { open, onClose, endpoint, onConfirm } = props;
+  const { open, onClose, endpoint, onConfirm, loading = false } = props;
 
   return (
     <Dialog open={open} onClose={onClose} title="Delete webhook?">
@@ -23,6 +24,7 @@ export function DeleteWebhookDialog(props: {
           variant={BUTTON_VARIANT.Danger}
           size={BUTTON_SIZE.Md}
           className="flex-1"
+          loading={loading}
           onClick={onConfirm}
         >
           Delete
@@ -31,6 +33,7 @@ export function DeleteWebhookDialog(props: {
           variant={BUTTON_VARIANT.Normal}
           size={BUTTON_SIZE.Md}
           className="flex-1"
+          disabled={loading}
           onClick={onClose}
         >
           Cancel

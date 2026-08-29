@@ -15,7 +15,7 @@ import { ResetPasswordDialog } from "@/views/auth/ResetPasswordDialog";
 import { RESET_PASSWORD_VARIANT } from "@/views/auth/config";
 import { SIDEBAR_AVATAR_SRC } from "./config";
 
-export function AccountMenu({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function AccountMenu() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -65,7 +65,7 @@ export function AccountMenu({ onOpenSettings }: { onOpenSettings: () => void }) 
 
   const openSettings = () => {
     setOpen(false);
-    onOpenSettings();
+    navigate("/settings");
   };
 
   return (

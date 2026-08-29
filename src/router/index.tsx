@@ -13,7 +13,7 @@ import { PlaceholderView } from "@/views/placeholder/PlaceholderView";
 import { PayView } from "@/views/payer/PayView";
 import { WaitingView } from "@/views/payer/WaitingView";
 import { ReportsView } from "@/views/reports/ReportsView";
-import { WebhooksView } from "@/views/webhooks/WebhooksView";
+import { SettingsView } from "@/views/settings/SettingsView";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
 
 export const router = createBrowserRouter([
@@ -56,7 +56,8 @@ export const router = createBrowserRouter([
           { path: "/payment-links/create", element: <CreatePaymentLinkView /> },
           { path: "/payment-links/create/preview", element: <CreatePaymentLinkPreviewView /> },
           { path: "/api-keys", element: <ApiKeysView /> },
-          { path: "/webhooks", element: <WebhooksView /> },
+          { path: "/settings", element: <SettingsView /> },
+          { path: "/webhooks", element: <Navigate to="/settings" replace /> },
           { path: "/reports", element: <ReportsView /> },
           ...PLACEHOLDER_ROUTES.map((path) => ({
             path,
