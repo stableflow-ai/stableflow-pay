@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { IconLogout } from "@/components/icons/logout";
 import { IconMenu } from "@/components/icons/menu";
 import { IconResetPassword } from "@/components/icons/reset-password";
-import { IconSettings } from "@/components/icons/settings";
 import {
   FLOATING_ALIGN,
   FLOATING_SIDE,
@@ -61,11 +60,6 @@ export function AccountMenu() {
   const openResetPassword = () => {
     setOpen(false);
     setResetOpen(true);
-  };
-
-  const openSettings = () => {
-    setOpen(false);
-    navigate("/settings");
   };
 
   return (
@@ -126,15 +120,6 @@ export function AccountMenu() {
                 >
                   <IconResetPassword className="shrink-0" />
                   Change Password
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={openSettings}
-                  className="flex h-10 w-full items-center gap-2.5 px-[19px] font-montserrat text-sm font-medium text-[#606060] duration-150 hover:text-black"
-                >
-                  <IconSettings className="size-3.5 shrink-0" />
-                  Settings
                 </button>
                 <button
                   type="button"

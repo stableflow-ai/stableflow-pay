@@ -1,3 +1,3 @@
-export const QUICK_PAY_SLIPPAGE_TOLERANCE = 5;
+export const QUICK_PAY_SLIPPAGE_TOLERANCE = 50;
 export const REQUEST_WITHDRAW_COUNT_POLL_MS = 120_000;
 export const EXPORT_FILENAME_STAMP = "yyyyMMdd-HHmmss";
