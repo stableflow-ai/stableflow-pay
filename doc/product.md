@@ -13,7 +13,7 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. |
 | Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). View opens a payments drawer (transactions empty until that API exists). Uses `/v1/pay/links`. |
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
-| Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}` (`auth` only when a session exists). Quote / swap / submit and 1Click status are real APIs. |
+| Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Quote `POST /v1/pay/quote`, swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit`. Waiting polls 1Click status. |
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/apiKeys`. |
 | Reports | `/reports` | shipped | Partner analytics stats and charts (`GET /v1/pay/partner/analytics`) plus a paginated usage table (`GET /v1/pay/partner/payments`). No Partner registration. |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
@@ -37,7 +37,7 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, and `/paylink/:linkId` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
 
 The sidebar user chip shows `user.name` and a three-dot control. That control opens an upward floating menu (same pattern as v2, `side="top"`): Change Password, Settings, Log out. Settings goes to `/settings`. Change Password opens `ResetPasswordDialog` (`variant="authed"`).
 
@@ -53,7 +53,7 @@ Authenticated `/payment-links` lists merchant links from `GET /v1/pay/links`. Cr
 
 ## Public payer
 
-`/paylink/:linkId` is the guest checkout for a payment link. It does **not** use `AppLayout` and does **not** require login. Fixed links show a read-only amount; Open Amount links (empty `amount`) let the payer edit the amount (max 6 decimals). After swap + on-chain transfer, `/paylink/:linkId/waiting` polls `GET /v1/nearintents/status` until success or failure.
+`/paylink/:linkId` is the guest checkout for a payment link. `/checkout?sessionId=` is the guest checkout for an API-key session (`GET /v1/pay/checkout/sessions/{sessionId}`). Neither uses `AppLayout` nor requires login. Both reuse the same pay and waiting UI. Quote is `POST /v1/pay/quote` (`EXACT_OUTPUT`). Deposit address is `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`. After transfer, submit is `POST /v1/pay/swap/submit` (`swapId` + `txHash`) with a retry queue. Waiting polls `GET /v1/nearintents/status`. Checkout with a `success_url` shows a 10s `Redirecting in Ns` countdown on success, then opens that URL with query `amount`, `network`, `expires_at`, `created_at`, `out_order_no`, `recipient`, `session_id`, `status=success`, `symbol`. This product does not create checkout sessions (`POST /v1/pay/checkout/sessions`).
 
 ## API Keys
 

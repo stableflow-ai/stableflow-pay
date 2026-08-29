@@ -61,4 +61,12 @@ export const queryKeys = {
     all: ["nearintents"] as const,
     status: (depositAddress: string) => [...queryKeys.nearintents.all, "status", depositAddress] as const,
   },
+  pay: {
+    all: ["pay"] as const,
+    quote: (body: unknown) => [...queryKeys.pay.all, "quote", body] as const,
+  },
+  checkout: {
+    all: ["checkout"] as const,
+    session: (id: string) => [...queryKeys.checkout.all, "session", id] as const,
+  },
 } as const;

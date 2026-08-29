@@ -50,7 +50,8 @@ pnpm preview
 | `/payment-links` | merchant | Link list API |
 | `/payment-links/create` | merchant | Create + preview |
 | `/paylink/:linkId` | payer | Checkout; no login, no sidebar |
-| `/checkout?sessionId=cs_xxx` | payer | Checkout; no login, no sidebar |
+| `/checkout?sessionId=cs_xxx` | payer | Checkout session; no login, no sidebar |
+| `/checkout/waiting` | payer | Checkout waiting |
 | `/api-keys` | merchant | API keys API |
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |

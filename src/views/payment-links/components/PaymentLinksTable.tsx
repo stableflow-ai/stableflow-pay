@@ -21,6 +21,7 @@ import {
   paymentLinkType,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
+import { IconLoading } from "@/components/icons";
 
 export function PaymentLinksTable({
   links,
@@ -33,12 +34,14 @@ export function PaymentLinksTable({
   onCopyLink,
   onToggleStatus,
   onDelete,
+  loading,
 }: {
   links: PayPaymentLink[];
   query: string;
   onQueryChange: (value: string) => void;
   page: number;
   totalPage: number;
+  loading?: boolean;
   onPageChange: (page: number) => void;
   onView: (link: PayPaymentLink) => void;
   onCopyLink: (link: PayPaymentLink) => void;
@@ -83,7 +86,13 @@ export function PaymentLinksTable({
       </TableHeader>
       <TableBody className="flex flex-col gap-3.5 pt-1">
         {links.length === 0 ? (
-          <ListEmptyState>{emptyCopy}</ListEmptyState>
+          loading ? (
+            <div className="flex justify-center items-center py-10">
+              <IconLoading className="size-4 animate-spin text-[#909090]" />
+            </div>
+          ) : (
+            <ListEmptyState>{emptyCopy}</ListEmptyState>
+          )
         ) : (
           links.map((link) => (
             <PaymentLinkRow

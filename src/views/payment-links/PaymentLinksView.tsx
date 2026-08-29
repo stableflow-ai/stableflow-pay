@@ -97,6 +97,7 @@ export function PaymentLinksView() {
         onCopyLink={(link) => void copyLink(link)}
         onToggleStatus={toggleStatus}
         onDelete={setDeleting}
+        loading={linksQuery.isPending}
       />
       <LinkPaymentsDrawer link={viewingLink} onClose={() => setViewing(null)} />
       <CreatePaymentLinkDrawer

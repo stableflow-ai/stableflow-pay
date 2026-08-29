@@ -44,8 +44,8 @@ export function ApiKeysTable({
         <TableHead />
       </TableHeader>
       {isPending ? (
-        <div className="flex justify-center py-20 md:py-[150px]">
-          <IconLoading className="size-6 animate-spin text-[#909090]" />
+        <div className="flex justify-center py-10">
+          <IconLoading className="size-4 animate-spin text-[#909090]" />
         </div>
       ) : isError ? (
         <p className="py-20 text-center font-montserrat text-sm font-medium text-danger md:py-[150px]">

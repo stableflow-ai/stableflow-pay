@@ -46,7 +46,7 @@ export function PayCard(props: {
             <p className="text-center font-montserrat text-sm text-[#909090]">
               {props.state === PAYER_CARD_STATE.Loading
                 ? "Loading…"
-                : "This payment link is not available"}
+                : "This payment is not available"}
             </p>
           </div>
         }

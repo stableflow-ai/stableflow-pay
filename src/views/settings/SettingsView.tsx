@@ -127,6 +127,7 @@ export function SettingsView() {
         recipientAddress={recipientAddress}
         onRecipientAddressChange={setRecipientAddress}
         endpoints={endpoints}
+        endpointsLoading={webhooksQuery.isPending}
         pendingId={pendingId}
         onAdd={() => setAddOpen(true)}
         onToggle={(endpoint, enabled) => {

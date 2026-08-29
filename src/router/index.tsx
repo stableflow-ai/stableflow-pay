@@ -26,6 +26,14 @@ export const router = createBrowserRouter([
     element: <WaitingView />,
   },
   {
+    path: "/checkout/waiting",
+    element: <WaitingView />,
+  },
+  {
+    path: "/checkout",
+    element: <PayView />,
+  },
+  {
     path: "/login",
     element: (
       <RedirectIfAuthed>

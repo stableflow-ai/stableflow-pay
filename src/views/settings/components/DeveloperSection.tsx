@@ -9,6 +9,7 @@ export function DeveloperSection(props: {
   recipientAddress: string;
   onRecipientAddressChange: (value: string) => void;
   endpoints: PayWebhook[];
+  endpointsLoading?: boolean;
   pendingId: string | null;
   onAdd: () => void;
   onToggle: (endpoint: PayWebhook, enabled: boolean) => void;
@@ -20,6 +21,7 @@ export function DeveloperSection(props: {
     recipientAddress,
     onRecipientAddressChange,
     endpoints,
+    endpointsLoading,
     pendingId,
     onAdd,
     onToggle,
@@ -54,6 +56,7 @@ export function DeveloperSection(props: {
         <p className="font-montserrat text-sm font-medium text-[#606060]">Webhooks</p>
         <WebhookList
           endpoints={endpoints}
+          endpointsLoading={endpointsLoading}
           pendingId={pendingId}
           onAdd={onAdd}
           onToggle={onToggle}

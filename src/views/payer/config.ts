@@ -1,4 +1,9 @@
 export const PAYER_PATH_PREFIX = "/paylink";
+export const CHECKOUT_PATH = "/checkout";
+export const CHECKOUT_WAITING_PATH = "/checkout/waiting";
+export const CHECKOUT_SESSION_QUERY = "sessionId";
+export const CHECKOUT_SUCCESS_STATUS = "success";
+export const CHECKOUT_REDIRECT_SECONDS = 10;
 
 export const AMOUNT_MAX_DECIMALS = 6;
 export const QUOTE_DEBOUNCE_MS = 900;
@@ -37,4 +42,14 @@ export function payerPath(id: string): string {
 
 export function payerWaitingPath(id: string): string {
   return `${PAYER_PATH_PREFIX}/${id}/waiting`;
+}
+
+export function checkoutPath(sessionId: string): string {
+  const params = new URLSearchParams({ [CHECKOUT_SESSION_QUERY]: sessionId });
+  return `${CHECKOUT_PATH}?${params.toString()}`;
+}
+
+export function checkoutWaitingPath(sessionId: string): string {
+  const params = new URLSearchParams({ [CHECKOUT_SESSION_QUERY]: sessionId });
+  return `${CHECKOUT_WAITING_PATH}?${params.toString()}`;
 }

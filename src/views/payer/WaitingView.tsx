@@ -1,22 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useNearintentsStatusQuery } from "@/hooks/use-nearintents-status";
 import { txExplorerUrl } from "@/config/chains";
-import { usePayerSessionStore } from "@/stores/payer-session";
+import { PAYER_KIND, usePayerSessionStore } from "@/stores/payer-session";
 import { PayerLayout } from "./components/PayerLayout";
 import { WaitingCard } from "./components/WaitingCard";
-import { PAYER_WAIT_STATUS, payerPath } from "./config";
-import { waitStatusFromOneClick } from "./utils";
+import {
+  CHECKOUT_PATH,
+  CHECKOUT_REDIRECT_SECONDS,
+  CHECKOUT_SESSION_QUERY,
+  PAYER_WAIT_STATUS,
+  checkoutPath,
+  payerPath,
+} from "./config";
+import { buildCheckoutSuccessUrl, waitStatusFromOneClick } from "./utils";
 
 export function WaitingView() {
+  const { pathname } = useLocation();
   const { linkId: idParam } = useParams();
-  const linkId = idParam?.trim() || "";
+  const [searchParams] = useSearchParams();
+  const isCheckout = pathname.startsWith(CHECKOUT_PATH);
+  const linkId = isCheckout ? "" : (idParam?.trim() || "");
+  const sessionId = isCheckout ? (searchParams.get(CHECKOUT_SESSION_QUERY)?.trim() || "") : "";
+  const paymentId = isCheckout ? sessionId : linkId;
   const navigate = useNavigate();
   const session = usePayerSessionStore((s) => s.session);
   const clearSession = usePayerSessionStore((s) => s.clearSession);
   const [hydrated, setHydrated] = useState(() => usePayerSessionStore.persist.hasHydrated());
+  const sessionMatches = Boolean(
+    session
+    && session.paymentId === paymentId
+    && session.kind === (isCheckout ? PAYER_KIND.Checkout : PAYER_KIND.Paylink),
+  );
   const statusQuery = useNearintentsStatusQuery(
-    hydrated && session?.linkId === linkId ? session.depositAddress : null,
+    hydrated && sessionMatches ? session?.depositAddress ?? null : null,
   );
 
   useEffect(() => {
@@ -25,6 +42,28 @@ export function WaitingView() {
   }, [hydrated]);
 
   const waitStatus = waitStatusFromOneClick(statusQuery.data?.status);
+  const redirectUrl = session?.checkout ? buildCheckoutSuccessUrl(session.checkout) : null;
+  const [redirectIn, setRedirectIn] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (waitStatus !== PAYER_WAIT_STATUS.Success || !redirectUrl) {
+      setRedirectIn(null);
+      return;
+    }
+    setRedirectIn(CHECKOUT_REDIRECT_SECONDS);
+    const timer = window.setInterval(() => {
+      setRedirectIn((current) => {
+        if (current == null || current <= 1) {
+          window.clearInterval(timer);
+          window.location.assign(redirectUrl);
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [redirectUrl, waitStatus]);
+
   const explorerUrl = useMemo(() => {
     if (!session) return null;
     const details = statusQuery.data?.swapDetails;
@@ -41,8 +80,10 @@ export function WaitingView() {
     return <PayerLayout />;
   }
 
-  if (!linkId || !session || session.linkId !== linkId) {
-    return <Navigate to={payerPath(linkId || "")} replace />;
+  const payPath = isCheckout ? checkoutPath(sessionId) : payerPath(linkId || "");
+
+  if (!paymentId || !session || !sessionMatches) {
+    return <Navigate to={payPath} replace />;
   }
 
   return (
@@ -58,9 +99,10 @@ export function WaitingView() {
         status={waitStatus}
         session={session}
         explorerUrl={explorerUrl}
+        redirectIn={redirectUrl && waitStatus === PAYER_WAIT_STATUS.Success ? redirectIn : null}
         onBack={() => {
           clearSession();
-          navigate(payerPath(linkId));
+          navigate(payPath);
         }}
       />
     </PayerLayout>

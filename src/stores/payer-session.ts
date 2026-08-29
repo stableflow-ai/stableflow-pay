@@ -1,12 +1,26 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import type { PayCheckoutSession } from "@/types/pay";
 
 const STORAGE_KEY = "stableflow-pay.payer-session";
 
+export const PAYER_KIND = {
+  Paylink: "paylink",
+  Checkout: "checkout",
+} as const;
+
+export type PayerKind = (typeof PAYER_KIND)[keyof typeof PAYER_KIND];
+
+export type PayerCheckoutSnapshot = Pick<
+  PayCheckoutSession,
+  "amount" | "createdAt" | "expiresAt" | "network" | "outOrderNo" | "recipient" | "sessionId" | "symbol" | "successUrl"
+>;
+
 export interface PayerSession {
-  linkId: string;
+  kind: PayerKind;
+  paymentId: string;
   depositAddress: string;
-  orderId: string;
+  swapId: string;
   txHash: string;
   iconUrl: string | null;
   recipientAddress: string;
@@ -22,6 +36,7 @@ export interface PayerSession {
   payoutUsd: string;
   timeEstimate: number;
   paidAt: number;
+  checkout?: PayerCheckoutSnapshot;
 }
 
 interface PayerSessionState {

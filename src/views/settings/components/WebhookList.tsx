@@ -5,9 +5,11 @@ import { Switch } from "@/components/ui/switch/Switch";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
 import type { PayWebhook } from "@/types/webhooks";
 import { formatWebhookEvents, isWebhookEnabled } from "../utils";
+import { IconLoading } from "@/components/icons";
 
 export function WebhookList(props: {
   endpoints: PayWebhook[];
+  endpointsLoading?: boolean;
   pendingId: string | null;
   onAdd: () => void;
   onToggle: (endpoint: PayWebhook, enabled: boolean) => void;
@@ -15,9 +17,16 @@ export function WebhookList(props: {
   onSendTest: (endpoint: PayWebhook) => void;
   onDelete: (endpoint: PayWebhook) => void;
 }) {
-  const { endpoints, pendingId, onAdd, onToggle, onRotate, onSendTest, onDelete } = props;
+  const { endpoints, endpointsLoading, pendingId, onAdd, onToggle, onRotate, onSendTest, onDelete } = props;
 
   if (endpoints.length === 0) {
+    if (endpointsLoading) {
+      return (
+        <div className="flex justify-center items-center py-10">
+          <IconLoading className="size-4 animate-spin text-[#909090]" />
+        </div>
+      );
+    }
     return (
       <p className="font-montserrat text-sm font-medium text-[#aaa]">
         No webhook endpoints yet.{" "}

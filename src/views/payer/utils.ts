@@ -1,7 +1,14 @@
 import { ApiError } from "@/lib/api-error";
+import type { PayerCheckoutSnapshot } from "@/stores/payer-session";
 import type { IntentsToken } from "@/stores/intents-tokens";
+import type { PayCheckoutSession } from "@/types/pay";
 import { Big, formatAmount } from "@/utils";
-import { ONE_CLICK_STATUS, type PayerWaitStatus, PAYER_WAIT_STATUS } from "./config";
+import {
+  CHECKOUT_SUCCESS_STATUS,
+  ONE_CLICK_STATUS,
+  type PayerWaitStatus,
+  PAYER_WAIT_STATUS,
+} from "./config";
 
 const USER_REJECTED_PATTERNS = [
   "user rejected",
@@ -121,4 +128,49 @@ export function waitStatusFromOneClick(status: string | undefined): PayerWaitSta
     return PAYER_WAIT_STATUS.Failed;
   }
   return PAYER_WAIT_STATUS.Pending;
+}
+
+const CHECKOUT_UNAVAILABLE_STATUS = new Set([
+  "paid",
+  "expired",
+  "canceled",
+  "cancelled",
+  "failed",
+  "complete",
+  "completed",
+  "success",
+]);
+
+export function isCheckoutOpenAmount(session: Pick<PayCheckoutSession, "amount">) {
+  return !session.amount.trim();
+}
+
+export function isCheckoutPayable(session: PayCheckoutSession) {
+  const status = session.status.trim().toLowerCase();
+  if (status && CHECKOUT_UNAVAILABLE_STATUS.has(status)) return false;
+  const expiresAt = session.expiresAt.trim();
+  if (!expiresAt) return true;
+  const expiresMs = Date.parse(expiresAt);
+  if (!Number.isFinite(expiresMs)) return true;
+  return expiresMs > Date.now();
+}
+
+export function buildCheckoutSuccessUrl(snapshot: PayerCheckoutSnapshot): string | null {
+  const base = snapshot.successUrl.trim();
+  if (!base) return null;
+  try {
+    const url = new URL(base, window.location.origin);
+    url.searchParams.set("amount", snapshot.amount);
+    url.searchParams.set("network", snapshot.network);
+    url.searchParams.set("expires_at", snapshot.expiresAt);
+    url.searchParams.set("created_at", snapshot.createdAt);
+    url.searchParams.set("out_order_no", snapshot.outOrderNo);
+    url.searchParams.set("recipient", snapshot.recipient);
+    url.searchParams.set("session_id", snapshot.sessionId);
+    url.searchParams.set("status", CHECKOUT_SUCCESS_STATUS);
+    url.searchParams.set("symbol", snapshot.symbol);
+    return url.toString();
+  } catch {
+    return null;
+  }
 }

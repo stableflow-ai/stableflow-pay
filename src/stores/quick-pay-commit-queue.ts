@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-const STORAGE_KEY = "stableflow-pay:quick-pay-commit-queue:v1";
+const STORAGE_KEY = "stableflow-pay:quick-pay-commit-queue:v2";
 const BASE_RETRY_MS = 5_000;
 
 export interface QuickPayCommitItem {
   id: string;
-  orderId: string;
+  swapId: string;
   txHash: string;
   createdAt: number;
 }
@@ -82,10 +82,10 @@ async function processCommit(id: string, item: QuickPayCommitItem, retryCount = 
   taskMetaMap.set(id, { ...meta, inFlight: true });
 
   try {
-    const { singleSubmit } = await import("@/api/payout");
+    const { paySwapSubmit } = await import("@/api/pay");
     const { useAuthStore } = await import("@/stores/auth");
-    await singleSubmit(
-      { orderId: item.orderId, txHash: item.txHash },
+    await paySwapSubmit(
+      { swapId: item.swapId, txHash: item.txHash },
       { auth: Boolean(useAuthStore.getState().token) },
     );
     useQuickPayCommitQueueStore.getState().remove(id);
@@ -106,7 +106,7 @@ export const useQuickPayCommitQueueStore = create(
       queue: [],
       enqueue: (item) => {
         set((state) => {
-          if (state.queue.some((row) => row.id === item.id || row.txHash === item.txHash || row.orderId === item.orderId)) {
+          if (state.queue.some((row) => row.id === item.id || row.txHash === item.txHash || row.swapId === item.swapId)) {
             return state;
           }
           return { queue: [...state.queue, item] };
@@ -120,7 +120,7 @@ export const useQuickPayCommitQueueStore = create(
     }),
     {
       name: STORAGE_KEY,
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ queue: state.queue }) as QuickPayCommitQueueState,
     },
@@ -128,13 +128,13 @@ export const useQuickPayCommitQueueStore = create(
 );
 
 export function enqueueQuickPayCommit(input: {
-  orderId: string;
+  swapId: string;
   txHash: string;
 }): string {
   const id = crypto.randomUUID();
   const item: QuickPayCommitItem = {
     id,
-    orderId: input.orderId,
+    swapId: input.swapId,
     txHash: input.txHash,
     createdAt: Date.now(),
   };

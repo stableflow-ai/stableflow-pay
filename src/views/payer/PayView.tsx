@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
+import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
-import { useSinglePayQuote, useSinglePaySwap } from "@/hooks/use-single-payout-api";
+import { usePayQuote, usePaySwap } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
-import { usePayerSessionStore } from "@/stores/payer-session";
+import { PAYER_KIND, usePayerSessionStore } from "@/stores/payer-session";
 import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
-import type { PaySingleQuoteParam, PaySingleSwapParam } from "@/types/payout";
+import { PAY_SWAP_TYPE, type PayQuoteParam, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
 import type { ChainKind } from "@/wallet";
@@ -22,12 +23,17 @@ import { PayerLayout } from "./components/PayerLayout";
 import { PayCard } from "./components/PayCard";
 import {
   AMOUNT_MAX_DECIMALS,
+  CHECKOUT_PATH,
+  CHECKOUT_SESSION_QUERY,
   PAYER_CARD_STATE,
   QUOTE_DEBOUNCE_MS,
+  checkoutWaitingPath,
   payerWaitingPath,
 } from "./config";
 import {
   formatQuoteErrorMessage,
+  isCheckoutOpenAmount,
+  isCheckoutPayable,
   isDryQuoteStale,
   parsePositiveDecimal,
   payoutNetworkToken,
@@ -51,10 +57,16 @@ function useDebouncedValue<T>(value: T, delayMs: number): T {
 }
 
 export function PayView() {
+  const { pathname } = useLocation();
   const { linkId: idParam } = useParams();
-  const linkId = idParam?.trim() || "";
+  const [searchParams] = useSearchParams();
+  const isCheckout = pathname === CHECKOUT_PATH || pathname.startsWith(`${CHECKOUT_PATH}/`);
+  const linkId = isCheckout ? "" : (idParam?.trim() || "");
+  const sessionId = isCheckout ? (searchParams.get(CHECKOUT_SESSION_QUERY)?.trim() || "") : "";
   const linkQuery = usePaymentLinkQuery(linkId);
+  const checkoutQuery = useCheckoutSessionQuery(sessionId);
   const link = linkQuery.data;
+  const checkout = checkoutQuery.data;
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const guestAuth = { auth: Boolean(token) };
@@ -77,21 +89,52 @@ export function PayView() {
     void ensureFresh();
   }, [ensureFresh]);
 
-  const isOpenAmount = Boolean(link && isPaymentLinkOpen(link));
-  const amountInput = isOpenAmount ? openAmount : (link?.amount ?? "");
-  const destToken = useMemo(() => {
+  const payment = useMemo(() => {
+    if (isCheckout) {
+      if (!checkout) return null;
+      return {
+        kind: PAYER_KIND.Checkout,
+        id: checkout.sessionId || sessionId,
+        title: checkout.outOrderNo.trim() || "Payment",
+        amount: checkout.amount,
+        symbol: checkout.symbol,
+        network: checkout.network,
+        recipient: checkout.recipient,
+        payable: isCheckoutPayable(checkout),
+        isOpenAmount: isCheckoutOpenAmount(checkout),
+        checkout,
+      };
+    }
     if (!link) return null;
-    const symbol = normalizeSymbol(link.symbol);
-    if (!symbol) return null;
-    return findByChainAndSymbol(link.network, symbol) ?? null;
-  }, [findByChainAndSymbol, link, tokens]);
+    return {
+      kind: PAYER_KIND.Paylink,
+      id: link.linkId || linkId,
+      title: link.title,
+      amount: link.amount,
+      symbol: link.symbol,
+      network: link.network,
+      recipient: link.recipient,
+      payable: isPaymentLinkActive(link.status),
+      isOpenAmount: isPaymentLinkOpen(link),
+      checkout: undefined,
+    };
+  }, [checkout, isCheckout, link, linkId, sessionId]);
 
-  const destinationAddress = link?.recipient.trim() ?? "";
+  const isOpenAmount = Boolean(payment?.isOpenAmount);
+  const amountInput = isOpenAmount ? openAmount : (payment?.amount ?? "");
+  const destToken = useMemo(() => {
+    if (!payment) return null;
+    const symbol = normalizeSymbol(payment.symbol);
+    if (!symbol) return null;
+    return findByChainAndSymbol(payment.network, symbol) ?? null;
+  }, [findByChainAndSymbol, payment, tokens]);
+
+  const destinationAddress = payment?.recipient.trim() ?? "";
   const amountForQuote = parsePositiveDecimal(amountInput, AMOUNT_MAX_DECIMALS);
   const debouncedAmountForQuote = useDebouncedValue(amountForQuote, QUOTE_DEBOUNCE_MS);
-  const linkPayable = Boolean(link && isPaymentLinkActive(link.status));
+  const payable = Boolean(payment?.payable);
 
-  const quoteBody = useMemo((): PaySingleQuoteParam | null => {
+  const quoteBody = useMemo((): PayQuoteParam | null => {
     if (
       !originToken
       || !destToken
@@ -99,7 +142,7 @@ export function PayView() {
       || !destinationAddress
       || !walletReady
       || !connectedAddress
-      || !linkPayable
+      || !payable
     ) {
       return null;
     }
@@ -107,14 +150,15 @@ export function PayView() {
     const dest = payoutNetworkToken(destToken);
     return {
       amount: debouncedAmountForQuote,
-      destinationAddress,
+      destinationAmount: debouncedAmountForQuote,
       destinationNetwork: dest.network,
-      destinationToken: dest.token,
+      destinationSymbol: dest.token,
       network: origin.network,
-      token: origin.token,
+      recipient: destinationAddress,
       refundTo: connectedAddress,
       slippageTolerance: QUICK_PAY_SLIPPAGE_TOLERANCE,
-      payer: connectedAddress,
+      swapType: PAY_SWAP_TYPE.ExactOutput,
+      symbol: origin.token,
     };
   }, [
     originToken,
@@ -123,11 +167,11 @@ export function PayView() {
     destinationAddress,
     walletReady,
     connectedAddress,
-    linkPayable,
+    payable,
   ]);
 
-  const dryQuoteQuery = useSinglePayQuote(quoteBody, guestAuth);
-  const swapMutation = useSinglePaySwap(guestAuth);
+  const dryQuoteQuery = usePayQuote(quoteBody, guestAuth);
+  const swapMutation = usePaySwap(guestAuth);
   const quote = amountForQuote && destinationAddress && destToken ? dryQuoteQuery.data : undefined;
   const dryQuoteStale = isDryQuoteStale({
     amountForQuote,
@@ -146,13 +190,13 @@ export function PayView() {
   const feeUsd = quote?.amountInUsd && amountForQuote
     ? usdFee(quote.amountInUsd, amountForQuote)
     : null;
-  const feeDisplay = feeUsd ? formatAmount(feeUsd) : "—";
+  const feeDisplay = feeUsd ? formatAmount(feeUsd, { maxDecimals: 2, showDust: true }) : "—";
   const durationDisplay = quote?.timeEstimate != null ? `~${quote.timeEstimate}s` : "—";
   const fetchOneBalance = useTokenBalancesStore((s) => s.fetchOne);
 
   const settleMutation = useMutation({
     mutationFn: async () => {
-      if (!originToken || !destToken || !amountForQuote || !quote || !destinationAddress || !connectedAddress || !link) {
+      if (!originToken || !destToken || !amountForQuote || !quote || !destinationAddress || !connectedAddress || !payment) {
         throw new Error("Missing payment inputs");
       }
       if (!wallet.isConnected || !wallet.account?.address) {
@@ -163,21 +207,25 @@ export function PayView() {
       setPhase("quoting");
       const origin = payoutNetworkToken(originToken);
       const dest = payoutNetworkToken(destToken);
-      const swapBody: PaySingleSwapParam = {
+      const swapBody: PaySwapParam = {
         amount: amountForQuote,
-        destinationAddress,
+        destinationAmount: amountForQuote,
         destinationNetwork: dest.network,
-        destinationToken: dest.token,
+        destinationSymbol: dest.token,
         network: origin.network,
-        token: origin.token,
+        recipient: destinationAddress,
         refundTo: paymentWalletAddress,
         slippageTolerance: QUICK_PAY_SLIPPAGE_TOLERANCE,
+        swapType: PAY_SWAP_TYPE.ExactOutput,
+        symbol: origin.token,
         payer: paymentWalletAddress,
       };
-      const memoValue = link.description?.trim();
-      if (memoValue) swapBody.memo = memoValue;
 
-      const swapped = await swapMutation.mutateAsync(swapBody);
+      const swapped = await swapMutation.mutateAsync({
+        kind: payment.kind,
+        id: payment.id,
+        body: swapBody,
+      });
       const depositAddress = swapped.depositAddress?.trim();
       if (!depositAddress) {
         throw new Error("Missing deposit address");
@@ -199,16 +247,18 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      enqueueQuickPayCommit({ orderId: swapped.orderId, txHash });
+      enqueueQuickPayCommit({ swapId: swapped.swapId, txHash });
       const youPayAmount = swapped.amountInFormatted
         ? formatAmount(swapped.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
         : amountInDisplay;
       const payoutUsd = swapped.amountInUsd || quote.amountInUsd || "";
       const fees = payoutUsd && amountForQuote ? usdFee(payoutUsd, amountForQuote) : null;
+      const checkoutSnap = payment.checkout;
       setSession({
-        linkId,
+        kind: payment.kind,
+        paymentId: payment.id,
         depositAddress,
-        orderId: swapped.orderId,
+        swapId: swapped.swapId,
         txHash,
         iconUrl: null,
         recipientAddress: destinationAddress,
@@ -224,8 +274,25 @@ export function PayView() {
         payoutUsd,
         timeEstimate: swapped.timeEstimate ?? quote.timeEstimate,
         paidAt: Date.now(),
+        checkout: checkoutSnap
+          ? {
+              amount: amountForQuote,
+              createdAt: checkoutSnap.createdAt,
+              expiresAt: checkoutSnap.expiresAt,
+              network: checkoutSnap.network,
+              outOrderNo: checkoutSnap.outOrderNo,
+              recipient: checkoutSnap.recipient,
+              sessionId: checkoutSnap.sessionId,
+              symbol: checkoutSnap.symbol,
+              successUrl: checkoutSnap.successUrl,
+            }
+          : undefined,
       });
-      navigate(payerWaitingPath(linkId));
+      navigate(
+        payment.kind === PAYER_KIND.Checkout
+          ? checkoutWaitingPath(payment.id)
+          : payerWaitingPath(payment.id),
+      );
     },
     onError: (err) => {
       setPhase("idle");
@@ -246,14 +313,26 @@ export function PayView() {
     && !dryQuoteStale
     && !quoteError
     && !sending
-    && linkPayable,
+    && payable,
   );
 
+  const detailPending = isCheckout ? checkoutQuery.isPending : linkQuery.isPending;
+  const missingId = isCheckout ? !sessionId : !linkId;
+
   const cardState = (() => {
-    if (!linkId || linkQuery.isPending) {
+    if (isCheckout && !sessionId) {
+      return PAYER_CARD_STATE.Unavailable;
+    }
+    if (missingId || detailPending) {
       return PAYER_CARD_STATE.Loading;
     }
-    if (!link || !isPaymentLinkActive(link.status)) {
+    if (isCheckout && (checkoutQuery.isError || !checkout)) {
+      return PAYER_CARD_STATE.Unavailable;
+    }
+    if (!isCheckout && (linkQuery.isError || !link)) {
+      return PAYER_CARD_STATE.Unavailable;
+    }
+    if (!payment || !payment.payable) {
       return PAYER_CARD_STATE.Unavailable;
     }
     return PAYER_CARD_STATE.Pay;
@@ -264,8 +343,8 @@ export function PayView() {
       paymentWallet.connectWallet();
       return;
     }
-    if (!linkPayable) {
-      toast.fail({ title: "This payment link is not available" });
+    if (!payable) {
+      toast.fail({ title: "This payment is not available" });
       return;
     }
     void settleMutation.mutateAsync();
@@ -275,7 +354,7 @@ export function PayView() {
     <PayerLayout>
       <PayCard
         state={cardState}
-        paymentTitle={link?.title ?? ""}
+        paymentTitle={payment?.title ?? ""}
         isOpenAmount={isOpenAmount}
         amount={amountInput}
         onAmountChange={setOpenAmount}

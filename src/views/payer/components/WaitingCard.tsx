@@ -12,9 +12,10 @@ export function WaitingCard(props: {
   status: PayerWaitStatus;
   session: PayerSession;
   explorerUrl: string | null;
+  redirectIn?: number | null;
   onBack: () => void;
 }) {
-  const { status, session, explorerUrl, onBack } = props;
+  const { status, session, explorerUrl, redirectIn, onBack } = props;
   const isSuccess = status === PAYER_WAIT_STATUS.Success;
   const isFailed = status === PAYER_WAIT_STATUS.Failed;
   const title = isSuccess
@@ -34,6 +35,11 @@ export function WaitingCard(props: {
           {subtitle ? (
             <p className="mt-3 text-center font-montserrat text-sm font-medium text-[#606060]">
               {subtitle}
+            </p>
+          ) : null}
+          {isSuccess && redirectIn != null && redirectIn > 0 ? (
+            <p className="mt-3 text-center font-montserrat text-sm font-medium text-[#606060]">
+              Redirecting in {redirectIn}s
             </p>
           ) : null}
         </div>
