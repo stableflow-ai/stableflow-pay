@@ -7,6 +7,8 @@ import { PAYER_WAIT_STATUS, type PayerWaitStatus } from "../config";
 import { CouponShell } from "./CouponShell";
 import { DetailRow, PrivateBadge } from "./DetailRow";
 import { StatusMark } from "./StatusMark";
+import { IconCopy } from "@/components/icons";
+import useToast from "@/hooks/use-toast";
 
 export function WaitingCard(props: {
   status: PayerWaitStatus;
@@ -16,6 +18,9 @@ export function WaitingCard(props: {
   onBack: () => void;
 }) {
   const { status, session, explorerUrl, redirectIn, onBack } = props;
+
+  const toast = useToast();
+
   const isSuccess = status === PAYER_WAIT_STATUS.Success;
   const isFailed = status === PAYER_WAIT_STATUS.Failed;
   const title = isSuccess
@@ -25,6 +30,15 @@ export function WaitingCard(props: {
       : "Waiting for Payment...";
   const subtitle = isSuccess || isFailed ? null : "This can take 0-3 minutes";
   const tilde = isSuccess ? "" : "~";
+
+  const handleCopy = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success({ title: "Copied" });
+    } catch {
+      toast.fail({ title: "Could not copy" });
+    }
+  };
 
   return (
     <CouponShell
@@ -50,7 +64,22 @@ export function WaitingCard(props: {
           <div className="mt-6 flex flex-col gap-[22px]">
             <DetailRow
               label="Recipient Address"
-              value={formatAddress(session.recipientAddress)}
+              value={(
+                <div className="flex items-center gap-2">
+                  <div className="shrink-0">
+                    {formatAddress(session.recipientAddress)}
+                  </div>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-[#606060] hover:text-[#000]"
+                    onClick={() => {
+                      handleCopy(session.recipientAddress);
+                    }}
+                  >
+                    <IconCopy className="size-3" />
+                  </button>
+                </div>
+              )}
             />
             <DetailRow
               label="Request Payment"
@@ -63,7 +92,22 @@ export function WaitingCard(props: {
             <DetailRow
               label="Pay from"
               extra={<PrivateBadge />}
-              value={formatAddress(session.payerAddress)}
+              value={(
+                <div className="flex items-center gap-2">
+                  <div className="shrink-0">
+                    {formatAddress(session.payerAddress)}
+                  </div>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-[#606060] hover:text-[#000]"
+                    onClick={() => {
+                      handleCopy(session.payerAddress);
+                    }}
+                  >
+                    <IconCopy className="size-3" />
+                  </button>
+                </div>
+              )}
             />
             <DetailRow label="Route" value="Near intents" />
             <DetailRow
