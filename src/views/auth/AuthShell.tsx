@@ -44,10 +44,10 @@ export function AuthShell({
           />
 
           <h1 className="mt-10 max-w-[558px] font-montserrat text-[32px] font-semibold capitalize leading-tight text-white md:mt-16 md:text-[46px]">
-            Confidential Payments.
+            Built for Developers
           </h1>
           <p className="mt-4 max-w-[558px] font-montserrat text-[16px] font-normal leading-[1.5] text-white md:mt-5 md:text-[20px]">
-            Send across chains without creating a direct public link between sender and recipient.
+            Create payment links or integrate with a simple API. Accept confidential, cross-chain stablecoin payments.
           </p>
 
           <ul className="mt-8 hidden flex-col gap-8 md:mt-12 md:flex">
@@ -56,17 +56,17 @@ export function AuthShell({
                 {
                   icon: "lock" as AuthFeatureIconKey,
                   title: "Confidential by default",
-                  body: "Reduce direct public sender  recipient linkage.",
+                  body: "Reduce direct public sender recipient linkage.",
                 },
                 {
                   icon: "shield" as AuthFeatureIconKey,
-                  title: "Self-custodial",
-                  body: "Your wallet. Your funds. You authorize every payment",
+                  title: "Payment Links & API",
+                  body: "Create payment links or integrate with simple APIs.",
                 },
                 {
                   icon: "node" as AuthFeatureIconKey,
-                  title: "Cross-chain",
-                  body: "Pay across supported network whilethe recipient receives on another.",
+                  title: "Cross-Chain Payments",
+                  body: "Accept payments across networks to your receiving address.",
                 },
               ] as const
             ).map((feature) => {

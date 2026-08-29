@@ -20,6 +20,7 @@ export function useSolanaWallet(): UseWalletResult {
     select,
     signMessage: adapterSignMessage,
     signTransaction,
+    wallet,
   } = useSolanaAdapter();
   const { setVisible, visible } = useSolanaWalletModal();
 
@@ -36,8 +37,8 @@ export function useSolanaWallet(): UseWalletResult {
 
   const account = useMemo<WalletAccount | null>(() => {
     if (!address) return null;
-    return { address, chainKind: "solana", chainId: "mainnet-beta" };
-  }, [address]);
+    return { address, chainKind: "solana", chainId: "mainnet-beta", icon: wallet?.adapter.icon || null };
+  }, [address, wallet?.adapter.icon]);
 
   const connect = useCallback(() => {
     const openModal = () => setVisible(true);

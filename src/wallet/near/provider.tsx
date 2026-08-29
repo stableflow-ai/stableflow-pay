@@ -23,6 +23,7 @@ interface NearWalletContextValue {
   selector: WalletSelector | null;
   modal: WalletSelectorModal | null;
   accountId: string | null;
+  walletIcon: string | null;
   connecting: boolean;
 }
 
@@ -30,6 +31,7 @@ const NearWalletContext = createContext<NearWalletContextValue>({
   selector: null,
   modal: null,
   accountId: null,
+  walletIcon: null,
   connecting: false,
 });
 
@@ -37,6 +39,7 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
   const [selector, setSelector] = useState<WalletSelector | null>(null);
   const [modal, setModal] = useState<WalletSelectorModal | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [walletIcon, setWalletIcon] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(true);
 
   useEffect(() => {
@@ -71,6 +74,16 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
           const state = nextSelector.store.getState();
           const active = state.accounts.find((account) => account.active)?.accountId || null;
           setAccountId(active);
+          if (!active) {
+            setWalletIcon(null);
+            return;
+          }
+          void nextSelector.wallet().then((wallet) => {
+            if (cancelled) return;
+            setWalletIcon(wallet?.metadata.iconUrl || null);
+          }).catch(() => {
+            if (!cancelled) setWalletIcon(null);
+          });
         };
         syncAccounts();
         const subscription = nextSelector.store.observable.subscribe(syncAccounts);
@@ -92,8 +105,8 @@ export function NearWalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<NearWalletContextValue>(
-    () => ({ selector, modal, accountId, connecting }),
-    [selector, modal, accountId, connecting],
+    () => ({ selector, modal, accountId, walletIcon, connecting }),
+    [selector, modal, accountId, walletIcon, connecting],
   );
 
   return <NearWalletContext.Provider value={value}>{children}</NearWalletContext.Provider>;

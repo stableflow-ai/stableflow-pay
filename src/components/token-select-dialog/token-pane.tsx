@@ -1,10 +1,11 @@
-import { IconClose } from "@/components/icons/close";
+import type { ChainConfig } from "@/config/chains";
 import { SearchInput } from "@/components/ui/search-input/SearchInput";
-import { chainLogoUrl } from "@/lib/logo";
 import { cn } from "@/lib/utils";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { formatAmount } from "@/utils";
-import { tokenBalanceUsd } from "./utils";
+import { ChainWalletStatus } from "./chain-wallet-status";
+import { TOKEN_SEARCH_PLACEHOLDER } from "./config";
+import { tokenBalanceUsd, tokenSelectChainTitle } from "./utils";
 
 export type TokenPaneProps = {
   search: string;
@@ -15,9 +16,7 @@ export type TokenPaneProps = {
   showBalances?: boolean;
   getBalance: (token: IntentsToken) => string | null | undefined;
   isBalanceLoading: (token: IntentsToken) => boolean;
-  showClose?: boolean;
-  showTitle?: boolean;
-  onClose?: () => void;
+  selectedChain?: ChainConfig | null;
   onSelectToken: (token: IntentsToken) => void;
 };
 
@@ -30,37 +29,29 @@ export function TokenPane({
   showBalances = false,
   getBalance,
   isBalanceLoading,
-  showClose = false,
-  showTitle = true,
-  onClose,
+  selectedChain = null,
   onSelectToken,
 }: TokenPaneProps) {
+  const walletKind = selectedChain?.chainKind;
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {showTitle || showClose ? (
-        <div className="mb-4 flex items-center justify-between">
-          {showTitle ? (
-            <p className="font-montserrat text-base font-medium text-black">Select Token</p>
-          ) : <span />}
-          {showClose ? (
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-              className="shrink-0 cursor-pointer text-black"
-            >
-              <IconClose className="size-3.25" />
-            </button>
-          ) : null}
-        </div>
-      ) : null}
+      <div className="mb-3 flex min-h-8 items-center justify-between gap-2">
+        <p className="min-w-0 truncate font-montserrat text-base font-semibold text-black">
+          {selectedChain ? tokenSelectChainTitle(selectedChain) : ""}
+        </p>
+        {walletKind === "evm" || walletKind === "near" || walletKind === "solana" || walletKind === "tron" ? (
+          <ChainWalletStatus kind={walletKind} />
+        ) : null}
+      </div>
       <SearchInput
         value={search}
         onChange={onSearchChange}
-        placeholder="Search token"
+        placeholder={TOKEN_SEARCH_PLACEHOLDER}
         className="shrink-0"
+        inputClassName="rounded-[6px] border-[#E3E3E3] bg-[#F6F6F6] placeholder:text-black/30"
       />
-      <div className="mt-3 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+      <div className="mt-3 flex min-h-0 flex-1 flex-col overflow-y-auto">
         {loading && tokens.length === 0 ? (
           <p className="px-1 py-4 font-montserrat text-[13px] text-[#606060]">Loading tokens…</p>
         ) : null}
@@ -80,23 +71,13 @@ export function TokenPane({
               type="button"
               onClick={() => onSelectToken(token)}
               className={cn(
-                "flex w-full items-center justify-between rounded-[10px] px-1 py-1.5 text-left hover:bg-[#F6F6F6]",
+                "flex min-h-[49px] w-full items-center justify-between rounded-[6px] px-2.5 py-2 text-left hover:bg-[#F6F6F6]",
                 selected && "bg-[#F6F6F6]",
               )}
             >
               <span className="flex min-w-0 items-center gap-2.5">
-                <span className="relative size-8 shrink-0">
-                  <img src={token.logo} alt="" className="size-8 rounded-full object-cover" />
-                  <img
-                    src={chainLogoUrl(token.blockchain)}
-                    alt=""
-                    className="absolute -right-0.5 -bottom-0.5 size-3.5 rounded-[4px] border border-white object-cover"
-                  />
-                </span>
-                <span className="min-w-0">
-                  <span className="block font-montserrat text-sm font-medium text-black">{token.symbol}</span>
-                  <span className="block font-montserrat text-[10px] text-[#606060]">{token.chain.chainName}</span>
-                </span>
+                <img src={token.logo} alt="" className="size-[26px] shrink-0 rounded-full object-cover" />
+                <span className="truncate font-montserrat text-sm font-medium text-black">{token.symbol}</span>
               </span>
               {showBalances ? (
                 <span className="shrink-0 text-right">
@@ -107,11 +88,11 @@ export function TokenPane({
                     />
                   ) : formatted != null ? (
                     <>
-                      <span className="block font-montserrat text-sm text-[#606060]">
+                      <span className="block font-montserrat text-sm font-medium text-[#444C59]">
                         {formatAmount(formatted, { prefix: "", maxDecimals: 4 })}
                       </span>
                       {usd >= 0 ? (
-                        <span className="block font-montserrat text-[10px] text-[#909090]">
+                        <span className="block font-montserrat text-[10px] font-normal text-[#9FA7BA]">
                           {formatAmount(usd, { prefix: "$", showDust: true })}
                         </span>
                       ) : null}

@@ -14,13 +14,13 @@ import {
 } from "../intents-sign";
 
 export function useNearWallet(): UseWalletResult {
-  const { selector, modal, accountId, connecting } = useNearWalletContext();
+  const { selector, modal, accountId, walletIcon, connecting } = useNearWalletContext();
   const [modalOpen, setModalOpen] = useState(false);
 
   const account = useMemo<WalletAccount | null>(() => {
     if (!accountId) return null;
-    return { address: accountId, chainKind: "near", chainId: "mainnet" };
-  }, [accountId]);
+    return { address: accountId, chainKind: "near", chainId: "mainnet", icon: walletIcon };
+  }, [accountId, walletIcon]);
 
   useEffect(() => {
     if (!modal) return;

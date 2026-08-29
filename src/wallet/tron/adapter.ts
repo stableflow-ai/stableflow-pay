@@ -21,6 +21,7 @@ export function useTronWallet(): UseWalletResult {
     disconnect,
     signMessage: adapterSignMessage,
     signTransaction,
+    wallet,
   } = useTronAdapter();
   const { setVisible, visible } = useTronWalletModal();
 
@@ -35,8 +36,8 @@ export function useTronWallet(): UseWalletResult {
 
   const account = useMemo<WalletAccount | null>(() => {
     if (!address) return null;
-    return { address, chainKind: "tron", chainId: "mainnet" };
-  }, [address]);
+    return { address, chainKind: "tron", chainId: "mainnet", icon: wallet?.adapter.icon || null };
+  }, [address, wallet?.adapter.icon]);
 
   const connect = useCallback(() => {
     const openModal = () => setVisible(true);

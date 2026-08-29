@@ -234,7 +234,6 @@ export function CreateLinkForm() {
       <TokenSelectDialog
         open={tokenDialogOpen}
         onClose={() => setTokenDialogOpen(false)}
-        title="Receiving token"
         selectedAssetId={token?.assetId}
         showBalances={false}
         onSelect={({ token: next }) => {

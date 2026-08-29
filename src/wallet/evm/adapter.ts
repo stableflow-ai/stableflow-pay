@@ -7,6 +7,7 @@
 import { useCallback, useMemo } from "react";
 import { isAddress } from "viem";
 import { useAccount, useDisconnect, useSignMessage } from "wagmi";
+import { useEvmWalletInfo } from "@/hooks/use-evm-wallet-info";
 import type { GeneratedIntent, IntentSignInput, IntentSignedPayload, UseWalletResult, WalletAccount } from "../types";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import {
@@ -23,6 +24,7 @@ export function useEvmWallet(): UseWalletResult {
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
   const { signMessageAsync } = useSignMessage();
+  const walletInfo = useEvmWalletInfo();
 
   const account = useMemo<WalletAccount | null>(() => {
     if (!address) return null;
@@ -30,8 +32,9 @@ export function useEvmWallet(): UseWalletResult {
       address,
       chainKind: "evm",
       chainId,
+      icon: walletInfo.icon || null,
     };
-  }, [address, chainId]);
+  }, [address, chainId, walletInfo.icon]);
 
   const signMessage = useCallback(
     async (input: IntentSignInput): Promise<IntentSignedPayload> => {

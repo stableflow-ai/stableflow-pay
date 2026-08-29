@@ -16,6 +16,8 @@ export interface WalletAccount {
   address: string;
   chainKind: ChainKind;
   chainId?: string | number;
+  /** Connected wallet brand logo (connector / adapter icon). */
+  icon?: string | null;
 }
 
 /** Empty-intents ownership proof (or a later withdraw payload) for NEAR Intents. */

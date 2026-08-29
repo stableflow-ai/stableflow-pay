@@ -55,7 +55,7 @@ export function LoginView() {
     <AuthShell panelTop={<AuthBetaBanner />}>
       <form onSubmit={submit} className={AUTH_CARD_CLASS}>
         <h1 className="text-center font-montserrat text-xl font-semibold text-black">
-          Welcome to Stableflow Pay
+          Welcome to Pay. Stableflow
         </h1>
 
         <AuthField
@@ -98,7 +98,7 @@ export function LoginView() {
         </button>
 
         <p className={`block ${AUTH_LINK_CLASS}`}>
-          New to Stableflow Pay?{" "}
+          New to Pay. Stableflow?{" "}
           <Link to={registerPathWithReturnTo(returnTo)} className={`inline-flex items-center ${AUTH_LINK_ACCENT_CLASS}`}>
             Create an account
             <Icon2Right className="ml-1" />

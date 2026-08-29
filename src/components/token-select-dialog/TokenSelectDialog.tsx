@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Icon2Right } from "@/components/icons/to-right";
+import { IconClose } from "@/components/icons/close";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { Overlay } from "@/components/ui/overlay/Overlay";
@@ -12,9 +12,9 @@ import { isNativeToken, useIntentsTokensStore, type IntentsToken } from "@/store
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import type { WalletChainKind } from "@/utils";
 import { ChainPane } from "./chain-pane";
-import { EVM_CHAIN_FILTER, TOKEN_BALANCE_POLL_MS } from "./config";
+import { TOKEN_BALANCE_POLL_MS, TOKEN_SELECT_TITLE } from "./config";
 import { TokenPane } from "./token-pane";
-import { tokenBalanceUsd } from "./utils";
+import { defaultTokenSelectChain, sortTokenSelectChains, tokenBalanceUsd } from "./utils";
 
 export interface TokenSelectSelection {
   token: IntentsToken;
@@ -43,24 +43,10 @@ function hasAnyOwner(owners: ChainOwners | null | undefined): boolean {
   return Boolean(owners?.evm || owners?.near || owners?.solana || owners?.tron);
 }
 
-function defaultChainFilter(
-  selected: IntentsToken | undefined,
-  lockChainKind: WalletChainKind | null | undefined,
-): string {
-  if (selected) {
-    return selected.chain.chainKind === "evm" ? EVM_CHAIN_FILTER : selected.blockchain;
-  }
-  if (lockChainKind && lockChainKind !== "evm") {
-    const chain = FIXED_CHAINS.find((item) => item.chainKind === lockChainKind);
-    return chain?.blockchain ?? EVM_CHAIN_FILTER;
-  }
-  return EVM_CHAIN_FILTER;
-}
-
 export function TokenSelectDialog({
   open,
   onClose,
-  title = "Select token",
+  title = TOKEN_SELECT_TITLE,
   selectedAssetId,
   showBalances = false,
   balanceOwners = {},
@@ -77,21 +63,12 @@ export function TokenSelectDialog({
   const getBalance = useTokenBalancesStore((s) => s.getBalance);
   const balanceEntries = useTokenBalancesStore((s) => s.balances);
   const [search, setSearch] = useState("");
-  const [chainFilter, setChainFilter] = useState(EVM_CHAIN_FILTER);
-  const [mobileStep, setMobileStep] = useState<"chain" | "token">("chain");
+  const [chainFilter, setChainFilter] = useState("");
 
   const selected = useMemo(
     () => tokens.find((token) => token.assetId === selectedAssetId),
     [tokens, selectedAssetId],
   );
-
-  useEffect(() => {
-    if (!open) return;
-    void ensureFresh();
-    setSearch("");
-    setMobileStep("chain");
-    setChainFilter(defaultChainFilter(selected, lockChainKind));
-  }, [open, ensureFresh, selected, lockChainKind]);
 
   const allowed = useMemo(() => {
     if (!allowedBlockchains || allowedBlockchains.length === 0) return null;
@@ -106,6 +83,24 @@ export function TokenSelectDialog({
     });
   }, [tokens, allowed, excludeNative]);
 
+  const availableChains = useMemo(() => {
+    const codes = new Set(scopedTokens.map((token) => token.blockchain));
+    return sortTokenSelectChains(FIXED_CHAINS.filter((chain) => codes.has(chain.blockchain)));
+  }, [scopedTokens]);
+
+  useEffect(() => {
+    if (!open) return;
+    void ensureFresh();
+    setSearch("");
+    setChainFilter("");
+  }, [open, ensureFresh]);
+
+  useEffect(() => {
+    if (!open || availableChains.length === 0) return;
+    if (chainFilter && availableChains.some((chain) => chain.blockchain === chainFilter)) return;
+    setChainFilter(defaultTokenSelectChain(availableChains, selected?.blockchain, lockChainKind));
+  }, [open, availableChains, selected, lockChainKind, chainFilter]);
+
   useEnsureTokenBalances({
     owners,
     tokens: scopedTokens,
@@ -116,20 +111,13 @@ export function TokenSelectDialog({
   const filteredTokens = useMemo(() => {
     const q = search.trim().toLowerCase();
     return scopedTokens.filter((token) => {
-      if (chainFilter === EVM_CHAIN_FILTER) {
-        if (token.chain.chainKind !== "evm") return false;
-      } else if (token.blockchain !== chainFilter) {
-        return false;
-      }
-      if (
-        q
-        && !token.symbol.toLowerCase().includes(q)
-        && !token.providerSymbol.toLowerCase().includes(q)
-        && !token.chain.chainName.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-      return true;
+      if (!chainFilter || token.blockchain !== chainFilter) return false;
+      if (!q) return true;
+      if (token.symbol.toLowerCase().includes(q)) return true;
+      if (token.providerSymbol.toLowerCase().includes(q)) return true;
+      if (token.chain.chainName.toLowerCase().includes(q)) return true;
+      if (token.contractAddress?.toLowerCase().includes(q)) return true;
+      return false;
     }).slice().sort((a, b) => {
       const bySymbol = a.symbol.localeCompare(b.symbol) || a.chain.chainName.localeCompare(b.chain.chainName);
       if (!showBalances) return bySymbol;
@@ -140,10 +128,10 @@ export function TokenSelectDialog({
     });
   }, [scopedTokens, chainFilter, search, showBalances, owners, getBalance, balanceEntries]);
 
-  function handleSelectFilter(filter: string) {
-    setChainFilter(filter);
-    if (!isDesktop) setMobileStep("token");
-  }
+  const selectedChain = useMemo(
+    () => availableChains.find((chain) => chain.blockchain === chainFilter) ?? availableChains[0] ?? null,
+    [availableChains, chainFilter],
+  );
 
   function handleSelectToken(token: IntentsToken) {
     onSelect({ token });
@@ -161,31 +149,32 @@ export function TokenSelectDialog({
     return entry?.formatted == null && (!entry || entry.status === "loading");
   }
 
-  const chainPane = (
-    <ChainPane
-      chainFilter={chainFilter}
-      onSelectFilter={handleSelectFilter}
-      tokens={scopedTokens}
-      lockChainKind={lockChainKind}
-      hideTitle={!isDesktop}
-    />
-  );
-
-  const tokenPane = (
-    <TokenPane
-      search={search}
-      onSearchChange={setSearch}
-      tokens={filteredTokens}
-      selectedAssetId={selectedAssetId}
-      loading={loading}
-      showBalances={showBalances}
-      getBalance={tokenBalance}
-      isBalanceLoading={tokenBalanceLoading}
-      showClose={isDesktop}
-      showTitle={isDesktop}
-      onClose={onClose}
-      onSelectToken={handleSelectToken}
-    />
+  const body = (
+    <div className="flex min-h-0 min-w-0 flex-1">
+      <div className="w-20 shrink-0 overflow-y-auto">
+        <ChainPane
+          chainFilter={chainFilter}
+          onSelectFilter={setChainFilter}
+          tokens={scopedTokens}
+          lockChainKind={lockChainKind}
+        />
+      </div>
+      <div className="w-px shrink-0 bg-[#E3E3E3]" aria-hidden />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col px-2.5 pt-3 pb-2">
+        <TokenPane
+          search={search}
+          onSearchChange={setSearch}
+          tokens={filteredTokens}
+          selectedAssetId={selectedAssetId}
+          loading={loading}
+          showBalances={showBalances}
+          getBalance={tokenBalance}
+          isBalanceLoading={tokenBalanceLoading}
+          selectedChain={selectedChain}
+          onSelectToken={handleSelectToken}
+        />
+      </div>
+    </div>
   );
 
   if (!open) return null;
@@ -196,22 +185,11 @@ export function TokenSelectDialog({
         open={open}
         onClose={onClose}
         side={DRAWER_SIDE.Bottom}
-        title={mobileStep === "chain" ? "Select Chain" : title}
-        headerAction={mobileStep === "token" ? (
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={() => setMobileStep("chain")}
-            className="cursor-pointer text-black"
-          >
-            <Icon2Right className="size-3 rotate-180" />
-          </button>
-        ) : undefined}
+        title={title}
         cardClassName="max-h-[85vh]"
+        contentClassName="flex min-h-[320px] overflow-hidden"
       >
-        <div className="min-h-[320px]">
-          {mobileStep === "chain" ? chainPane : tokenPane}
-        </div>
+        {body}
       </Drawer>
     );
   }
@@ -222,11 +200,21 @@ export function TokenSelectDialog({
         <div
           role="dialog"
           aria-modal="true"
-          className="pointer-events-auto relative flex h-[min(682px,90vh)] w-full max-w-[649px] overflow-hidden rounded-[20px] border border-white bg-[#F6F6F6] shadow-[0_0_20px_0_rgba(0,0,0,0.06)]"
+          className="pointer-events-auto relative flex h-[min(617px,90vh)] w-full max-w-[420px] flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_0_40px_0_rgba(0,0,0,0.1)]"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="w-[275px] shrink-0 overflow-y-auto p-5">{chainPane}</div>
-          <div className="flex min-w-0 flex-1 flex-col bg-white p-5">{tokenPane}</div>
+          <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-[#E3E3E3] px-6">
+            <p className="font-montserrat text-lg font-semibold text-black">{title}</p>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="shrink-0 cursor-pointer text-black"
+            >
+              <IconClose className="size-3.25" />
+            </button>
+          </div>
+          {body}
         </div>
       </div>
     </Overlay>
