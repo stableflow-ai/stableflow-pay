@@ -51,7 +51,7 @@ pnpm preview
 | `/payment-links/create` | merchant | Create + preview |
 | `/paylink/:linkId` | payer | Checkout; no login, no sidebar |
 | `/checkout?sessionId=cs_xxx` | payer | Checkout; no login, no sidebar |
-| `/api-keys` | merchant | Partner keys API |
+| `/api-keys` | merchant | API keys API |
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
 | `/terms`, `/docs` | merchant | Placeholder |

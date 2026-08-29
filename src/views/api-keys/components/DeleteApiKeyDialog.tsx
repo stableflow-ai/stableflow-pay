@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Dialog } from "@/components/ui/dialog/Dialog";
-import type { PayPartnerKey } from "@/types/partner";
+import type { PayApiKey } from "@/types/api-keys";
 
 export function DeleteApiKeyDialog(props: {
   open: boolean;
   onClose: () => void;
-  apiKey: PayPartnerKey | null;
+  apiKey: PayApiKey | null;
   onConfirm: () => void;
 }) {
   const { open, onClose, apiKey, onConfirm } = props;

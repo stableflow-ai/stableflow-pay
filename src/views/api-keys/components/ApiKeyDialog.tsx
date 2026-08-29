@@ -69,8 +69,11 @@ export function ApiKeyDialog(props: ApiKeyDialogProps) {
     <Dialog open={open} onClose={onClose} title={title} closeOnMaskClick={!submitting}>
       {createdKey ? (
         <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <p className="font-montserrat text-sm font-medium text-[#606060]">Key</p>
+          <p className="font-montserrat text-sm font-medium text-[#606060]">
+            Notice: Do not share your API key with others, or expose it in the browser or other
+            client-side code.
+          </p>
+          <div className="flex flex-col gap-1.5 bg-[#FDFDFD] rounded-[20px] py-4 px-4 border border-[#fff] shadow-[0_0_20px_0_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between gap-3">
               <p className="min-w-0 break-all font-montserrat text-sm font-medium text-black">
                 {createdKey}
@@ -87,10 +90,13 @@ export function ApiKeyDialog(props: ApiKeyDialogProps) {
               </Button>
             </div>
           </div>
-          <p className="font-montserrat text-sm font-medium text-black">
-            Notice: Do not share your API key with others, or expose it in the browser or other
-            client-side code.
-          </p>
+          <Button
+            size={BUTTON_SIZE.Lg}
+            className="w-full"
+            onClick={() => onClose()}
+          >
+            Done
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-8">

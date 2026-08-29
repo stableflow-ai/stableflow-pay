@@ -1,16 +1,3 @@
-export interface PayPartnerKey {
-  id: number;
-  userId: number;
-  name: string;
-  apiKey: string;
-  createdAt: string;
-  status: number;
-}
-
-export interface PayPartnerKeyLabelBody {
-  name: string;
-}
-
 export interface PayPartnerAnalyticsQuery {
   start_time?: number;
   end_time?: number;

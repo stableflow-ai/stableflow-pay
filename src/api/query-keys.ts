@@ -48,9 +48,12 @@ export const queryKeys = {
     all: ["webhooks"] as const,
     list: ["webhooks", "list"] as const,
   },
+  apiKeys: {
+    all: ["api-keys"] as const,
+    list: ["api-keys", "list"] as const,
+  },
   partner: {
     all: ["partner"] as const,
-    keys: ["partner", "keys"] as const,
     analytics: (params: unknown) => [...queryKeys.partner.all, "analytics", params] as const,
     payments: (params: unknown) => [...queryKeys.partner.all, "payments", params] as const,
   },

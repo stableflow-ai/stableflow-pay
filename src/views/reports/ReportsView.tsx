@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table/Table";
 import { FIXED_CHAINS, txExplorerUrl } from "@/config/chains";
-import { usePartnerKeysQuery } from "@/hooks/use-partner-api";
+import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import {
   usePartnerAnalyticsQuery,
   usePartnerPaymentsQuery,
@@ -65,7 +65,7 @@ function chartNumber(value: string): number {
 
 export function ReportsView() {
   const toast = useToast();
-  const keysQuery = usePartnerKeysQuery();
+  const keysQuery = useApiKeysQuery();
   const [range, setRange] = useState(() => lastNDaysRange(REPORT_TIME_PRESET.Days30));
   const [apiKey, setApiKey] = useState(REPORT_FILTER_ALL);
   const [network, setNetwork] = useState(REPORT_FILTER_ALL);

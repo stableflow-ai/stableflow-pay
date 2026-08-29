@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table/Table";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
-import type { PayPartnerKey } from "@/types/partner";
+import type { PayApiKey } from "@/types/api-keys";
 import { formatDate } from "@/utils";
 import { API_KEY_TABLE_COLUMNS } from "../config";
 import { maskApiKey } from "../utils";
@@ -26,14 +26,14 @@ export function ApiKeysTable({
   onEdit,
   onDelete,
 }: {
-  apiKeys: PayPartnerKey[];
+  apiKeys: PayApiKey[];
   isPending: boolean;
   isError: boolean;
   errorMessage: string;
   onCreate: () => void;
   onCopy: (apiKey: string) => void;
   onEdit: (id: number) => void;
-  onDelete: (row: PayPartnerKey) => void;
+  onDelete: (row: PayApiKey) => void;
 }) {
   return (
     <Table columns={API_KEY_TABLE_COLUMNS} className="w-full p-4 md:p-5">

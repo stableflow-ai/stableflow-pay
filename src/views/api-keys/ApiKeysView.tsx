@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { usePartnerKeyMutations, usePartnerKeysQuery } from "@/hooks/use-partner-api";
+import { useApiKeyMutations, useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import useToast from "@/hooks/use-toast";
-import type { PayPartnerKey } from "@/types/partner";
+import type { PayApiKey } from "@/types/api-keys";
 import { ApiKeyDialog } from "./components/ApiKeyDialog";
 import { ApiKeysTable } from "./components/ApiKeysTable";
 import { DeleteApiKeyDialog } from "./components/DeleteApiKeyDialog";
@@ -11,13 +11,13 @@ import { API_KEY_DIALOG_MODE, type ApiKeyDialogMode } from "./config";
 import { apiKeysError } from "./utils";
 
 export function ApiKeysView() {
-  const keysQuery = usePartnerKeysQuery();
-  const { createMutation, updateMutation, deleteMutation } = usePartnerKeyMutations();
+  const keysQuery = useApiKeysQuery();
+  const { createMutation, updateMutation, deleteMutation } = useApiKeyMutations();
   const toast = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<ApiKeyDialogMode>(API_KEY_DIALOG_MODE.Create);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState<PayPartnerKey | null>(null);
+  const [deleting, setDeleting] = useState<PayApiKey | null>(null);
 
   const apiKeys = keysQuery.data ?? [];
   const editingKey = apiKeys.find((row) => row.id === editingId);
