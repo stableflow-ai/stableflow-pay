@@ -48,7 +48,10 @@ export function WaitingCard(props: {
         <>
           <p className="font-montserrat text-base font-medium text-black">Payment Details</p>
           <div className="mt-6 flex flex-col gap-[22px]">
-            <DetailRow label="Recipient Address" value={session.recipientAddress} />
+            <DetailRow
+              label="Recipient Address"
+              value={formatAddress(session.recipientAddress)}
+            />
             <DetailRow
               label="Request Payment"
               value={`${session.requestAmount} ${formatTokenNetwork(session.destSymbol, session.destNetwork)}`}
@@ -65,11 +68,11 @@ export function WaitingCard(props: {
             <DetailRow label="Route" value="Near intents" />
             <DetailRow
               label="Total Fees"
-              value={session.feesUsd ? `${tilde}${formatAmount(session.feesUsd)}` : "—"}
+              value={session.feesUsd ? `${tilde}${formatAmount(session.feesUsd, { maxDecimals: 2, showDust: true })}` : "—"}
             />
             <DetailRow
               label="Total Payout"
-              value={session.payoutUsd ? `${tilde}${formatAmount(session.payoutUsd)}` : "—"}
+              value={session.payoutUsd ? `${tilde}${formatAmount(session.payoutUsd, { maxDecimals: 2, showDust: true })}` : "—"}
             />
             {isSuccess ? (
               <>
