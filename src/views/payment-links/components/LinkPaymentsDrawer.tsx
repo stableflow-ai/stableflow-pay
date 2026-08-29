@@ -12,7 +12,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import useToast from "@/hooks/use-toast";
 import type { PayPaymentLink } from "@/types/payment-links";
-import { formatDate } from "@/utils";
+import { formatAmount, formatDate } from "@/utils";
 import { LINK_TRANSACTIONS_TABLE_COLUMNS } from "../config";
 import {
   buildPaymentLinkUrl,
@@ -85,9 +85,6 @@ export function LinkPaymentsDrawer({
 
 function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
   const isActive = isPaymentLinkActive(link.status);
-  const tokenLabel = isPaymentLinkOpen(link)
-    ? "No limit"
-    : formatTokenNetwork(link.symbol, link.network);
 
   return (
     <div className="flex flex-col gap-6">
@@ -100,8 +97,12 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
             {paymentLinkStatusLabel(link.status)}
           </span>
         </SummaryField>
-        <SummaryField label="Payment Token">{tokenLabel}</SummaryField>
-        <SummaryField label="Price">—</SummaryField>
+        <SummaryField label="Payment Token">
+          {formatTokenNetwork(link.symbol, link.network)}
+        </SummaryField>
+        <SummaryField label="Price">
+          {isPaymentLinkOpen(link) ? "No limit" : formatAmount(link.amount, { prefix: "", maxDecimals: 2, showDust: true })}
+        </SummaryField>
         <SummaryField label="Revenue">—</SummaryField>
         <SummaryField label="Transactions">—</SummaryField>
       </div>
