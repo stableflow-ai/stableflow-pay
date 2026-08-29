@@ -63,9 +63,10 @@ export function LinkPaymentsDrawer({
       open={open}
       onClose={onClose}
       side={isDesktop ? DRAWER_SIDE.Right : DRAWER_SIDE.Bottom}
+      panelClassName={isDesktop ? "w-[min(100%,948px)]" : undefined}
       cardClassName={
         isDesktop
-          ? "w-[min(100%,948px)] md:rounded-r-none"
+          ? "w-full rounded-r-none"
           : "w-full max-h-[90vh] rounded-b-none"
       }
       titleClassName="min-h-0 min-w-0 flex-1"

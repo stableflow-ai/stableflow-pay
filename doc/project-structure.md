@@ -39,6 +39,7 @@ src/
     auth/                 # Login, register, AuthShell, ResetPasswordDialog
     how-it-works/         # Public marketing page
     overview/             # Authenticated home at /
+    guide/                # Authenticated /guide onboarding (own layout, step drawers)
     payment-links/        # Merchant payment-link list and create
     payer/                # Public /paylink/:linkId and /checkout?sessionId= pay + waiting (no login)
     settings/             # Settings page at /settings (profile + webhooks)

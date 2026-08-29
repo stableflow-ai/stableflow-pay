@@ -28,7 +28,13 @@ import { TokenSelectButton } from "./TokenSelectButton";
 const FIELD_INPUT_CLASS =
   "h-9 w-full rounded-[6px] border bg-[#f6f6f6] px-3 font-montserrat text-sm font-medium outline-none placeholder:text-black/30";
 
-export function CreateLinkForm() {
+export function CreateLinkForm({
+  showStepper = true,
+  onCreated,
+}: {
+  showStepper?: boolean;
+  onCreated?: (created: { linkId: string; title: string }) => void;
+} = {}) {
   const navigate = useNavigate();
   const toast = useToast();
   const { createMutation } = usePaymentLinkMutations();
@@ -84,6 +90,10 @@ export function CreateLinkForm() {
         network: token.blockchain,
         recipient: address.trim(),
       });
+      if (onCreated) {
+        onCreated({ linkId: created.linkId, title: title.trim() });
+        return;
+      }
       const state: CreatePaymentLinkPreviewState = { linkId: created.linkId };
       navigate(CREATE_PAYMENT_LINK_PREVIEW_PATH, { state });
     } catch (error) {
@@ -94,8 +104,12 @@ export function CreateLinkForm() {
   return (
     <>
       <div>
-        <CreateLinkStepper step={CREATE_PAYMENT_LINK_STEP.Form} />
-        <div className="mt-6 h-px w-full bg-[#e3e3e3]" />
+        {showStepper ? (
+          <>
+            <CreateLinkStepper step={CREATE_PAYMENT_LINK_STEP.Form} />
+            <div className="mt-6 h-px w-full bg-[#e3e3e3]" />
+          </>
+        ) : null}
 
         <label
           htmlFor="payment-title"

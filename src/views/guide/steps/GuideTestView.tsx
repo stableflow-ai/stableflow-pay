@@ -1,0 +1,156 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { IconCheck2 } from "@/components/icons/check";
+import { IconCopy } from "@/components/icons/copy";
+import { Button } from "@/components/ui/button/Button";
+import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { useCreateCheckoutSessionMutation } from "@/hooks/use-checkout-api";
+import useToast from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { useGuideStore } from "@/stores/guide";
+import {
+  GUIDE_STEPS,
+  GUIDE_TEST_LANG,
+  GUIDE_TEST_LANG_OPTIONS,
+  GUIDE_TEST_SAMPLE,
+  type GuideTestLang,
+} from "../config";
+import { GuideDrawer } from "../GuideDrawer";
+import { useGuideProgress } from "../hooks/use-guide-progress";
+import {
+  buildGuideTestSnippet,
+  formatGuideJson,
+  generateGuideOutOrderNo,
+  guideErrorMessage,
+} from "../utils";
+
+export function GuideTestView() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const setTestCompleted = useGuideStore((state) => state.setTestCompleted);
+  const { apiKey } = useGuideProgress();
+  const createSession = useCreateCheckoutSessionMutation();
+  const [lang, setLang] = useState<GuideTestLang>(GUIDE_TEST_LANG.Node);
+  const [result, setResult] = useState<string | null>(null);
+  const [passed, setPassed] = useState(false);
+
+  const key = apiKey?.key ?? "";
+  const snippet = buildGuideTestSnippet(lang, key);
+  const fileName = GUIDE_TEST_LANG_OPTIONS.find((option) => option.value === lang)?.fileName ?? "server.js";
+
+  async function copySnippet() {
+    try {
+      await navigator.clipboard.writeText(snippet);
+      toast.success({ title: "Copied" });
+    } catch {
+      toast.fail({ title: "Could not copy" });
+    }
+  }
+
+  async function runTest() {
+    if (!key) {
+      toast.fail({ title: "Create an API key before running the test" });
+      return;
+    }
+    try {
+      const data = await createSession.mutateAsync({
+        apiKey: key,
+        body: {
+          amount: GUIDE_TEST_SAMPLE.amount,
+          network: GUIDE_TEST_SAMPLE.network,
+          out_order_no: generateGuideOutOrderNo(),
+          recipient: GUIDE_TEST_SAMPLE.recipient,
+          success_url: GUIDE_TEST_SAMPLE.successUrl,
+          symbol: GUIDE_TEST_SAMPLE.symbol,
+        },
+      });
+      setResult(formatGuideJson(data));
+      setPassed(true);
+      setTestCompleted(true);
+    } catch (error) {
+      setPassed(false);
+      setResult(guideErrorMessage(error, "Could not create checkout session"));
+    }
+  }
+
+  function finish() {
+    navigate("/");
+  }
+
+  return (
+    <GuideDrawer title={GUIDE_STEPS[3].drawerTitle}>
+      <div className="flex flex-col">
+        <div className="grid h-[50px] grid-cols-3 rounded-[12px] bg-[#f2f2f2] p-[5px]">
+          {GUIDE_TEST_LANG_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setLang(option.value)}
+              className={cn(
+                "rounded-[10px] font-montserrat text-sm font-medium text-black",
+                lang === option.value && "border border-[#e3e3e3] bg-white",
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-7 overflow-hidden rounded-[12px] bg-black">
+          <div className="flex items-center justify-between px-7 pt-5">
+            <p className="font-montserrat text-sm font-medium text-[#aaa]">{fileName}</p>
+            <button
+              type="button"
+              onClick={() => void copySnippet()}
+              className="inline-flex items-center gap-1.5 font-montserrat text-sm font-medium text-white"
+            >
+              <IconCopy className="size-3.5 text-white" />
+              Copy
+            </button>
+          </div>
+          <div className="mt-4 h-px w-full bg-white/15" />
+          <pre className="overflow-x-auto px-7 py-5 font-montserrat text-sm font-medium leading-[1.5] whitespace-pre-wrap text-white">
+            {snippet}
+          </pre>
+        </div>
+
+        <div className="mt-7 flex min-h-[399px] flex-col rounded-[12px] border border-[#e3e3e3] bg-white">
+          <div className="flex items-center justify-between px-7 pt-4">
+            <p className="font-montserrat text-sm font-medium text-[#aaa]">Test Result</p>
+            {passed ? (
+              <span className="inline-flex items-center gap-1.5 font-montserrat text-sm font-medium text-[#769400]">
+                <IconCheck2 className="h-[11px] w-3.5" />
+                Running
+              </span>
+            ) : null}
+          </div>
+          <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-6">
+            {result ? (
+              <pre className="w-full self-start overflow-auto font-montserrat text-sm font-medium leading-[1.5] whitespace-pre-wrap text-black">
+                {result}
+              </pre>
+            ) : (
+              <p className="text-center font-montserrat text-sm font-medium text-[#AAA]">
+                Run the request to verify your API key.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <Button
+          size={BUTTON_SIZE.Lg}
+          className="mt-8 w-full"
+          loading={createSession.isPending}
+          onClick={() => {
+            if (passed) finish();
+            else void runTest();
+          }}
+        >
+          {passed ? "Get Ready" : "Run Test"}
+        </Button>
+      </div>
+    </GuideDrawer>
+  );
+}
+
+export default GuideTestView;

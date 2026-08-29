@@ -10,7 +10,8 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | --- | --- | --- | --- |
 | Auth | `/login`, `/register` | shipped | Email + password. Same API as v2. Guest forgot password in a dialog. Authed users change password from the sidebar account menu. |
 | Marketing | `/howitworks` | shipped | Public. Linked from the auth shell. |
-| Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. |
+| Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. A four-step guide panel sits above the stats until Step 4 Test is completed. |
+| Guide | `/guide`, `/guide/payment-link`, `/guide/api-key`, `/guide/webhook`, `/guide/test` | shipped | Authenticated onboarding. Own layout (no sidebar). Step drawers: 600px right on desktop, bottom below 768px. Creates a payment link, API key, and webhook; Step 4 POSTs `/v1/pay/checkout/sessions` with `x-api-key`. Progress is Zustand persist (`stableflow-pay.guide`). After Test completes, the Overview guide panel is hidden. |
 | Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). List is `GET /v1/pay/links` (`page`, `pageSize`, `q`; `revenue` / `payments`). View loads `/stats` and paginated `/payments`, plus CSV export. |
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
 | Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit` (`payments_id`). Both waiting pages poll `GET /v1/pay/payments/{paymentId}`. |
@@ -37,7 +38,9 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+
+`/guide` is authenticated but does **not** use `AppLayout`. It has its own logo column and a step drawer.
 
 The sidebar user chip shows `user.name` and a three-dot control. That control opens an upward floating menu (same pattern as v2, `side="top"`): Change Password, Settings, Log out. Settings goes to `/settings`. Change Password opens `ResetPasswordDialog` (`variant="authed"`).
 
@@ -45,7 +48,11 @@ Sidebar footer (muted): Settings, Developer Docs, Terms of Service. There is no 
 
 ## Overview
 
-One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this product exists. Follow [mocks.md](mocks.md). Do not invent `src/types/overview.ts` or query keys in the mock phase.
+One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this product exists. Follow [mocks.md](mocks.md). Do not invent `src/types/overview.ts` or query keys in the mock phase. A four-step guide panel sits 20px above the stats row until `testCompleted` is true (Get Ready after a successful Run Test).
+
+## Guide
+
+Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, Get Start, four step cards, Skip All. Switching a step opens a 600px right drawer on desktop and a bottom drawer below 768px. Step 1 reuses the payment-link form. Step 2 creates an API key. Step 3 creates a webhook. Step 4 runs `POST /v1/pay/checkout/sessions` with `x-api-key`. Guide progress is stored in `useGuideStore` persist. Skip does not mark a step complete. Skip All returns to `/` and does not hide the Overview panel. Get Ready after a successful test sets `testCompleted` and hides the Overview guide panel.
 
 ## Payment Links
 
@@ -53,7 +60,7 @@ Authenticated `/payment-links` lists merchant links from `GET /v1/pay/links` (`p
 
 ## Public payer
 
-`/paylink/:linkId` is the guest checkout for a payment link. `/checkout?sessionId=` is the guest checkout for an API-key session (`GET /v1/pay/checkout/sessions/{sessionId}`). Neither uses `AppLayout` nor requires login. Both reuse the same pay and waiting UI. Preview and pay use `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}` (`EXACT_OUTPUT`, no quote). After transfer, submit is `POST /v1/pay/swap/submit` (`swapId` + `txHash`) with a retry queue; the body returns `payments_id` and `status`. Checkout uses session `status` (`created` / `processing` / `completed` / `failed` / `expired`) only to show the form vs `/checkout/waiting`. Waiting polls `GET /v1/pay/payments/{paymentId}` (`submitted` / `completed` / `failed`): checkout reads `payments_id` from the session; paylink uses `/paylink/:linkId/waiting?paymentId=`. Checkout with a `success_url` shows a 10s `Redirecting in Ns` countdown when the payment is `completed`, then opens that URL with query `amount`, `network`, `expires_at`, `created_at`, `out_order_no`, `recipient`, `session_id`, `status=success`, `symbol`, plus `destination_txHash`, `paid_at`, and `tx_hash` from the payment. `/checkout/waiting` polls `GET /v1/pay/payments/{paymentId}` when `paymentId` is present and only polls the checkout session when it is missing. Waiting Total Fees / Total Payout come from `feesUsd` and `payoutUsd` query params written at pay time until the payment API returns those fields. This product does not create checkout sessions (`POST /v1/pay/checkout/sessions`) and does not persist a local payer session.
+`/paylink/:linkId` is the guest checkout for a payment link. `/checkout?sessionId=` is the guest checkout for an API-key session (`GET /v1/pay/checkout/sessions/{sessionId}`). Neither uses `AppLayout` nor requires login. Both reuse the same pay and waiting UI. Preview and pay use `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}` (`EXACT_OUTPUT`, no quote). After transfer, submit is `POST /v1/pay/swap/submit` (`swapId` + `txHash`) with a retry queue; the body returns `payments_id` and `status`. Checkout uses session `status` (`created` / `processing` / `completed` / `failed` / `expired`) only to show the form vs `/checkout/waiting`. Waiting polls `GET /v1/pay/payments/{paymentId}` (`submitted` / `completed` / `failed`): checkout reads `payments_id` from the session; paylink uses `/paylink/:linkId/waiting?paymentId=`. Checkout with a `success_url` shows a 10s `Redirecting in Ns` countdown when the payment is `completed`, then opens that URL with query `amount`, `network`, `expires_at`, `created_at`, `out_order_no`, `recipient`, `session_id`, `status=success`, `symbol`, plus `destination_txHash`, `paid_at`, and `tx_hash` from the payment. `/checkout/waiting` polls `GET /v1/pay/payments/{paymentId}` when `paymentId` is present and only polls the checkout session when it is missing. Waiting Total Fees / Total Payout come from `feesUsd` and `payoutUsd` query params written at pay time until the payment API returns those fields. The public payer flow does not persist a local payer session. The Guide Step 4 test creates a checkout session with `POST /v1/pay/checkout/sessions` and `x-api-key`.
 
 ## API Keys
 

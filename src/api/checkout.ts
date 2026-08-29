@@ -1,7 +1,7 @@
 import { http } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { apiText, asRecord } from "@/api/map";
-import type { PayCheckoutSession } from "@/types/pay";
+import type { PayCheckoutSession, PayCheckoutSessionBody } from "@/types/pay";
 
 export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
   const row = asRecord(raw) ?? {};
@@ -18,6 +18,18 @@ export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
     successUrl: apiText(row.success_url ?? row.successUrl),
     symbol: apiText(row.symbol),
   };
+}
+
+export async function createCheckoutSession(
+  body: PayCheckoutSessionBody,
+  apiKey: string,
+): Promise<unknown> {
+  return http<unknown>(`${PAY_API_PREFIX}/checkout/sessions`, {
+    method: "POST",
+    body,
+    apiKey,
+    sameOrigin: import.meta.env.DEV,
+  });
 }
 
 export async function getCheckoutSession(

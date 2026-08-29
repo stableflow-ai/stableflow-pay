@@ -13,12 +13,13 @@ All Dialog chrome props, plus:
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | `"right"` | Use `DRAWER_SIDE` from `./config` |
-| `cardClassName` | `string` | — | Override width, radius, height |
+| `cardClassName` | `string` | — | Override padding, radius on the Card |
+| `panelClassName` | `string` | — | Override the positioned shell width (right/left default `w-[min(100%,420px)]`) |
 
 Edge defaults:
 
 - `top` / `bottom`: `width: 100%`, `max-h-[90vh]`, square corners on the screen edge
-- `left` / `right`: `h-full`, default `w-[min(100%,420px)]`, square corners on the screen edge
+- `left` / `right`: shell `h-full w-[min(100%,420px)]` flush to that edge; Card is `w-full` with square corners on the screen edge. Wider drawers set `panelClassName`.
 
 Mask, close, and title APIs match Dialog (`mask`, `maskClassName`, `closeOnMaskClick`, `titleClassName`, `closeClassName`, `closeIcon`).
 
@@ -33,7 +34,7 @@ import { DRAWER_SIDE } from "@/components/ui/drawer/config";
   onClose={() => setOpen(false)}
   side={DRAWER_SIDE.Left}
   title="Filters"
-  cardClassName="w-[min(100%,360px)]"
+  panelClassName="w-[min(100%,360px)]"
 >
   Filter content
 </Drawer>

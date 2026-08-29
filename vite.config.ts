@@ -6,6 +6,7 @@
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { loadEnv } from "vite";
 import { defineConfig, type Plugin } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -48,63 +49,77 @@ function normalizeNodeBuiltinImports(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [normalizeNodeBuiltinImports(), react(), tailwindcss()],
-  resolve: {
-    alias: [
-      {
-        find: "@",
-        replacement: path.resolve(__dirname, "src"),
-      },
-      { find: /^buffer$/, replacement: bufferEntry },
-      { find: /^node:buffer$/, replacement: bufferEntry },
-      { find: /^process$/, replacement: processEntry },
-      { find: /^node:process$/, replacement: processEntry },
-      { find: /^stream$/, replacement: streamEntry },
-      { find: /^node:stream$/, replacement: streamEntry },
-      { find: /^util$/, replacement: utilEntry },
-      { find: /^node:util$/, replacement: utilEntry },
-      { find: /^events$/, replacement: eventsEntry },
-      { find: /^node:events$/, replacement: eventsEntry },
-    ],
-  },
-  define: {
-    global: "globalThis",
-    "process.env": "{}",
-    "process.browser": "true",
-  },
-  optimizeDeps: {
-    rolldownOptions: {
-      transform: {
-        define: {
-          global: "globalThis",
-          "process.env": "{}",
-          "process.browser": "true",
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const apiTarget = (env.VITE_API_BASE_URL || "https://test-api.stableflow.ai").replace(/\/+$/, "");
+  const checkoutProxy = {
+    "/v1/pay/checkout/sessions": {
+      target: apiTarget,
+      changeOrigin: true,
+    },
+  };
+
+  return {
+    plugins: [normalizeNodeBuiltinImports(), react(), tailwindcss()],
+    resolve: {
+      alias: [
+        {
+          find: "@",
+          replacement: path.resolve(__dirname, "src"),
+        },
+        { find: /^buffer$/, replacement: bufferEntry },
+        { find: /^node:buffer$/, replacement: bufferEntry },
+        { find: /^process$/, replacement: processEntry },
+        { find: /^node:process$/, replacement: processEntry },
+        { find: /^stream$/, replacement: streamEntry },
+        { find: /^node:stream$/, replacement: streamEntry },
+        { find: /^util$/, replacement: utilEntry },
+        { find: /^node:util$/, replacement: utilEntry },
+        { find: /^events$/, replacement: eventsEntry },
+        { find: /^node:events$/, replacement: eventsEntry },
+      ],
+    },
+    define: {
+      global: "globalThis",
+      "process.env": "{}",
+      "process.browser": "true",
+    },
+    optimizeDeps: {
+      rolldownOptions: {
+        transform: {
+          define: {
+            global: "globalThis",
+            "process.env": "{}",
+            "process.browser": "true",
+          },
         },
       },
+      include: [
+        "buffer",
+        "process",
+        "stream-browserify",
+        "util",
+        "events",
+        "@solana/web3.js",
+        "@solana/spl-token",
+      ],
+      force: true,
     },
-    include: [
-      "buffer",
-      "process",
-      "stream-browserify",
-      "util",
-      "events",
-      "@solana/web3.js",
-      "@solana/spl-token",
-    ],
-    force: true,
-  },
-  build: {
-    reportCompressedSize: false,
-    chunkSizeWarningLimit: 2000,
-  },
-  server: {
-    port: 5173,
-    host: "127.0.0.1",
-    // When a real API is wired, the client calls VITE_API_BASE_URL directly (no proxy).
-  },
-  test: {
-    environment: "node",
-    include: ["src/**/*.test.ts"],
-  },
+    build: {
+      reportCompressedSize: false,
+      chunkSizeWarningLimit: 2000,
+    },
+    server: {
+      port: 5173,
+      host: "127.0.0.1",
+      proxy: checkoutProxy,
+    },
+    preview: {
+      proxy: checkoutProxy,
+    },
+    test: {
+      environment: "node",
+      include: ["src/**/*.test.ts"],
+    },
+  };
 });

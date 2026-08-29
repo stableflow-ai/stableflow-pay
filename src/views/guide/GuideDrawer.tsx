@@ -1,27 +1,30 @@
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { GUIDE_PATH } from "./config";
 
-export function CreatePaymentLinkDrawer({
-  open,
-  onClose,
+export function GuideDrawer({
+  title,
   children,
 }: {
-  open: boolean;
-  onClose: () => void;
+  title: string;
   children: ReactNode;
 }) {
+  const navigate = useNavigate();
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
 
   return (
     <Drawer
-      open={open}
-      onClose={onClose}
+      open
+      onClose={() => navigate(GUIDE_PATH)}
       side={isDesktop ? DRAWER_SIDE.Right : DRAWER_SIDE.Bottom}
-      title="Create Payment Link"
-      titleClassName="text-[18px]"
+      mask={false}
+      closeOnMaskClick={false}
+      title={title}
+      titleClassName="text-[26px] font-semibold"
       panelClassName={isDesktop ? "w-[min(100%,600px)]" : undefined}
       cardClassName={
         isDesktop
@@ -34,4 +37,4 @@ export function CreatePaymentLinkDrawer({
   );
 }
 
-export default CreatePaymentLinkDrawer;
+export default GuideDrawer;

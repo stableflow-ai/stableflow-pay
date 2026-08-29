@@ -15,10 +15,17 @@ export interface HttpOptions {
   /** When true, send `Authorization: Bearer {token}`. Default true. */
   auth?: boolean;
   /**
+   * Merchant `x-api-key`. When set, Bearer is omitted and HTTP 401 does not
+   * call `logout()`.
+   */
+  apiKey?: string;
+  /**
    * When true (default), require `{ code: 200, data }`.
    * `/v1/nearintents/*` proxies 1Click and may return the upstream JSON as-is.
    */
   envelope?: boolean;
+  /** Request the path on the current origin (Vite proxy in dev). */
+  sameOrigin?: boolean;
 }
 
 export interface HttpBlobOptions extends Omit<HttpOptions, "envelope"> {
@@ -36,6 +43,11 @@ interface Envelope<T> {
   message?: string;
 }
 
+function resolveAuth(options: HttpOptions): boolean {
+  if (options.apiKey) return false;
+  return options.auth ?? true;
+}
+
 function apiBaseUrl(): string {
   const base = import.meta.env.VITE_API_BASE_URL?.trim();
   if (!base) {
@@ -44,8 +56,9 @@ function apiBaseUrl(): string {
   return base.replace(/\/+$/, "");
 }
 
-function joinUrl(path: string): string {
+function joinUrl(path: string, sameOrigin = false): string {
   const suffix = path.startsWith("/") ? path : `/${path}`;
+  if (sameOrigin) return suffix;
   return `${apiBaseUrl()}${suffix}`;
 }
 
@@ -105,10 +118,14 @@ export function filenameFromContentDisposition(
 }
 
 async function send(path: string, options: HttpOptions, accept: string): Promise<Response> {
-  const { method = "GET", body, query, auth = true } = options;
+  const { method = "GET", body, query, apiKey } = options;
+  const auth = resolveAuth(options);
   const headers: Record<string, string> = { Accept: accept };
   if (body !== undefined) {
     headers["Content-Type"] = "application/json";
+  }
+  if (apiKey) {
+    headers["x-api-key"] = apiKey;
   }
   if (auth) {
     const token = useAuthStore.getState().token;
@@ -118,7 +135,7 @@ async function send(path: string, options: HttpOptions, accept: string): Promise
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(joinUrl(withQuery(path, query)), {
+  return fetch(joinUrl(withQuery(path, query), options.sameOrigin), {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -141,7 +158,8 @@ function throwHttpError(
 }
 
 export async function http<T>(path: string, options: HttpOptions = {}): Promise<T> {
-  const { method = "GET", auth = true, envelope = true } = options;
+  const { method = "GET", envelope = true } = options;
+  const auth = resolveAuth(options);
   const res = await send(path, options, "application/json");
 
   let payload: Envelope<T> | null = null;
@@ -188,7 +206,8 @@ export async function httpBlob(
   path: string,
   options: HttpBlobOptions = {},
 ): Promise<HttpBlobResult> {
-  const { auth = true, fallbackFilename = DEFAULT_BLOB_FILENAME } = options;
+  const auth = resolveAuth(options);
+  const { fallbackFilename = DEFAULT_BLOB_FILENAME } = options;
   const res = await send(path, options, "text/csv, application/json");
   const buffer = await res.arrayBuffer();
   const contentType = res.headers.get("content-type");

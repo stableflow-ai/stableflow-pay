@@ -24,7 +24,7 @@ Fill `.env.local`:
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | yes | Backend origin (no Vite proxy). Default `https://test-api.stableflow.ai` |
+| `VITE_API_BASE_URL` | yes | Backend origin. Dashboard calls it directly. Guide Test `POST /v1/pay/checkout/sessions` is proxied in `pnpm dev` / `preview`. Default `https://test-api.stableflow.ai` |
 | `VITE_WALLETCONNECT_PROJECT_ID` | for wallets | WalletConnect Cloud ID (RainbowKit + Tron) |
 | `VITE_RPC_PROXY_HOST` / `VITE_RPC_SECRET_KEY` | optional | HMAC-signed RPC proxy |
 | `VITE_AMOUNT_MAX_DECIMALS` | optional | Amount input precision (default `6`) |

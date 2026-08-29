@@ -67,7 +67,7 @@ export function Overlay(props: OverlayProps) {
       {open ? (
         <motion.div
           key="overlay-root"
-          className={cn("fixed inset-0 overflow-hidden", className)}
+          className={cn("fixed inset-0 overflow-hidden", !mask && "pointer-events-none", className)}
           style={{ zIndex }}
           role="presentation"
           initial={{ opacity: 1 }}

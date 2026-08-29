@@ -41,7 +41,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
       <div className="flex shrink-0 items-center gap-3">
         <h2
           className={cn(
-            "min-h-5 font-montserrat text-[20px] font-semibold leading-normal text-black",
+            "min-h-5 min-w-0 font-montserrat text-[20px] font-semibold leading-normal text-black",
             titleClassName,
           )}
         >

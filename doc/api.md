@@ -2,7 +2,7 @@
 
 How to call the Stableflow Pay backend. Read this before adding or changing an endpoint.
 
-The browser calls `VITE_API_BASE_URL` directly (no Vite proxy). Default: `https://test-api.stableflow.ai`. Product APIs live under `/v1/pay/` and `/v1/nearintents/` and are **GET**, **POST**, or **DELETE**.
+The browser calls `VITE_API_BASE_URL` directly for dashboard APIs. Default: `https://test-api.stableflow.ai`. Product APIs live under `/v1/pay/` and `/v1/nearintents/` and are **GET**, **POST**, or **DELETE**. Guide Step 4 `POST /v1/pay/checkout/sessions` (`x-api-key`) uses a Vite proxy in `pnpm dev` / `pnpm preview` (`sameOrigin`) so the browser stays same-origin. Other routes still hit the API host. Production static hosting has no Vite server unless the deploy layer also proxies that path.
 
 ## Layers
 
@@ -74,6 +74,8 @@ http<T>(path, {
   body?: unknown;          // JSON body (POST)
   query?: Record<string, string | number | boolean | null | undefined>;
   auth?: boolean;          // default true
+  apiKey?: string;         // merchant x-api-key; omits Bearer and does not logout on 401
+  sameOrigin?: boolean;    // request the path on the current origin (Vite proxy in dev)
   envelope?: boolean;      // default true; false for `/v1/nearintents/*` 1Click passthrough
 })
 ```
@@ -167,6 +169,7 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/swap/link/{linkId}` | if session | `PaySwapParam` | `PaySwapResp` | `paySwapLink` | `usePaySwapQuery` |
 | POST | `/v1/pay/swap/checkout/{sessionId}` | if session | `PaySwapParam` | `PaySwapResp` | `paySwapCheckout` | `usePaySwapQuery` |
 | POST | `/v1/pay/swap/submit` | if session | `PaySwapSubmitParam` | `PaySwapSubmitResp` | `paySwapSubmit` | commit queue |
+| POST | `/v1/pay/checkout/sessions` | x-api-key | `PayCheckoutSessionBody` | `unknown` | `createCheckoutSession` | `useCreateCheckoutSessionMutation` |
 | GET | `/v1/pay/checkout/sessions/{sessionId}` | if session | — | `PayCheckoutSession` | `getCheckoutSession` | `useCheckoutSessionQuery` |
 | GET | `/v1/pay/payments/{paymentId}` | if session | — | `PayPaymentDetail` | `getPayPayment` | `usePayPaymentQuery` |
 | POST | `/v1/pay/single/quote` | yes | `PaySingleQuoteParam` | `PaySingleQuoteResp` | `singleQuote` | `useSinglePayQuote` |
@@ -226,7 +229,7 @@ Public files:
 | `src/api/webhooks.ts` | Webhook list, create, get, update, delete, enable, disable, rotate-secret, deliveries, events |
 | `src/api/payment-links.ts` | Payment link list, create, get, delete, enable, disable |
 | `src/api/pay.ts` | Payer swap/link, swap/checkout, swap submit |
-| `src/api/checkout.ts` | Checkout session get |
+| `src/api/checkout.ts` | Checkout session create (x-api-key) and get |
 | `src/api/nearintents.ts` | 1Click proxy: quote, generate-intent, submit-intent, status |
 | `src/api/request-payment.ts` | Create request, request detail, received list, disable, withdraw, withdraw count |
 | `src/hooks/use-auth-api.ts` | Auth mutations + profile query |
@@ -243,11 +246,13 @@ Public files:
 | `src/hooks/use-payment-link.ts` | Public payer payment-link detail query |
 | `src/hooks/use-pay-quote-api.ts` | Payer swap query (link / checkout) |
 | `src/hooks/use-checkout-session.ts` | Public checkout session query (optional poll until `payments_id`) |
+| `src/hooks/use-checkout-api.ts` | Guide checkout-session create mutation (`x-api-key`) |
 | `src/hooks/use-pay-payment.ts` | Public waiting payment-detail poll (`GET /v1/pay/payments/{paymentId}`) |
 | `src/hooks/use-partner-reports.ts` | Partner reports analytics + payments queries |
 | `src/hooks/use-request-payment.ts` | Received list query, withdraw count query, create/disable mutations, payer detail query |
 | `src/hooks/use-request-withdraw.ts` | Confidential withdraw mutation |
 | `src/stores/auth.ts` | Product JWT session store |
+| `src/stores/guide.ts` | Guide persist (payment link, API key, webhook, testCompleted) |
 | `src/stores/nearintents-user-session.ts` | 1Click / Near Intents User-Session (not the product JWT) |
 | `src/types/auth.ts` | Auth types |
 | `src/types/payout.ts` | Quick, batch, overview, volume, payment list, and export types |

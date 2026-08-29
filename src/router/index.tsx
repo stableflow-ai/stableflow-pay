@@ -4,6 +4,14 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { LoginView } from "@/views/auth/LoginView";
 import { RegisterView } from "@/views/auth/RegisterView";
 import { HowItWorksView } from "@/views/how-it-works/HowItWorksView";
+import { GuideView } from "@/views/guide/GuideView";
+import { GuideApiKeyFormView } from "@/views/guide/steps/GuideApiKeyFormView";
+import { GuideApiKeyPreviewView } from "@/views/guide/steps/GuideApiKeyPreviewView";
+import { GuidePaymentLinkFormView } from "@/views/guide/steps/GuidePaymentLinkFormView";
+import { GuidePaymentLinkPreviewView } from "@/views/guide/steps/GuidePaymentLinkPreviewView";
+import { GuideTestView } from "@/views/guide/steps/GuideTestView";
+import { GuideWebhookFormView } from "@/views/guide/steps/GuideWebhookFormView";
+import { GuideWebhookPreviewView } from "@/views/guide/steps/GuideWebhookPreviewView";
 import { OverviewView } from "@/views/overview/OverviewView";
 import { CreatePaymentLinkPreviewView } from "@/views/payment-links/CreatePaymentLinkPreviewView";
 import { CreatePaymentLinkView } from "@/views/payment-links/CreatePaymentLinkView";
@@ -56,6 +64,19 @@ export const router = createBrowserRouter([
   {
     element: <RequireAuth />,
     children: [
+      {
+        path: "/guide",
+        element: <GuideView />,
+        children: [
+          { path: "payment-link", element: <GuidePaymentLinkFormView /> },
+          { path: "payment-link/preview", element: <GuidePaymentLinkPreviewView /> },
+          { path: "api-key", element: <GuideApiKeyFormView /> },
+          { path: "api-key/preview", element: <GuideApiKeyPreviewView /> },
+          { path: "webhook", element: <GuideWebhookFormView /> },
+          { path: "webhook/preview", element: <GuideWebhookPreviewView /> },
+          { path: "test", element: <GuideTestView /> },
+        ],
+      },
       {
         element: <AppLayout />,
         children: [

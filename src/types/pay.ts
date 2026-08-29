@@ -47,6 +47,15 @@ export interface PaySwapSubmitResp {
   status: string;
 }
 
+export interface PayCheckoutSessionBody {
+  amount: string;
+  network: string;
+  out_order_no: string;
+  recipient: string;
+  success_url: string;
+  symbol: string;
+}
+
 export interface PayCheckoutSession {
   amount: string;
   createdAt: string;

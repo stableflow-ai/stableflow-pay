@@ -23,6 +23,7 @@ export function Drawer(props: DrawerProps) {
     maskClassName,
     closeOnMaskClick = true,
     cardClassName,
+    panelClassName,
     titleClassName,
     closeClassName,
     contentClassName,
@@ -42,7 +43,7 @@ export function Drawer(props: DrawerProps) {
       closeOnMaskClick={closeOnMaskClick}
     >
       <motion.div
-        className={getDrawerPositionClassName(side)}
+        className={cn("pointer-events-auto", getDrawerPositionClassName(side), panelClassName)}
         initial={hidden}
         animate={{
           x: 0,
@@ -90,9 +91,9 @@ function getDrawerPositionClassName(side: DrawerSide) {
     return "absolute inset-x-0 bottom-0";
   }
   if (side === DRAWER_SIDE.Left) {
-    return "absolute inset-y-0 left-0 h-full";
+    return "absolute inset-y-0 left-0 h-full w-[min(100%,420px)]";
   }
-  return "absolute inset-y-0 right-0 h-full";
+  return "absolute inset-y-0 right-0 h-full w-[min(100%,420px)]";
 }
 
 function getDrawerPanelClassName(side: DrawerSide) {
@@ -103,7 +104,7 @@ function getDrawerPanelClassName(side: DrawerSide) {
     return "w-full max-h-[90vh] rounded-b-none";
   }
   if (side === DRAWER_SIDE.Left) {
-    return "h-full w-[min(100%,420px)] rounded-l-none";
+    return "h-full w-full rounded-l-none";
   }
-  return "h-full w-[min(100%,420px)] rounded-r-none";
+  return "h-full w-full rounded-r-none";
 }

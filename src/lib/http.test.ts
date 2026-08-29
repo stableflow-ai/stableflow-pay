@@ -109,6 +109,45 @@ describe("http", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("requests a same-origin path when sameOrigin is true", async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 200, data: { ok: true } }));
+    await http("/v1/pay/checkout/sessions", {
+      method: "POST",
+      body: { amount: "1" },
+      apiKey: "sk-test",
+      sameOrigin: true,
+    });
+    const [url] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/v1/pay/checkout/sessions");
+  });
+
+  it("sends x-api-key and omits Bearer when apiKey is set", async () => {
+    applySession();
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 200, data: { ok: true } }));
+    await http("/v1/pay/checkout/sessions", {
+      method: "POST",
+      body: { amount: "1" },
+      apiKey: "sk-test",
+    });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const headers = init.headers as Record<string, string>;
+    expect(headers["x-api-key"]).toBe("sk-test");
+    expect(headers.Authorization).toBeUndefined();
+  });
+
+  it("does not clear the session on HTTP 401 when apiKey is set", async () => {
+    applySession();
+    fetchMock.mockResolvedValueOnce(jsonResponse({ code: 401, message: "Bad key" }, 401));
+    await expect(
+      http("/v1/pay/checkout/sessions", { method: "POST", body: {}, apiKey: "sk-test" }),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      status: 401,
+      message: "Bad key",
+    });
+    expect(useAuthStore.getState().token).toBe("tok-1");
+  });
+
   it("omits Authorization when auth is false", async () => {
     applySession();
     fetchMock.mockResolvedValueOnce(jsonResponse({ code: 200, data: {} }));

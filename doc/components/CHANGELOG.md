@@ -2,6 +2,11 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-08-30
+
+- **Drawer:** `panelClassName` sizes the positioned shell. Right/left default width is on the shell (`w-[min(100%,420px)]`); the Card is `w-full`. Overlay `mask={false}` uses `pointer-events-none` on the root so the page behind stays clickable; the panel is `pointer-events-auto`.
+- **OverlayPanel:** Title uses `min-w-0` so long titles do not widen the panel.
+
 ## 2026-08-28
 
 - **Checkbox:** 16px square toggle (`checked` / `defaultChecked` / `onCheckedChange`). Unchecked white + `#E3E3E3` border; checked `#6284F5` with white `IconCheck`.
