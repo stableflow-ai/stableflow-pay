@@ -11,7 +11,7 @@ export function CouponShell(props: { top: ReactNode; bottom: ReactNode }) {
         alt=""
         aria-hidden
         draggable={false}
-        className="block h-auto w-full"
+        className="block h-auto w-full relative z-1"
       />
       <div className="rounded-b-[20px] border border-t-0 border-white bg-[#fdfdfd] px-[30px] pt-5 pb-8 shadow-[0_0_20px_0_rgba(0,0,0,0.06)]">
         {props.bottom}
