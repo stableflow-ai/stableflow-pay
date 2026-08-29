@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
@@ -11,7 +9,6 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { SettingsDialog } from "@/views/settings/SettingsDialog";
 import { IconChevron, IconMenu } from "@/components/icons";
 import {
-  CREATE_PAYMENT_LINK_PATH,
   PAYMENT_LINKS_PATH,
   isCreatePaymentLinkPath,
 } from "@/views/payment-links/config";
@@ -60,15 +57,6 @@ export function AppLayout() {
               <IconMenu className="h-6 w-6" />
             </button>
           )}
-          {pathname === "/" ? (
-            <Button
-              size={BUTTON_SIZE.Md}
-              className="hidden h-[46px] shrink-0 rounded-[12px] px-5 text-sm md:flex"
-              onClick={() => navigate(CREATE_PAYMENT_LINK_PATH)}
-            >
-              Create Payment Link
-            </Button>
-          ) : null}
         </header>
         <main className="min-h-0 flex-1 overflow-auto px-3 py-4 md:px-10 md:py-5">
           <Outlet context={{ openSettings } satisfies AppLayoutContextValue} />
