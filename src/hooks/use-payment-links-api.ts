@@ -4,18 +4,70 @@ import {
   deletePaymentLink,
   disablePaymentLink,
   enablePaymentLink,
+  exportPaymentLinkPayments,
+  getPaymentLinkStats,
+  listPaymentLinkPayments,
   listPaymentLinks,
 } from "@/api/payment-links";
 import { queryKeys } from "@/api/query-keys";
 import { useAuthStore } from "@/stores/auth";
-import type { PayPaymentLinkBody } from "@/types/payment-links";
+import type {
+  PayPaymentLinkBody,
+  PayPaymentLinkPaymentsQuery,
+  PayPaymentLinksQuery,
+} from "@/types/payment-links";
+import { stampDownloadFilename } from "@/utils";
 
-export function usePaymentLinksQuery() {
+function saveBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function usePaymentLinksQuery(params: PayPaymentLinksQuery) {
   const token = useAuthStore((state) => state.token);
   return useQuery({
-    queryKey: queryKeys.paymentLinks.list,
-    queryFn: listPaymentLinks,
+    queryKey: queryKeys.paymentLinks.list(params),
+    queryFn: () => listPaymentLinks(params),
     enabled: Boolean(token),
+  });
+}
+
+export function usePaymentLinkStatsQuery(linkId: string | undefined) {
+  const token = useAuthStore((state) => state.token);
+  const id = linkId?.trim() ?? "";
+  return useQuery({
+    queryKey: queryKeys.paymentLinks.stats(id),
+    queryFn: () => getPaymentLinkStats(id),
+    enabled: Boolean(token && id),
+  });
+}
+
+export function usePaymentLinkPaymentsQuery(
+  linkId: string | undefined,
+  params: PayPaymentLinkPaymentsQuery,
+) {
+  const token = useAuthStore((state) => state.token);
+  const id = linkId?.trim() ?? "";
+  return useQuery({
+    queryKey: queryKeys.paymentLinks.payments(id, params),
+    queryFn: () => listPaymentLinkPayments(id, params),
+    enabled: Boolean(token && id),
+  });
+}
+
+export function useExportPaymentLinkPaymentsMutation() {
+  return useMutation({
+    mutationFn: (linkId: string) => exportPaymentLinkPayments(linkId),
+    onSuccess: ({ blob, filename }) => {
+      saveBlob(blob, stampDownloadFilename(filename));
+    },
   });
 }
 

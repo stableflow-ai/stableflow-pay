@@ -3,6 +3,8 @@ export const CHECKOUT_PATH = "/checkout";
 export const CHECKOUT_WAITING_PATH = "/checkout/waiting";
 export const CHECKOUT_SESSION_QUERY = "sessionId";
 export const PAYER_PAYMENT_QUERY = "paymentId";
+export const PAYER_FEES_QUERY = "feesUsd";
+export const PAYER_PAYOUT_QUERY = "payoutUsd";
 export const CHECKOUT_SUCCESS_STATUS = "success";
 export const CHECKOUT_REDIRECT_SECONDS = 10;
 
@@ -57,12 +59,27 @@ export function payerPath(id: string): string {
   return `${PAYER_PATH_PREFIX}/${id}`;
 }
 
-export function payerWaitingPath(id: string, paymentId?: string): string {
+export interface PayerWaitingQuery {
+  feesUsd?: string;
+  paymentId?: string;
+  payoutUsd?: string;
+}
+
+function applyWaitingQuery(params: URLSearchParams, query?: PayerWaitingQuery) {
+  const paymentId = query?.paymentId?.trim() ?? "";
+  const feesUsd = query?.feesUsd?.trim() ?? "";
+  const payoutUsd = query?.payoutUsd?.trim() ?? "";
+  if (paymentId) params.set(PAYER_PAYMENT_QUERY, paymentId);
+  if (feesUsd) params.set(PAYER_FEES_QUERY, feesUsd);
+  if (payoutUsd) params.set(PAYER_PAYOUT_QUERY, payoutUsd);
+}
+
+export function payerWaitingPath(id: string, query?: PayerWaitingQuery): string {
   const path = `${PAYER_PATH_PREFIX}/${id}/waiting`;
-  const value = paymentId?.trim() ?? "";
-  if (!value) return path;
-  const params = new URLSearchParams({ [PAYER_PAYMENT_QUERY]: value });
-  return `${path}?${params.toString()}`;
+  const params = new URLSearchParams();
+  applyWaitingQuery(params, query);
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
 }
 
 export function checkoutPath(sessionId: string): string {
@@ -70,7 +87,8 @@ export function checkoutPath(sessionId: string): string {
   return `${CHECKOUT_PATH}?${params.toString()}`;
 }
 
-export function checkoutWaitingPath(sessionId: string): string {
+export function checkoutWaitingPath(sessionId: string, query?: PayerWaitingQuery): string {
   const params = new URLSearchParams({ [CHECKOUT_SESSION_QUERY]: sessionId });
+  applyWaitingQuery(params, query);
   return `${CHECKOUT_WAITING_PATH}?${params.toString()}`;
 }

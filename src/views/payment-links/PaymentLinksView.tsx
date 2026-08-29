@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
@@ -17,34 +17,22 @@ export function PaymentLinksView() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
-  const linksQuery = usePaymentLinksQuery();
-  const { deleteMutation, enableMutation, disableMutation } = usePaymentLinkMutations();
-  const links = linksQuery.data ?? [];
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [viewing, setViewing] = useState<PayPaymentLink | null>(null);
   const [deleting, setDeleting] = useState<PayPaymentLink | null>(null);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return links;
-    return links.filter((link) => link.title.toLowerCase().includes(needle));
-  }, [links, query]);
-
-  const totalPage = Math.max(1, Math.ceil(filtered.length / PAYMENT_LINKS_PAGE_SIZE));
+  const linksQuery = usePaymentLinksQuery({
+    page,
+    pageSize: PAYMENT_LINKS_PAGE_SIZE,
+    q: query.trim() || undefined,
+  });
+  const { deleteMutation, enableMutation, disableMutation } = usePaymentLinkMutations();
+  const links = linksQuery.data?.list ?? [];
+  const total = linksQuery.data?.total ?? 0;
+  const totalPage = Math.max(1, linksQuery.data?.totalPage ?? 1);
   const safePage = Math.min(page, totalPage);
-  const paged = filtered.slice(
-    (safePage - 1) * PAYMENT_LINKS_PAGE_SIZE,
-    safePage * PAYMENT_LINKS_PAGE_SIZE,
-  );
-
-  const viewingLink = viewing
-    ? (links.find((link) => link.linkId === viewing.linkId) ?? null)
-    : null;
-
-  const total = links.length;
   const active = links.filter((link) => isPaymentLinkActive(link.status)).length;
-  const inactive = total - active;
+  const inactive = links.length - active;
 
   async function copyLink(link: PayPaymentLink) {
     try {
@@ -87,7 +75,7 @@ export function PaymentLinksView() {
     <div className="flex flex-col gap-5">
       <LinksStatsCard total={total} active={active} inactive={inactive} />
       <PaymentLinksTable
-        links={paged}
+        links={links}
         query={query}
         onQueryChange={handleQueryChange}
         page={safePage}
@@ -99,7 +87,7 @@ export function PaymentLinksView() {
         onDelete={setDeleting}
         loading={linksQuery.isPending}
       />
-      <LinkPaymentsDrawer link={viewingLink} onClose={() => setViewing(null)} />
+      <LinkPaymentsDrawer link={viewing} onClose={() => setViewing(null)} />
       <CreatePaymentLinkDrawer
         open={isCreatePaymentLinkPath(pathname)}
         onClose={() => navigate(PAYMENT_LINKS_PATH)}

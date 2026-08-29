@@ -4,18 +4,21 @@ import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayPaymentQuery } from "@/hooks/use-pay-payment";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { txExplorerUrl } from "@/config/chains";
-import { onQuickPayCommitSuccess } from "@/stores/quick-pay-commit-queue";
+import { onQuickPayCommitSuccess, peekLastQuickPayCommitSuccess } from "@/stores/quick-pay-commit-queue";
 import { PayerLayout } from "./components/PayerLayout";
 import { WaitingCard } from "./components/WaitingCard";
 import {
   CHECKOUT_PATH,
   CHECKOUT_REDIRECT_SECONDS,
   CHECKOUT_SESSION_QUERY,
+  PAYER_FEES_QUERY,
   PAYER_PATH_PREFIX,
   PAYER_PAYMENT_QUERY,
+  PAYER_PAYOUT_QUERY,
   PAYER_WAIT_STATUS,
   PAYER_WAITING_STATE,
   checkoutPath,
+  checkoutWaitingPath,
   payerPath,
   payerWaitingPath,
 } from "./config";
@@ -36,39 +39,63 @@ export function WaitingView() {
   const linkId = isCheckout ? "" : (idParam?.trim() || "");
   const sessionId = isCheckout ? (searchParams.get(CHECKOUT_SESSION_QUERY)?.trim() || "") : "";
   const queryPaymentId = searchParams.get(PAYER_PAYMENT_QUERY)?.trim() || "";
+  const feesUsd = searchParams.get(PAYER_FEES_QUERY)?.trim() || "";
+  const payoutUsd = searchParams.get(PAYER_PAYOUT_QUERY)?.trim() || "";
   const awaitingSubmit = Boolean(
     !isCheckout && (state as { awaitingSubmit?: boolean } | null)?.awaitingSubmit === PAYER_WAITING_STATE.awaitingSubmit,
   );
   const navigate = useNavigate();
   useQuickPayCommitQueue();
 
-  const checkoutQuery = useCheckoutSessionQuery(isCheckout ? sessionId : undefined, { poll: true });
+  const checkoutQuery = useCheckoutSessionQuery(isCheckout ? sessionId : undefined, {
+    poll: isCheckout && !queryPaymentId,
+  });
   const checkout = checkoutQuery.data;
   const checkoutPaymentsId = checkout?.paymentsId.trim() || "";
-  const paymentId = isCheckout ? checkoutPaymentsId : queryPaymentId;
+  const paymentId = queryPaymentId || (isCheckout ? checkoutPaymentsId : "");
   const paymentQuery = usePayPaymentQuery(paymentId);
   const payment = paymentQuery.data;
 
   useEffect(() => {
-    if (isCheckout || queryPaymentId) return;
+    const quoteQuery = { feesUsd, payoutUsd };
+    function applyPaymentsId(paymentsId: string) {
+      if (!paymentsId) return;
+      if (isCheckout) {
+        if (!sessionId) return;
+        navigate(checkoutWaitingPath(sessionId, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
+        return;
+      }
+      if (!linkId) return;
+      navigate(
+        payerWaitingPath(linkId, { ...quoteQuery, paymentId: paymentsId }),
+        { replace: true, state: PAYER_WAITING_STATE },
+      );
+    }
+
+    if (!queryPaymentId) {
+      const last = peekLastQuickPayCommitSuccess();
+      if (last?.paymentsId) applyPaymentsId(last.paymentsId);
+    }
+
+    if (queryPaymentId) return;
     return onQuickPayCommitSuccess((result) => {
-      if (!result.paymentsId || !linkId) return;
-      navigate(payerWaitingPath(linkId, result.paymentsId), { replace: true });
+      applyPaymentsId(result.paymentsId);
     });
-  }, [isCheckout, linkId, navigate, queryPaymentId]);
+  }, [feesUsd, isCheckout, linkId, navigate, payoutUsd, queryPaymentId, sessionId]);
 
   const waitStatus = (() => {
+    if (paymentId) return waitStatusFromPayment(payment?.status);
     if (isCheckout && checkout && isCheckoutSuspended(checkout)) {
       return PAYER_WAIT_STATUS.Suspended;
     }
     if (isCheckout && checkout && isCheckoutFailedWithoutPayment(checkout)) {
       return PAYER_WAIT_STATUS.Failed;
     }
-    return waitStatusFromPayment(payment?.status);
+    return PAYER_WAIT_STATUS.Pending;
   })();
 
   const redirectUrl = checkout && waitStatus === PAYER_WAIT_STATUS.Success
-    ? buildCheckoutSuccessUrl(checkout)
+    ? buildCheckoutSuccessUrl(checkout, payment)
     : null;
   const [redirectIn, setRedirectIn] = useState<number | null>(null);
 
@@ -98,7 +125,9 @@ export function WaitingView() {
     fallbackAmount: checkout?.amount,
     fallbackSymbol: checkout?.symbol,
     fallbackNetwork: checkout?.network,
-  }), [checkout, payment]);
+    feesUsd,
+    payoutUsd,
+  }), [checkout, feesUsd, payment, payoutUsd]);
 
   const explorerUrl = useMemo(() => {
     const destHash = payment?.destinationTxHash.trim();
@@ -112,13 +141,13 @@ export function WaitingView() {
     if (!sessionId) {
       return <Navigate to={CHECKOUT_PATH} replace />;
     }
-    if (checkoutQuery.isPending) {
+    if (!queryPaymentId && checkoutQuery.isPending) {
       return <PayerLayout />;
     }
-    if (checkoutQuery.isError || !checkout) {
+    if (!queryPaymentId && (checkoutQuery.isError || !checkout)) {
       return <Navigate to={checkoutPath(sessionId)} replace />;
     }
-    if (shouldCheckoutShowForm(checkout)) {
+    if (!queryPaymentId && checkout && shouldCheckoutShowForm(checkout)) {
       return <Navigate to={checkoutPath(sessionId)} replace />;
     }
   } else {

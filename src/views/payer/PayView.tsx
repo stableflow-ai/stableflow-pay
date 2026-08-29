@@ -231,13 +231,30 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      enqueueQuickPayCommit({ swapId: swap.swapId, txHash });
+      const quoteQuery = {
+        feesUsd: feeUsd ?? "",
+        payoutUsd: swap.amountOutUsd.trim() || amountForQuote,
+      };
+      enqueueQuickPayCommit({
+        swapId: swap.swapId,
+        txHash,
+        onSuccess: (paymentsId) => {
+          if (payment.kind === PAYER_KIND.Checkout) {
+            navigate(checkoutWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
+            return;
+          }
+          navigate(
+            payerWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }),
+            { replace: true, state: PAYER_WAITING_STATE },
+          );
+        },
+      });
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id));
+        navigate(checkoutWaitingPath(payment.id, quoteQuery));
         return;
       }
-      navigate(payerWaitingPath(payment.id), { state: PAYER_WAITING_STATE });
+      navigate(payerWaitingPath(payment.id, quoteQuery), { state: PAYER_WAITING_STATE });
     },
     onError: (err) => {
       setPhase("idle");
@@ -298,7 +315,12 @@ export function PayView() {
   }
 
   if (isCheckout && checkout && !shouldCheckoutShowForm(checkout)) {
-    return <Navigate to={checkoutWaitingPath(checkout.sessionId || sessionId)} replace />;
+    return (
+      <Navigate
+        to={checkoutWaitingPath(checkout.sessionId || sessionId, { paymentId: checkout.paymentsId })}
+        replace
+      />
+    );
   }
 
   return (

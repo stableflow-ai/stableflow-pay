@@ -13,10 +13,12 @@ import {
 export interface PayerWaitDetails {
   destNetwork: string;
   destSymbol: string;
+  feesUsd: string;
   originNetwork: string;
   originSymbol: string;
   paidAt: string;
   payerAddress: string;
+  payoutUsd: string;
   recipientAddress: string;
   requestAmount: string;
   youPayAmount: string;
@@ -178,6 +180,8 @@ export function payerWaitDetailsFromSources(input: {
   fallbackAmount?: string;
   fallbackSymbol?: string;
   fallbackNetwork?: string;
+  feesUsd?: string;
+  payoutUsd?: string;
 }): PayerWaitDetails {
   const checkout = input.checkout;
   const payment = input.payment;
@@ -194,10 +198,15 @@ export function payerWaitDetailsFromSources(input: {
     originNetwork: payment?.network.trim() || "",
     payerAddress: payment?.payer.trim() || "",
     paidAt: payment?.paidAt.trim() || "",
+    feesUsd: input.feesUsd?.trim() || "",
+    payoutUsd: input.payoutUsd?.trim() || "",
   };
 }
 
-export function buildCheckoutSuccessUrl(snapshot: PayCheckoutSession): string | null {
+export function buildCheckoutSuccessUrl(
+  snapshot: PayCheckoutSession,
+  payment?: Pick<PayPaymentDetail, "destinationTxHash" | "paidAt" | "txHash"> | null,
+): string | null {
   const base = snapshot.successUrl.trim();
   if (!base) return null;
   try {
@@ -211,6 +220,9 @@ export function buildCheckoutSuccessUrl(snapshot: PayCheckoutSession): string | 
     url.searchParams.set("session_id", snapshot.sessionId);
     url.searchParams.set("status", CHECKOUT_SUCCESS_STATUS);
     url.searchParams.set("symbol", snapshot.symbol);
+    url.searchParams.set("destination_txHash", payment?.destinationTxHash.trim() ?? "");
+    url.searchParams.set("paid_at", payment?.paidAt.trim() ?? "");
+    url.searchParams.set("tx_hash", payment?.txHash.trim() ?? "");
     return url.toString();
   } catch {
     return null;

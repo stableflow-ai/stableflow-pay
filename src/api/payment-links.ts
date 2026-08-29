@@ -1,7 +1,15 @@
-import { http } from "@/lib/http";
+import { http, httpBlob } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
-import { apiText, asRecord } from "@/api/map";
-import type { PayPaymentLink, PayPaymentLinkBody } from "@/types/payment-links";
+import { mapPaymentDetail } from "@/api/payout";
+import { apiNumber, apiText, asRecord } from "@/api/map";
+import type { PayPaymentDetail } from "@/types/pay";
+import type {
+  PayPaymentLink,
+  PayPaymentLinkBody,
+  PayPaymentLinkPaymentsQuery,
+  PayPaymentLinksQuery,
+  PayPaymentLinksResp,
+} from "@/types/payment-links";
 
 export function mapPaymentLink(raw: unknown): PayPaymentLink {
   const row = asRecord(raw) ?? {};
@@ -15,6 +23,8 @@ export function mapPaymentLink(raw: unknown): PayPaymentLink {
     recipient: apiText(row.recipient),
     status: apiText(row.status),
     createdAt: apiText(row.created_at ?? row.createdAt),
+    revenue: apiText(row.revenue),
+    payments: apiNumber(row.payments ?? row.transactions) ?? 0,
   };
 }
 
@@ -27,8 +37,20 @@ function mapPaymentLinkList(data: unknown): PayPaymentLink[] {
   return list.map(mapPaymentLink).filter((row) => row.linkId);
 }
 
-export async function listPaymentLinks(): Promise<PayPaymentLink[]> {
-  return mapPaymentLinkList(await http<unknown>(`${PAY_API_PREFIX}/links`));
+export async function listPaymentLinks(query: PayPaymentLinksQuery): Promise<PayPaymentLinksResp> {
+  const data = asRecord(await http<unknown>(`${PAY_API_PREFIX}/links`, {
+    query: {
+      page: query.page,
+      pageSize: query.pageSize,
+      q: query.q?.trim() || undefined,
+    },
+  })) ?? {};
+  const list = mapPaymentLinkList(data.list ?? data);
+  return {
+    total: apiNumber(data.total) ?? list.length,
+    totalPage: Math.max(1, apiNumber(data.total_page ?? data.totalPage) ?? 1),
+    list,
+  };
 }
 
 export async function createPaymentLink(body: PayPaymentLinkBody): Promise<PayPaymentLink> {
@@ -41,6 +63,37 @@ export async function getPaymentLink(linkId: string, options?: { auth?: boolean 
       auth: options?.auth ?? true,
     }),
   );
+}
+
+export async function getPaymentLinkStats(linkId: string): Promise<PayPaymentLink> {
+  return mapPaymentLink(await http<unknown>(`${PAY_API_PREFIX}/links/${linkId}/stats`));
+}
+
+export async function listPaymentLinkPayments(
+  linkId: string,
+  query: PayPaymentLinkPaymentsQuery,
+): Promise<{ total: number; totalPage: number; list: PayPaymentDetail[] }> {
+  const data = asRecord(await http<unknown>(`${PAY_API_PREFIX}/links/${linkId}/payments`, {
+    query: {
+      page: query.page,
+      pageSize: query.pageSize,
+    },
+  })) ?? {};
+  const rawList = Array.isArray(data.list) ? data.list : [];
+  const list = rawList.map(mapPaymentDetail);
+  return {
+    total: apiNumber(data.total) ?? list.length,
+    totalPage: Math.max(1, apiNumber(data.total_page ?? data.totalPage) ?? 1),
+    list,
+  };
+}
+
+const LINK_PAYMENTS_EXPORT_FILENAME = "payment-link-transactions.csv";
+
+export function exportPaymentLinkPayments(linkId: string) {
+  return httpBlob(`${PAY_API_PREFIX}/links/${linkId}/payments/export`, {
+    fallbackFilename: LINK_PAYMENTS_EXPORT_FILENAME,
+  });
 }
 
 export function deletePaymentLink(linkId: string) {

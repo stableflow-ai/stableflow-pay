@@ -30,6 +30,8 @@ export type QuickPayCommitSuccess = {
 
 type CommitSuccessListener = (result: QuickPayCommitSuccess) => void;
 const successListeners = new Set<CommitSuccessListener>();
+const commitCallbacks = new Map<string, (paymentsId: string) => void>();
+let lastCommitSuccess: QuickPayCommitSuccess | null = null;
 
 export function onQuickPayCommitSuccess(listener: CommitSuccessListener): () => void {
   successListeners.add(listener);
@@ -38,7 +40,12 @@ export function onQuickPayCommitSuccess(listener: CommitSuccessListener): () => 
   };
 }
 
+export function peekLastQuickPayCommitSuccess(): QuickPayCommitSuccess | null {
+  return lastCommitSuccess;
+}
+
 function notifySuccessListeners(result: QuickPayCommitSuccess) {
+  lastCommitSuccess = result;
   for (const listener of successListeners) {
     try {
       listener(result);
@@ -94,7 +101,11 @@ async function processCommit(id: string, item: QuickPayCommitItem, retryCount = 
     );
     useQuickPayCommitQueueStore.getState().remove(id);
     clearTaskMeta(id);
-    notifySuccessListeners({ paymentsId: submitted.paymentsId.trim() });
+    const paymentsId = submitted.paymentsId.trim();
+    const onItemSuccess = commitCallbacks.get(id);
+    commitCallbacks.delete(id);
+    notifySuccessListeners({ paymentsId });
+    if (paymentsId && onItemSuccess) onItemSuccess(paymentsId);
   } catch {
     taskMetaMap.set(id, {
       ...(taskMetaMap.get(id) ?? {}),
@@ -134,6 +145,7 @@ export const useQuickPayCommitQueueStore = create(
 export function enqueueQuickPayCommit(input: {
   swapId: string;
   txHash: string;
+  onSuccess?: (paymentsId: string) => void;
 }): string {
   const id = crypto.randomUUID();
   const item: QuickPayCommitItem = {
@@ -142,6 +154,7 @@ export function enqueueQuickPayCommit(input: {
     txHash: input.txHash,
     createdAt: Date.now(),
   };
+  if (input.onSuccess) commitCallbacks.set(id, input.onSuccess);
   useQuickPayCommitQueueStore.getState().enqueue(item);
   void processCommit(item.id, item, 0);
   return id;

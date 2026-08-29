@@ -136,9 +136,9 @@ function PaymentLinkRow({
       </TableCell>
       <TableCell className="py-0">{PAYMENT_LINK_TYPE_LABEL[paymentLinkType(link)]}</TableCell>
       <TableCell className="py-0">{formatLinkAmount(link)}</TableCell>
-      <TableCell className="py-0 text-[#9fa7ba]">—</TableCell>
+      <TableCell className="py-0">{link.revenue || "0"}</TableCell>
       <TableCell className="gap-2 py-0">
-        <span className="text-[#9fa7ba]">—</span>
+        <span>{link.payments}</span>
         <button
           type="button"
           className="cursor-pointer font-montserrat text-sm font-medium text-[#3f8afb] hover:underline"

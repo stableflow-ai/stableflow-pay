@@ -1,27 +1,41 @@
-import type { ReactNode } from "react";
-import { IconLink } from "@/components/icons/link";
+import { useState, type ReactNode } from "react";
+import { IconCheck, IconLoading } from "@/components/icons";
+import { IconExportLink, IconLink, IconOutLink } from "@/components/icons/link";
+import { Button } from "@/components/ui/button/Button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
+import { Pagination } from "@/components/ui/pagination/Pagination";
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
+  TableRow,
 } from "@/components/ui/table/Table";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  useExportPaymentLinkPaymentsMutation,
+  usePaymentLinkPaymentsQuery,
+  usePaymentLinkStatsQuery,
+} from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import type { PayPaymentLink } from "@/types/payment-links";
-import { formatAmount, formatDate } from "@/utils";
-import { LINK_TRANSACTIONS_TABLE_COLUMNS } from "../config";
+import { formatAddress, formatAmount, formatDate } from "@/utils";
+import { LINK_PAYMENTS_PAGE_SIZE, LINK_TRANSACTIONS_TABLE_COLUMNS } from "../config";
 import {
   buildPaymentLinkUrl,
   formatTokenNetwork,
   isPaymentLinkActive,
   isPaymentLinkOpen,
   paymentLinkStatusLabel,
+  paymentLinksError,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
+import { txExplorerUrl } from "@/config/chains";
+import { cn } from "@/lib/utils";
 
 export function LinkPaymentsDrawer({
   link,
@@ -84,7 +98,26 @@ export function LinkPaymentsDrawer({
 }
 
 function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
-  const isActive = isPaymentLinkActive(link.status);
+  const toast = useToast();
+  const [page, setPage] = useState(1);
+  const statsQuery = usePaymentLinkStatsQuery(link.linkId);
+  const paymentsQuery = usePaymentLinkPaymentsQuery(link.linkId, {
+    page,
+    pageSize: LINK_PAYMENTS_PAGE_SIZE,
+  });
+  const exportMutation = useExportPaymentLinkPaymentsMutation();
+  const detail = statsQuery.data ?? link;
+  const isActive = isPaymentLinkActive(detail.status);
+  const rows = paymentsQuery.data?.list ?? [];
+  const totalPage = Math.max(1, paymentsQuery.data?.totalPage ?? 1);
+
+  function handleExport() {
+    void exportMutation.mutateAsync(link.linkId).catch((error) => {
+      toast.fail({ title: paymentLinksError(error, "Could not export CSV") });
+    });
+  }
+
+  console.log(rows)
 
   return (
     <div className="flex flex-col gap-6">
@@ -94,24 +127,43 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
             <span
               className={`size-2 rounded-full ${isActive ? "bg-[#769400]" : "bg-[#9fa7ba]"}`}
             />
-            {paymentLinkStatusLabel(link.status)}
+            {paymentLinkStatusLabel(detail.status)}
           </span>
         </SummaryField>
         <SummaryField label="Payment Token">
-          {formatTokenNetwork(link.symbol, link.network)}
+          {formatTokenNetwork(detail.symbol, detail.network)}
         </SummaryField>
         <SummaryField label="Price">
-          {isPaymentLinkOpen(link) ? "No limit" : formatAmount(link.amount, { prefix: "", maxDecimals: 2, showDust: true })}
+          {isPaymentLinkOpen(detail) ? "No limit" : formatAmount(detail.amount, { prefix: "", maxDecimals: 2, showDust: true })}
         </SummaryField>
-        <SummaryField label="Revenue">—</SummaryField>
-        <SummaryField label="Transactions">—</SummaryField>
+        <SummaryField label="Revenue">{detail.revenue || "0"}</SummaryField>
+        <SummaryField label="Transactions">{detail.payments}</SummaryField>
       </div>
 
-      <p className="font-montserrat text-base font-medium text-black">Transactions</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-montserrat text-base font-medium text-black">Transactions</p>
+        <Button
+          variant={BUTTON_VARIANT.Normal}
+          size={BUTTON_SIZE.Sm}
+          className="h-9 w-auto rounded-[6px] border-[#e3e3e3] px-3 text-black"
+          loading={exportMutation.isPending}
+          onClick={handleExport}
+        >
+          Export CSV
+          <IconExportLink className="size-3.5 shrink-0" />
+        </Button>
+      </div>
 
       <Table
         className="w-full border-0 bg-transparent p-0 shadow-none"
         columns={LINK_TRANSACTIONS_TABLE_COLUMNS}
+        footer={
+          rows.length === 0 ? undefined : (
+            <div className="mt-3 flex justify-end">
+              <Pagination page={page} totalPage={totalPage} onPageChange={setPage} />
+            </div>
+          )
+        }
       >
         <TableHeader className="border-b border-black/10">
           <TableHead>Time</TableHead>
@@ -122,7 +174,54 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
           <TableHead>Status</TableHead>
         </TableHeader>
         <TableBody>
-          <ListEmptyState>No transactions yet</ListEmptyState>
+          {paymentsQuery.isPending ? (
+            <div className="flex items-center justify-center py-10">
+              <IconLoading className="size-4 animate-spin text-[#909090]" />
+            </div>
+          ) : rows.length === 0 ? (
+            <ListEmptyState>No transactions yet</ListEmptyState>
+          ) : (
+            rows.map((row) => {
+              const isSuccess = row.status === "completed";
+              return (
+                <TableRow key={row.paymentsId || row.id || `${row.txHash}-${row.submittedAt}`}>
+                  <TableCell>{formatDate(row.submittedAt) || "—"}</TableCell>
+                  <TableCell>{row.payer ? formatAddress(row.payer) : "—"}</TableCell>
+                  <TableCell>
+                    {row.amount
+                      ? formatAmount(row.amount, { prefix: "", maxDecimals: 6, showDust: true })
+                      : "—"}
+                  </TableCell>
+                  <TableCell>
+                    {row.symbol ? formatTokenNetwork(row.symbol, row.network) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    {row.destinationAmount
+                      ? formatAmount(row.destinationAmount, { prefix: "$", maxDecimals: 2, showDust: true })
+                      : "—"}
+                  </TableCell>
+                  <TableCell className={cn("capitalize flex items-center gap-1.5", isSuccess ? "text-[#769400]" : "text-[#9fa7ba]")}>
+                    {
+                      isSuccess && (
+                        <IconCheck className="size-3" />
+                      )
+                    }
+                    <span>{row.status || "—"}</span>
+                    {
+                      isSuccess && (
+                        <a
+                          target="_blank"
+                          href={txExplorerUrl(row.destinationNetwork, row.destinationTxHash) || ""}
+                        >
+                          <IconOutLink className="size-3" />
+                        </a>
+                      )
+                    }
+                  </TableCell>
+                </TableRow>
+              )
+            })
+          )}
         </TableBody>
       </Table>
     </div>

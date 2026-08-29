@@ -8,6 +8,8 @@ export interface PayPaymentLink {
   recipient: string;
   status: string;
   createdAt: string;
+  revenue: string;
+  payments: number;
 }
 
 export interface PayPaymentLinkBody {
@@ -17,4 +19,21 @@ export interface PayPaymentLinkBody {
   symbol: string;
   network: string;
   recipient: string;
+}
+
+export interface PayPaymentLinksQuery {
+  page: number;
+  pageSize: number;
+  q?: string;
+}
+
+export interface PayPaymentLinksResp {
+  total: number;
+  totalPage: number;
+  list: PayPaymentLink[];
+}
+
+export interface PayPaymentLinkPaymentsQuery {
+  page: number;
+  pageSize: number;
 }

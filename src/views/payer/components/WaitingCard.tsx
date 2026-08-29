@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { formatAddress, formatDate } from "@/utils";
+import { formatAddress, formatAmount, formatDate } from "@/utils";
 import { formatTokenNetwork } from "@/views/payment-links/utils";
 import { PAYER_WAIT_STATUS, type PayerWaitStatus } from "../config";
 import type { PayerWaitDetails } from "../utils";
@@ -42,6 +42,7 @@ export function WaitingCard(props: {
     : isSuccess || isFailed
       ? null
       : "This can take 0-3 minutes";
+  const tilde = isSuccess ? "" : "~";
 
   const handleCopy = async (value: string) => {
     try {
@@ -122,8 +123,18 @@ export function WaitingCard(props: {
               ) : "—"}
             />
             <DetailRow label="Route" value="Near intents" />
-            <DetailRow label="Total Fees" value="—" />
-            <DetailRow label="Total Payout" value="—" />
+            <DetailRow
+              label="Total Fees"
+              value={details.feesUsd
+                ? `${tilde}${formatAmount(details.feesUsd, { maxDecimals: 2, showDust: true })}`
+                : "—"}
+            />
+            <DetailRow
+              label="Total Payout"
+              value={details.payoutUsd
+                ? `${tilde}${formatAmount(details.payoutUsd, { maxDecimals: 2, showDust: true })}`
+                : "—"}
+            />
             {isSuccess ? (
               <>
                 <DetailRow label="Status" value="Complete" valueClassName="text-[#84a20f]" />
