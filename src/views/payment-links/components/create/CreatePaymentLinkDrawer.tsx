@@ -24,7 +24,7 @@ export function CreatePaymentLinkDrawer({
       titleClassName="text-[18px]"
       cardClassName={
         isDesktop
-          ? "h-full w-[min(100%,600px)] rounded-r-none px-[30px] py-7"
+          ? "h-full w-[min(100%,600px)] md:rounded-r-none px-[30px] py-7"
           : "w-full max-h-[90vh] rounded-b-none px-4 py-4"
       }
     >
