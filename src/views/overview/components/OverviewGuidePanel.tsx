@@ -49,7 +49,9 @@ export function OverviewGuidePanel() {
               <GuideStepIcon number={step.number} completed={done} />
               <p className="font-montserrat text-base font-medium capitalize text-black">{step.title}</p>
             </div>
-            <p className="mt-2 font-montserrat text-sm font-normal text-[#909090]">{step.description}</p>
+            <p className="mt-2 font-montserrat text-sm font-normal text-[#909090] h-10 overflow-hidden line-clamp-2">
+              {step.description}
+            </p>
             <div className="mt-5">
               {done && step.number === 1 && progress.paymentLink ? (
                 <CompletedLink
