@@ -16,7 +16,7 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
 | Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit` (`payments_id`). Both waiting pages poll `GET /v1/pay/payments/{paymentId}`. |
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/apiKeys`. |
-| Reports | `/reports` | shipped | Partner analytics stats and charts (`GET /v1/pay/partner/analytics`) plus a paginated usage table (`GET /v1/pay/partner/payments`). No Partner registration. |
+| Reports | `/reports` | shipped | Report analytics charts (`GET /v1/pay/report/analytics`) plus a paginated usage table (`GET /v1/pay/report/payments`) and CSV export (`GET /v1/pay/report/payments/export`). |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
 | Terms / Docs | `/terms`, `/docs` | placeholder | Sidebar footer links. AppLayout also shows Terms of Service at the bottom right of authenticated pages (not login, register, or public payer). |
 
@@ -72,7 +72,7 @@ Authenticated `/settings` has two cards. Profile loads and saves organization `n
 
 ## Reports
 
-Authenticated `/reports`. Top time / API key / network filters drive volume stats and charts (`GET /v1/pay/partner/analytics`). A paginated usage table has its own API key / source / destination / amount filters (`GET /v1/pay/partner/payments`). There is no Partner registration gate. Export CSV is not implemented yet.
+Authenticated `/reports`. Top time / API key / network filters drive volume stats and charts (`GET /v1/pay/report/analytics`). A paginated usage table has source / destination / amount filters (`GET /v1/pay/report/payments`; no table API key filter). Export CSV is `GET /v1/pay/report/payments/export` with the same table filters (no pagination).
 
 ## Wallet and payout capability
 

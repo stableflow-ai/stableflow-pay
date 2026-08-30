@@ -19,11 +19,11 @@ import {
 import { FIXED_CHAINS, txExplorerUrl } from "@/config/chains";
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import {
-  usePartnerAnalyticsQuery,
-  usePartnerPaymentsQuery,
-} from "@/hooks/use-partner-reports";
+  useExportReportPaymentsMutation,
+  useReportAnalyticsQuery,
+  useReportPaymentsQuery,
+} from "@/hooks/use-report-api";
 import useToast from "@/hooks/use-toast";
-import { tokenLogoUrl } from "@/lib/logo";
 import { formatAmount, formatDate } from "@/utils";
 import { ReportsAddressCell } from "./components/ReportsAddressCell";
 import { ReportsAssetCell } from "./components/ReportsAssetCell";
@@ -32,7 +32,6 @@ import {
   REPORT_AMOUNT_FILTER,
   REPORT_AMOUNT_OPTIONS,
   REPORT_FILTER_ALL,
-  REPORT_PAGE_SIZE,
   REPORT_TABLE_COLUMNS,
   REPORT_TIME_PRESET,
   REPORT_TOKENS,
@@ -41,10 +40,11 @@ import {
 } from "./config";
 import {
   eachDateKey,
-  reportAmountQuery,
   reportDailyDateKey,
   reportOptionalApiKeyId,
   reportOptionalFilter,
+  reportPaymentsFilters,
+  reportPaymentsListQuery,
   reportsError,
 } from "./utils";
 
@@ -69,7 +69,6 @@ export function ReportsView() {
   const [range, setRange] = useState(() => lastNDaysRange(REPORT_TIME_PRESET.Days30));
   const [apiKey, setApiKey] = useState(REPORT_FILTER_ALL);
   const [network, setNetwork] = useState(REPORT_FILTER_ALL);
-  const [tableApiKey, setTableApiKey] = useState(REPORT_FILTER_ALL);
   const [sourceNetwork, setSourceNetwork] = useState(REPORT_FILTER_ALL);
   const [sourceToken, setSourceToken] = useState(REPORT_FILTER_ALL);
   const [destNetwork, setDestNetwork] = useState(REPORT_FILTER_ALL);
@@ -85,29 +84,33 @@ export function ReportsView() {
   }, [keysQuery.data]);
 
   const times = rangeToUnixSeconds(range);
-  const analyticsQuery = usePartnerAnalyticsQuery({
+  const analyticsQuery = useReportAnalyticsQuery({
     start_time: times.start_time,
     end_time: times.end_time,
     api_key_id: reportOptionalApiKeyId(apiKey),
     network: reportOptionalFilter(network),
   });
-  const paymentsQuery = usePartnerPaymentsQuery({
-    page,
-    pageSize: REPORT_PAGE_SIZE,
-    api_key_id: reportOptionalApiKeyId(tableApiKey),
-    network: reportOptionalFilter(sourceNetwork),
-    token: reportOptionalFilter(sourceToken),
-    destination_network: reportOptionalFilter(destNetwork),
-    destination_token: reportOptionalFilter(destToken),
-    ...reportAmountQuery(amountFilter),
-  });
+
+  const paymentFilters = useMemo(
+    () =>
+      reportPaymentsFilters({
+        sourceNetwork,
+        sourceToken,
+        destNetwork,
+        destToken,
+        amountFilter,
+      }),
+    [amountFilter, destNetwork, destToken, sourceNetwork, sourceToken],
+  );
+  const paymentsQuery = useReportPaymentsQuery(reportPaymentsListQuery(page, paymentFilters));
+  const exportMutation = useExportReportPaymentsMutation();
 
   const dailyByDate = useMemo(() => {
     const map = new Map<string, { volume: number; count: number }>();
     for (const item of analyticsQuery.data?.dailyStats ?? []) {
       map.set(reportDailyDateKey(item.date), {
-        volume: chartNumber(item.totalAmount),
-        count: item.transactionCount,
+        volume: chartNumber(item.volume),
+        count: item.transactions,
       });
     }
     return map;
@@ -127,14 +130,6 @@ export function ReportsView() {
     }));
   }, [dailyByDate, range]);
 
-  const tokenChips = (analyticsQuery.data?.tokenStats ?? []).filter(
-    (item) => chartNumber(item.totalAmount) > 0,
-  );
-  const transactionCount = (analyticsQuery.data?.dailyStats ?? []).reduce(
-    (sum, item) => sum + item.transactionCount,
-    0,
-  );
-
   const totalPage = Math.max(1, paymentsQuery.data?.totalPage ?? 1);
   const safePage = Math.min(page, totalPage);
   const pageRows = paymentsQuery.data?.list ?? [];
@@ -150,6 +145,12 @@ export function ReportsView() {
     : null;
 
   const resetPage = () => setPage(1);
+
+  function handleExport() {
+    void exportMutation.mutateAsync(paymentFilters).catch((error) => {
+      toast.fail({ title: reportsError(error, "Could not export CSV") });
+    });
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -182,37 +183,18 @@ export function ReportsView() {
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Total Volume
           </h2>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <p className="font-montserrat text-[26px] font-medium text-black">
-              {analyticsQuery.isPending
-                ? "—"
-                : formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true })}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {tokenChips.map((token) => (
-                <span
-                  key={token.token}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-[18px] border border-[#e3e3e3] bg-white px-2"
-                >
-                  <img
-                    src={tokenLogoUrl(token.token)}
-                    alt=""
-                    className="size-5 rounded-[12px] object-cover"
-                  />
-                  <span className="font-montserrat text-base font-medium text-black">
-                    {formatAmount(token.totalAmount, { prefix: "", padDecimals: true })}
-                  </span>
-                </span>
-              ))}
-            </div>
-          </div>
+          <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
+            {analyticsQuery.isPending
+              ? "—"
+              : formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true, showDust: true })}
+          </p>
         </section>
         <section>
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Transactions
           </h2>
           <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
-            {analyticsQuery.isPending ? "—" : transactionCount}
+            {analyticsQuery.isPending ? "—" : (analyticsQuery.data?.transactions ?? 0)}
           </p>
         </section>
       </Card>
@@ -242,26 +224,14 @@ export function ReportsView() {
                 variant={BUTTON_VARIANT.Normal}
                 size={BUTTON_SIZE.Sm}
                 className="h-9 w-full rounded-[6px] border-[#e3e3e3] px-3 text-black sm:w-auto"
-                onClick={() => {
-                  toast.info({ title: "Export CSV is coming soon" });
-                }}
+                loading={exportMutation.isPending}
+                onClick={handleExport}
               >
                 Export CSV
                 <IconExportLink className="size-3.5 shrink-0" />
               </Button>
             </div>
             <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Dropdown
-                label="API Key"
-                value={tableApiKey}
-                onChange={(value) => {
-                  setTableApiKey(value);
-                  resetPage();
-                }}
-                options={apiKeyOptions}
-                className="min-w-0 w-full"
-                triggerClassName="w-full"
-              />
               <Dropdown
                 label="Source Network"
                 value={sourceNetwork}

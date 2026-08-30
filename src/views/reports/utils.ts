@@ -1,7 +1,8 @@
 import { differenceInCalendarDays, format, startOfDay, subDays } from "date-fns";
 import type { DateRangeValue } from "@/components/date-range-picker/utils";
 import { ApiError } from "@/lib/api-error";
-import { REPORT_AMOUNT_FILTER, REPORT_FILTER_ALL } from "./config";
+import type { ReportPaymentsExportQuery } from "@/types/report";
+import { REPORT_AMOUNT_FILTER, REPORT_FILTER_ALL, REPORT_PAGE_SIZE } from "./config";
 
 export function reportsError(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.message;
@@ -24,6 +25,33 @@ export function reportAmountQuery(filter: string): { min_amount?: number; max_am
   if (filter === REPORT_AMOUNT_FILTER.From1kTo10k) return { min_amount: 1000, max_amount: 10000 };
   if (filter === REPORT_AMOUNT_FILTER.Over10k) return { min_amount: 10000 };
   return {};
+}
+
+export function reportPaymentsFilters(input: {
+  sourceNetwork: string;
+  sourceToken: string;
+  destNetwork: string;
+  destToken: string;
+  amountFilter: string;
+}): ReportPaymentsExportQuery {
+  return {
+    network: reportOptionalFilter(input.sourceNetwork),
+    symbol: reportOptionalFilter(input.sourceToken),
+    destination_network: reportOptionalFilter(input.destNetwork),
+    destination_symbol: reportOptionalFilter(input.destToken),
+    ...reportAmountQuery(input.amountFilter),
+  };
+}
+
+export function reportPaymentsListQuery(
+  page: number,
+  filters: ReportPaymentsExportQuery,
+): ReportPaymentsExportQuery & { page: number; pageSize: number } {
+  return {
+    page,
+    pageSize: REPORT_PAGE_SIZE,
+    ...filters,
+  };
 }
 
 export function reportDailyDateKey(date: string): string {

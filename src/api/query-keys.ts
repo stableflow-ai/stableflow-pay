@@ -55,10 +55,10 @@ export const queryKeys = {
     all: ["api-keys"] as const,
     list: ["api-keys", "list"] as const,
   },
-  partner: {
-    all: ["partner"] as const,
-    analytics: (params: unknown) => [...queryKeys.partner.all, "analytics", params] as const,
-    payments: (params: unknown) => [...queryKeys.partner.all, "payments", params] as const,
+  report: {
+    all: ["report"] as const,
+    analytics: (params: unknown) => [...queryKeys.report.all, "analytics", params] as const,
+    payments: (params: unknown) => [...queryKeys.report.all, "payments", params] as const,
   },
   nearintents: {
     all: ["nearintents"] as const,
