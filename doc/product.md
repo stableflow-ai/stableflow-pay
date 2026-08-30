@@ -10,8 +10,8 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | --- | --- | --- | --- |
 | Auth | `/login`, `/register` | shipped | Email + password. Same API as v2. Guest forgot password in a dialog. Authed users change password from the sidebar account menu. |
 | Marketing | `/howitworks` | shipped | Public. Linked from the auth shell. |
-| Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. A four-step guide panel sits above the stats until Step 4 Test is completed. |
-| Guide | `/guide`, `/guide/payment-link`, `/guide/api-key`, `/guide/webhook`, `/guide/test` | shipped | Authenticated onboarding. Own layout (no sidebar). Step drawers: 600px right on desktop, bottom below 768px. Creates a payment link, API key, and webhook; Step 4 POSTs `/v1/pay/checkout/sessions` with `x-api-key`. Progress is Zustand persist (`stableflow-pay.guide`). After Test completes, the Overview guide panel is hidden. |
+| Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. A four-step guide panel sits above the stats until profile `guideCompleted` is true. |
+| Guide | `/guide`, `/guide/payment-link`, `/guide/api-key`, `/guide/webhook`, `/guide/test` | shipped | Authenticated onboarding. Own layout (no sidebar). Step drawers: 600px right on desktop, bottom below 768px. Creates a payment link, API key, and webhook; Step 4 POSTs `/v1/pay/checkout/sessions` with `x-api-key`, then `POST /v1/pay/guide/complete`. Completion is profile `guideCompleted`. |
 | Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). List is `GET /v1/pay/links` (`page`, `pageSize`, `q`; `revenue` / `payments`). View loads `/stats` and paginated `/payments`, plus CSV export. |
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
 | Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit` (`payments_id`). Both waiting pages poll `GET /v1/pay/payments/{paymentId}`. |
@@ -26,7 +26,7 @@ Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and conf
 
 - Login: `email` + `password`.
 - Register: `name` (max 50), `email` (max 100), `password` (8–50), confirm password must match, `inviteCode` (max 10).
-- Session: Zustand `useAuthStore` with `persist` middleware. Types: `AuthUser` (`id`, `email`, `name`). Do **not** read or write `localStorage` from feature code.
+- Session: Zustand `useAuthStore` with `persist` middleware. Types: `AuthUser` (`id`, `email`, `name`, `guideCompleted`). Do **not** read or write `localStorage` from feature code.
 - Unauthenticated `/` redirects to `/login`. Authenticated `/login` or `/register` redirects to `/`, or to a safe `returnTo` query when present.
 - After login or register, navigate to a safe `returnTo` (in-app path with search) or `/`.
 - Boot: persist hydrates `{ token, user }`, then `GET /v1/pay/profile` in the background. HTTP 401 calls `logout()`. Navigation is not blocked while the profile request is in flight.
@@ -48,11 +48,11 @@ Sidebar footer (muted): Settings, Developer Docs, Terms of Service. There is no 
 
 ## Overview
 
-One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this product exists. Follow [mocks.md](mocks.md). Do not invent `src/types/overview.ts` or query keys in the mock phase. A four-step guide panel sits 20px above the stats row until `testCompleted` is true (Get Ready after a successful Run Test).
+One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this product exists. Follow [mocks.md](mocks.md). Do not invent `src/types/overview.ts` or query keys in the mock phase. A four-step guide panel sits 20px above the stats row until profile `guideCompleted` is true.
 
 ## Guide
 
-Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, Get Start, four step cards, Skip All. Switching a step opens a 600px right drawer on desktop and a bottom drawer below 768px. Step 1 reuses the payment-link form. Step 2 creates an API key. Step 3 creates a webhook. Step 4 runs `POST /v1/pay/checkout/sessions` with `x-api-key`. Guide progress is stored in `useGuideStore` persist. Skip does not mark a step complete. Skip All returns to `/` and does not hide the Overview panel. Get Ready after a successful test sets `testCompleted` and hides the Overview guide panel.
+Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, Get Start, four step cards, Skip All. Switching a step opens a 600px right drawer on desktop and a bottom drawer below 768px. Step 1 reuses the payment-link form. Step 2 creates an API key. Step 3 creates a webhook. Step 4 runs `POST /v1/pay/checkout/sessions` with `x-api-key`, then reports `POST /v1/pay/guide/complete`. Completion is `GET /v1/pay/profile` `guide_completed` (`AuthUser.guideCompleted`). Skip does not mark a step complete. Skip All returns to `/` and does not hide the Overview panel. Get Ready after a successful complete report navigates to `/`.
 
 ## Payment Links
 

@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/auth";
 
 const API_BASE = "https://test-api.stableflow.ai";
 
-const SAMPLE_USER = { id: 1, email: "a@b.com", name: "Ada" };
+const SAMPLE_USER = { id: 1, email: "a@b.com", name: "Ada", guideCompleted: false };
 
 function createMemoryStorage(): Storage {
   const map = new Map<string, string>();

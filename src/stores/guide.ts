@@ -24,11 +24,9 @@ interface GuideState {
   paymentLink: GuidePaymentLink | null;
   apiKey: GuideApiKey | null;
   webhook: GuideWebhook | null;
-  testCompleted: boolean;
   setPaymentLink: (value: GuidePaymentLink) => void;
   setApiKey: (value: GuideApiKey) => void;
   setWebhook: (value: GuideWebhook) => void;
-  setTestCompleted: (value: boolean) => void;
 }
 
 const persistStorage: StateStorage = {
@@ -61,11 +59,9 @@ export const useGuideStore = create<GuideState>()(
       paymentLink: null,
       apiKey: null,
       webhook: null,
-      testCompleted: false,
       setPaymentLink: (paymentLink) => set({ paymentLink }),
       setApiKey: (apiKey) => set({ apiKey }),
       setWebhook: (webhook) => set({ webhook }),
-      setTestCompleted: (testCompleted) => set({ testCompleted }),
     }),
     {
       name: GUIDE_STORAGE_NAME,
@@ -74,7 +70,6 @@ export const useGuideStore = create<GuideState>()(
         paymentLink: state.paymentLink,
         apiKey: state.apiKey,
         webhook: state.webhook,
-        testCompleted: state.testCompleted,
       }),
     },
   ),

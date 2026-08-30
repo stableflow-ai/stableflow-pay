@@ -144,7 +144,8 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/change-password` | yes | `ChangePasswordBody` | `void` | `changePassword` | `useChangePasswordMutation` |
 | POST | `/v1/pay/reset-password` | no | `ResetPasswordBody` | `void` | `resetPassword` | `useResetPasswordMutation` |
 | POST | `/v1/pay/reset-password/code` | no | `ResetPasswordCodeBody` | `void` | `sendResetPasswordCode` | `useSendResetPasswordCodeMutation` |
-| GET | `/v1/pay/profile` | yes | — | `AuthUser` | `getProfile` | `useProfileQuery` |
+| GET | `/v1/pay/profile` | yes | — | `AuthUser` (`guideCompleted`) | `getProfile` | `useProfileQuery` |
+| POST | `/v1/pay/guide/complete` | yes | — | `void` | `completeGuide` | `useCompleteGuideMutation` |
 | GET | `/v1/pay/organization` | yes | — | `PayOrganization` | `getOrganization` | `useOrganizationQuery` |
 | POST | `/v1/pay/organization` | yes | `PayOrganizationBody` | `PayOrganization` | `updateOrganization` | `useUpdateOrganizationMutation` |
 | GET | `/v1/pay/webhooks` | yes | — | `PayWebhook[]` | `listWebhooks` | `useWebhooksQuery` |
@@ -219,7 +220,8 @@ Public files:
 | `src/lib/query-client.ts` | Shared `QueryClient` |
 | `src/api/config.ts` | `PAY_API_PREFIX`, `NEARINTENTS_API_PREFIX` |
 | `src/api/query-keys.ts` | Query key factory |
-| `src/api/auth.ts` | Login, register, profile, change / reset password |
+| `src/api/auth.ts` | Login, register, profile, change / reset password (`mapAuthUser` includes `guideCompleted`) |
+| `src/api/guide.ts` | Guide complete (`POST /v1/pay/guide/complete`) |
 | `src/api/payout.ts` | Single and batch quote / swap / submit; overview, volume, pending, recent, payments, export |
 | `src/api/analytics.ts` | Analytics month query |
 | `src/api/recipient.ts` | Address book list / create / update / delete |
@@ -233,6 +235,7 @@ Public files:
 | `src/api/nearintents.ts` | 1Click proxy: quote, generate-intent, submit-intent, status |
 | `src/api/request-payment.ts` | Create request, request detail, received list, disable, withdraw, withdraw count |
 | `src/hooks/use-auth-api.ts` | Auth mutations + profile query |
+| `src/hooks/use-guide-api.ts` | Guide complete mutation |
 | `src/hooks/use-single-payout-api.ts` | Single quote query + swap mutation |
 | `src/hooks/use-batch-payout-api.ts` | Batch quote query + swap mutation |
 | `src/hooks/use-payout-api.ts` | Overview, volume, recent, payments queries; export mutation |
@@ -252,7 +255,7 @@ Public files:
 | `src/hooks/use-request-payment.ts` | Received list query, withdraw count query, create/disable mutations, payer detail query |
 | `src/hooks/use-request-withdraw.ts` | Confidential withdraw mutation |
 | `src/stores/auth.ts` | Product JWT session store |
-| `src/stores/guide.ts` | Guide persist (payment link, API key, webhook, testCompleted) |
+| `src/stores/guide.ts` | Guide persist (payment link, API key, webhook). Completion is `AuthUser.guideCompleted` from profile. |
 | `src/stores/nearintents-user-session.ts` | 1Click / Near Intents User-Session (not the product JWT) |
 | `src/types/auth.ts` | Auth types |
 | `src/types/payout.ts` | Quick, batch, overview, volume, payment list, and export types |

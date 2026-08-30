@@ -1,4 +1,5 @@
 import { PAY_API_PREFIX } from "@/api/config";
+import { apiNumber, apiText, asRecord } from "@/api/map";
 import { http } from "@/lib/http";
 import type {
   AuthSession,
@@ -10,20 +11,42 @@ import type {
   ResetPasswordCodeBody,
 } from "@/types/auth";
 
-export function login(body: LoginBody) {
-  return http<AuthSession>(`${PAY_API_PREFIX}/auth/login`, {
-    method: "POST",
-    body,
-    auth: false,
-  });
+export function mapAuthUser(raw: unknown): AuthUser {
+  const row = asRecord(raw) ?? {};
+  return {
+    id: apiNumber(row.id) ?? 0,
+    email: apiText(row.email),
+    name: apiText(row.name),
+    guideCompleted: row.guide_completed === true || row.guideCompleted === true,
+  };
 }
 
-export function register(body: RegisterBody) {
-  return http<AuthSession>(`${PAY_API_PREFIX}/auth/register`, {
-    method: "POST",
-    body,
-    auth: false,
-  });
+export function mapAuthSession(raw: unknown): AuthSession {
+  const row = asRecord(raw) ?? {};
+  return {
+    token: apiText(row.token),
+    user: mapAuthUser(row.user),
+  };
+}
+
+export async function login(body: LoginBody) {
+  return mapAuthSession(
+    await http<unknown>(`${PAY_API_PREFIX}/auth/login`, {
+      method: "POST",
+      body,
+      auth: false,
+    }),
+  );
+}
+
+export async function register(body: RegisterBody) {
+  return mapAuthSession(
+    await http<unknown>(`${PAY_API_PREFIX}/auth/register`, {
+      method: "POST",
+      body,
+      auth: false,
+    }),
+  );
 }
 
 export function changePassword(body: ChangePasswordBody) {
@@ -49,6 +72,6 @@ export function resetPassword(body: ResetPasswordBody) {
   });
 }
 
-export function getProfile() {
-  return http<AuthUser>(`${PAY_API_PREFIX}/profile`);
+export async function getProfile() {
+  return mapAuthUser(await http<unknown>(`${PAY_API_PREFIX}/profile`));
 }

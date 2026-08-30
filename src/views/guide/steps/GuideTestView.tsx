@@ -5,9 +5,9 @@ import { IconCopy } from "@/components/icons/copy";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { useCreateCheckoutSessionMutation } from "@/hooks/use-checkout-api";
+import { useCompleteGuideMutation } from "@/hooks/use-guide-api";
 import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useGuideStore } from "@/stores/guide";
 import {
   GUIDE_STEPS,
   GUIDE_TEST_LANG,
@@ -27,9 +27,9 @@ import {
 export function GuideTestView() {
   const navigate = useNavigate();
   const toast = useToast();
-  const setTestCompleted = useGuideStore((state) => state.setTestCompleted);
   const { apiKey } = useGuideProgress();
   const createSession = useCreateCheckoutSessionMutation();
+  const completeGuide = useCompleteGuideMutation();
   const [lang, setLang] = useState<GuideTestLang>(GUIDE_TEST_LANG.Node);
   const [result, setResult] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
@@ -65,8 +65,13 @@ export function GuideTestView() {
         },
       });
       setResult(formatGuideJson(data));
-      setPassed(true);
-      setTestCompleted(true);
+      try {
+        await completeGuide.mutateAsync();
+        setPassed(true);
+      } catch (error) {
+        setPassed(false);
+        toast.fail({ title: guideErrorMessage(error, "Could not mark the guide complete") });
+      }
     } catch (error) {
       setPassed(false);
       setResult(guideErrorMessage(error, "Could not create checkout session"));
@@ -140,7 +145,7 @@ export function GuideTestView() {
         <Button
           size={BUTTON_SIZE.Lg}
           className="mt-8 w-full"
-          loading={createSession.isPending}
+          loading={createSession.isPending || completeGuide.isPending}
           onClick={() => {
             if (passed) finish();
             else void runTest();

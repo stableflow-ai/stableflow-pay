@@ -26,7 +26,12 @@ import { useAuthStore } from "@/stores/auth";
 import type { AuthUser } from "@/types/auth";
 
 function isSameUser(left: AuthUser, right: AuthUser): boolean {
-  return left.id === right.id && left.email === right.email && left.name === right.name;
+  return (
+    left.id === right.id &&
+    left.email === right.email &&
+    left.name === right.name &&
+    left.guideCompleted === right.guideCompleted
+  );
 }
 
 export function useLoginMutation() {

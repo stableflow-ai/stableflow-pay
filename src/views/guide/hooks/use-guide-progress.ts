@@ -1,6 +1,7 @@
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import { usePaymentLinksQuery } from "@/hooks/use-payment-links-api";
 import { useWebhooksQuery } from "@/hooks/use-webhooks-api";
+import { useAuthStore } from "@/stores/auth";
 import { useGuideStore } from "@/stores/guide";
 import { buildPaymentLinkUrl } from "@/views/payment-links/utils";
 
@@ -8,7 +9,7 @@ export function useGuideProgress() {
   const storedPaymentLink = useGuideStore((state) => state.paymentLink);
   const storedApiKey = useGuideStore((state) => state.apiKey);
   const storedWebhook = useGuideStore((state) => state.webhook);
-  const testCompleted = useGuideStore((state) => state.testCompleted);
+  const testCompleted = useAuthStore((state) => state.user?.guideCompleted === true);
 
   const linksQuery = usePaymentLinksQuery({ page: 1, pageSize: 1 });
   const keysQuery = useApiKeysQuery();
