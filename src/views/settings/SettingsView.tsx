@@ -7,6 +7,7 @@ import { AddWebhookDialog } from "./components/AddWebhookDialog";
 import { DeleteWebhookDialog } from "./components/DeleteWebhookDialog";
 import { DeveloperSection } from "./components/DeveloperSection";
 import { ProfileSection } from "./components/ProfileSection";
+import { RotateWebhookSecretDialog } from "./components/RotateWebhookSecretDialog";
 import { SendTestDialog } from "./components/SendTestDialog";
 import { SigningSecretDialog } from "./components/SigningSecretDialog";
 import { settingsError } from "./utils";
@@ -22,6 +23,7 @@ export function SettingsView() {
     enableMutation,
     disableMutation,
     rotateSecretMutation,
+    simulateMutation,
   } = useWebhookMutations();
 
   const [name, setName] = useState("");
@@ -31,6 +33,7 @@ export function SettingsView() {
   const [addOpen, setAddOpen] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
   const [testing, setTesting] = useState<PayWebhook | null>(null);
+  const [rotating, setRotating] = useState<PayWebhook | null>(null);
   const [deleting, setDeleting] = useState<PayWebhook | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -85,6 +88,7 @@ export function SettingsView() {
     setPendingId(endpoint.webhookId);
     try {
       const next = await rotateSecretMutation.mutateAsync(endpoint.webhookId);
+      setRotating(null);
       setSecret(next.secret);
     } catch (error) {
       toast.fail({ title: settingsError(error, "Could not rotate secret") });
@@ -93,8 +97,18 @@ export function SettingsView() {
     }
   };
 
-  const sendTest = async () => {
-    await Promise.resolve();
+  const confirmRotate = () => {
+    if (!rotating) return;
+    void rotateSecret(rotating);
+  };
+
+  const sendTest = async (eventType: WebhookEventType, payload: Record<string, unknown>) => {
+    if (!testing) return;
+    await simulateMutation.mutateAsync({
+      endpointId: testing.webhookId,
+      eventType,
+      payload,
+    });
   };
 
   const confirmDelete = () => {
@@ -133,9 +147,7 @@ export function SettingsView() {
         onToggle={(endpoint, enabled) => {
           void toggleEnabled(endpoint, enabled);
         }}
-        onRotate={(endpoint) => {
-          void rotateSecret(endpoint);
-        }}
+        onRotate={setRotating}
         onSendTest={setTesting}
         onDelete={setDeleting}
       />
@@ -154,6 +166,13 @@ export function SettingsView() {
         open={Boolean(testing)}
         onClose={() => setTesting(null)}
         onSend={sendTest}
+      />
+      <RotateWebhookSecretDialog
+        open={Boolean(rotating)}
+        onClose={() => setRotating(null)}
+        endpoint={rotating}
+        onConfirm={confirmRotate}
+        loading={rotateSecretMutation.isPending}
       />
       <DeleteWebhookDialog
         open={Boolean(deleting)}

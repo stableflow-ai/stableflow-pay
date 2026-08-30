@@ -95,8 +95,7 @@ function WebhookRow(props: {
             <IconResetPassword className="h-[18px] w-[15px]" />
           </button>
         </Tooltip>
-        {/* TODO: Temporarily hide Send Test Webhook functionality, will be added after API is available */}
-        {/* <Tooltip content="Send Test Webhook">
+        <Tooltip content="Send Test Webhook">
           <button
             type="button"
             disabled={pending}
@@ -106,7 +105,7 @@ function WebhookRow(props: {
           >
             <IconFlask className="h-3.5 w-[13px]" />
           </button>
-        </Tooltip> */}
+        </Tooltip>
         <Tooltip content="Delete">
           <button
             type="button"

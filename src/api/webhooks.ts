@@ -13,6 +13,8 @@ import type {
   PayWebhookEventsQuery,
   PayWebhookEventsResp,
   PayWebhookRotateSecretResp,
+  SimulateWebhookBody,
+  SimulateWebhookResp,
 } from "@/types/webhooks";
 
 function mapEvents(value: unknown): string[] {
@@ -82,6 +84,20 @@ export async function rotateWebhookSecret(webhookId: string): Promise<PayWebhook
   return {
     secret: apiText(data.secret),
     webhookId: apiText(data.webhook_id ?? data.webhookId) || webhookId,
+  };
+}
+
+export async function simulateWebhook(body: SimulateWebhookBody): Promise<SimulateWebhookResp> {
+  const data =
+    asRecord(
+      await http<unknown>(`${PAY_API_PREFIX}/dev/simulateWebhook`, {
+        method: "POST",
+        body,
+      }),
+    ) ?? {};
+  return {
+    deliveryId: apiText(data.delivery_id ?? data.deliveryId),
+    eventId: apiText(data.event_id ?? data.eventId),
   };
 }
 

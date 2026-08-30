@@ -68,7 +68,7 @@ Authenticated `/api-keys`. Signed-in users list, create, copy, edit the label, a
 
 ## Settings
 
-Authenticated `/settings` has two cards. Profile loads and saves organization `name`, `slug`, and `logo`. Developer includes a Recipient Address field that is not persisted, plus webhook endpoints: add, enable / disable, rotate secret (shown once), send test (mocked until the test API exists), and delete. Event logs and signature verification are not on this page.
+Authenticated `/settings` has two cards. Profile loads and saves organization `name`, `slug`, and `logo`. Developer includes a Recipient Address field that is not persisted, plus webhook endpoints: add, enable / disable, rotate secret (shown once), send test (`POST /v1/pay/dev/simulateWebhook`), and delete. Event logs and signature verification are not on this page.
 
 ## Reports
 

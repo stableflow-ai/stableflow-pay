@@ -6,10 +6,11 @@ import {
   enableWebhook,
   listWebhooks,
   rotateWebhookSecret,
+  simulateWebhook,
 } from "@/api/webhooks";
 import { queryKeys } from "@/api/query-keys";
 import { useAuthStore } from "@/stores/auth";
-import type { PayWebhookBody } from "@/types/webhooks";
+import type { PayWebhookBody, SimulateWebhookBody } from "@/types/webhooks";
 
 export function useWebhooksQuery() {
   const token = useAuthStore((state) => state.token);
@@ -44,6 +45,9 @@ export function useWebhookMutations() {
     mutationFn: (webhookId: string) => rotateWebhookSecret(webhookId),
     onSuccess: invalidate,
   });
+  const simulateMutation = useMutation({
+    mutationFn: (body: SimulateWebhookBody) => simulateWebhook(body),
+  });
 
   return {
     createMutation,
@@ -51,5 +55,6 @@ export function useWebhookMutations() {
     enableMutation,
     disableMutation,
     rotateSecretMutation,
+    simulateMutation,
   };
 }

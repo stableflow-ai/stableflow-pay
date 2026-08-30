@@ -88,3 +88,14 @@ export interface PayWebhookEventsResp {
   total: number;
   totalPage: number;
 }
+
+export interface SimulateWebhookBody {
+  endpointId: string;
+  eventType: string;
+  payload: Record<string, unknown>;
+}
+
+export interface SimulateWebhookResp {
+  deliveryId: string;
+  eventId: string;
+}
