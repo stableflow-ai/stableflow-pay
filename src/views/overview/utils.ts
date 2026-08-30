@@ -1,7 +1,10 @@
 import { formatAmount } from "@/utils";
-import { OVERVIEW_METRIC, type OverviewMetric } from "@/mocks/overview";
+import type { OverviewAnalyticsPeriod } from "@/types/overview";
+import { OVERVIEW_METRIC, type OverviewMetric } from "./config";
 
-export function splitUsdAmount(value: number): { whole: string; fraction: string } {
+const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export function splitUsdAmount(value: string | number): { whole: string; fraction: string } {
   const formatted = formatAmount(value, { maxDecimals: 2, padDecimals: true });
   const dot = formatted.lastIndexOf(".");
   if (dot < 0) return { whole: formatted, fraction: "" };
@@ -18,7 +21,22 @@ export function formatChartAxis(value: number, metric: OverviewMetric): string {
   if (metric === OVERVIEW_METRIC.Transaction) return String(value);
   if (value === 0) return "$0";
   if (value >= 1000) return `$${value / 1000}K`;
+  if (value < 1) return formatAmount(value, { maxDecimals: 2 });
   return formatAmount(value, { maxDecimals: 0 });
+}
+
+export function formatOverviewChartLabel(iso: string, period: OverviewAnalyticsPeriod): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = MONTH_SHORT[date.getUTCMonth()];
+  if (period === "month") return `${month} ${date.getUTCFullYear()}`;
+  return `${month} ${date.getUTCDate()}`;
+}
+
+export function overviewChartValue(volume: string, transactions: number, metric: OverviewMetric): number {
+  if (metric === OVERVIEW_METRIC.Transaction) return transactions;
+  const parsed = Number(volume);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function niceCeil(value: number): number {

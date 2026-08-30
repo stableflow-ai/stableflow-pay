@@ -50,11 +50,6 @@ export function truncateEnd(value: string, max: number): string {
   return `${value.slice(0, Math.max(0, max - 3))}...`;
 }
 
-export function generateGuideOutOrderNo(): string {
-  const rand = Math.random().toString(36).slice(2, 10);
-  return `guide_${Date.now()}_${rand}`;
-}
-
 export function guideSnippetApiKey(key: string): string {
   return key.trim() || "YOUR_API_KEY";
 }

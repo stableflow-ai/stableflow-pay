@@ -11,27 +11,26 @@ import {
 } from "recharts";
 import { Card } from "@/components/ui/card/Card";
 import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { useOverviewPaymentsAnalyticsQuery } from "@/hooks/use-overview-api";
 import { cn } from "@/lib/utils";
-import {
-  OVERVIEW_METRIC,
-  OVERVIEW_RANGE,
-  type OverviewChartPoint,
-  type OverviewMetric,
-  type OverviewRange,
-} from "@/mocks/overview";
+import type { OverviewAnalyticsPeriod } from "@/types/overview";
 import {
   OVERVIEW_CHART_COLOR,
+  OVERVIEW_METRIC,
   OVERVIEW_METRIC_OPTIONS,
+  OVERVIEW_RANGE,
   OVERVIEW_RANGE_OPTIONS,
+  type OverviewMetric,
 } from "../config";
-import { chartYTicks, formatChartAxis } from "../utils";
+import { chartYTicks, formatChartAxis, formatOverviewChartLabel, overviewChartValue } from "../utils";
 
-export function PaymentsChart({ chart }: { chart: OverviewChartPoint[] }) {
+export function PaymentsChart() {
   const [metric, setMetric] = useState<OverviewMetric>(OVERVIEW_METRIC.Volume);
-  const [range, setRange] = useState<OverviewRange>(OVERVIEW_RANGE.Daily);
-  const data = chart.map((point) => ({
-    label: point.label,
-    value: metric === OVERVIEW_METRIC.Volume ? point.volume : point.transactions,
+  const [period, setPeriod] = useState<OverviewAnalyticsPeriod>(OVERVIEW_RANGE.Daily);
+  const analyticsQuery = useOverviewPaymentsAnalyticsQuery(period);
+  const data = (analyticsQuery.data?.list ?? []).map((point) => ({
+    label: formatOverviewChartLabel(point.startAt, period),
+    value: overviewChartValue(point.volume, point.transactions, metric),
   }));
   const maxValue = data.reduce((max, point) => Math.max(max, point.value), 0);
   const ticks = chartYTicks(maxValue);
@@ -62,8 +61,8 @@ export function PaymentsChart({ chart }: { chart: OverviewChartPoint[] }) {
           })}
         </div>
         <Dropdown
-          value={range}
-          onChange={(value) => setRange(value as OverviewRange)}
+          value={period}
+          onChange={(value) => setPeriod(value as OverviewAnalyticsPeriod)}
           options={OVERVIEW_RANGE_OPTIONS}
           triggerClassName="h-[30px] w-[81px] rounded-[18px] border-black/10 bg-transparent px-2.5 text-xs shadow-none"
         />

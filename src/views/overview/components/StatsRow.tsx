@@ -1,20 +1,31 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card/Card";
-import type { OverviewStats } from "@/mocks/overview";
+import type { OverviewStats } from "@/types/overview";
 import { OVERVIEW_LINK_CLASS, OVERVIEW_VALUE_CLASS } from "../config";
 import { splitUsdAmount } from "../utils";
+import Big from "big.js";
 
 export function StatsRow({ stats }: { stats: OverviewStats }) {
   const revenue = splitUsdAmount(stats.totalRevenue);
+  const isDust = Big(stats.totalRevenue || 0).lt(0.01) && Big(stats.totalRevenue || 0).gt(0);
 
   return (
     <Card className="grid gap-8 p-4 md:grid-cols-4 md:gap-6 md:px-7 md:py-7">
       <div>
         <p className="font-montserrat text-base font-medium capitalize text-black">Total Revenue</p>
-        <p className={`${OVERVIEW_VALUE_CLASS} mt-2`}>
-          {revenue.whole}
-          {revenue.fraction ? <span className="text-[#9fa7ba]">{revenue.fraction}</span> : null}
-        </p>
+        {
+          isDust ? (
+            <p className={`${OVERVIEW_VALUE_CLASS} mt-2`}>
+              $&lt;0
+              <span className="text-[#9fa7ba]">.01</span>
+            </p>
+          ) : (
+            <p className={`${OVERVIEW_VALUE_CLASS} mt-2`}>
+              {revenue.whole}
+              {revenue.fraction ? <span className="text-[#9fa7ba]">{revenue.fraction}</span> : null}
+            </p>
+          )
+        }
       </div>
       <StatLinkBlock
         label="Total Transactions"

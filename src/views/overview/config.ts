@@ -1,9 +1,28 @@
-import {
-  OVERVIEW_METRIC,
-  OVERVIEW_RANGE,
-  type OverviewMetric,
-  type OverviewRange,
-} from "@/mocks/overview";
+import type { OverviewAnalyticsPeriod, OverviewStats } from "@/types/overview";
+
+export const OVERVIEW_ANALYTICS_TYPE = "paylink";
+
+export const OVERVIEW_METRIC = {
+  Volume: "volume",
+  Transaction: "transaction",
+} as const;
+
+export type OverviewMetric = (typeof OVERVIEW_METRIC)[keyof typeof OVERVIEW_METRIC];
+
+export const OVERVIEW_RANGE = {
+  Daily: "day",
+  Weekly: "week",
+  Monthly: "month",
+} as const;
+
+export type OverviewRange = (typeof OVERVIEW_RANGE)[keyof typeof OVERVIEW_RANGE];
+
+export const EMPTY_OVERVIEW_STATS: OverviewStats = {
+  totalRevenue: "0",
+  totalTransactions: 0,
+  activeLinks: 0,
+  apiKeys: 0,
+};
 
 export const OVERVIEW_CHART_COLOR = "#3F8AFB";
 export const OVERVIEW_LINK_CLASS =
@@ -17,7 +36,7 @@ export const OVERVIEW_METRIC_OPTIONS: { value: OverviewMetric; label: string }[]
   { value: OVERVIEW_METRIC.Transaction, label: "Transaction" },
 ];
 
-export const OVERVIEW_RANGE_OPTIONS: { value: OverviewRange; label: string }[] = [
+export const OVERVIEW_RANGE_OPTIONS: { value: OverviewAnalyticsPeriod; label: string }[] = [
   { value: OVERVIEW_RANGE.Daily, label: "Daily" },
   { value: OVERVIEW_RANGE.Weekly, label: "Weekly" },
   { value: OVERVIEW_RANGE.Monthly, label: "Monthly" },

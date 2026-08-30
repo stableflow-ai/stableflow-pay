@@ -10,7 +10,7 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | --- | --- | --- | --- |
 | Auth | `/login`, `/register` | shipped | Email + password. Same API as v2. Guest forgot password in a dialog. Authed users change password from the sidebar account menu. |
 | Marketing | `/howitworks` | shipped | Public. Linked from the auth shell. |
-| Overview | `/` | shipped (mock) | Authenticated home. Figma Overview layout. Organization card, stats, payments chart, top revenue links. Data from `src/mocks/overview.ts` until the API contract exists. A four-step guide panel sits above the stats until profile `guideCompleted` is true. |
+| Overview | `/` | shipped | Authenticated home. Stats from `GET /v1/pay/overview`. Payments chart from `GET /v1/pay/payments/analytics` (`period` + `type=paylink`). Volume / Transaction is client-side. A four-step guide panel sits above the stats until profile `guideCompleted` is true. |
 | Guide | `/guide`, `/guide/payment-link`, `/guide/api-key`, `/guide/webhook`, `/guide/test` | shipped | Authenticated onboarding. Own layout (no sidebar). Step drawers: 600px right on desktop, bottom below 768px. Creates a payment link, API key, and webhook; Step 4 POSTs `/v1/pay/checkout/sessions` with `x-api-key`, then `POST /v1/pay/guide/complete`. Completion is profile `guideCompleted`. |
 | Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). List is `GET /v1/pay/links` (`page`, `pageSize`, `q`; `revenue` / `payments`). View loads `/stats` and paginated `/payments`, plus CSV export. |
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
@@ -48,7 +48,7 @@ Sidebar footer (muted): Settings, Developer Docs, Terms of Service. There is no 
 
 ## Overview
 
-One authenticated page at `/`. Mock dashboard until `/v1/pay` overview for this product exists. Follow [mocks.md](mocks.md). Do not invent `src/types/overview.ts` or query keys in the mock phase. A four-step guide panel sits 20px above the stats row until profile `guideCompleted` is true.
+One authenticated page at `/`. Stats come from `GET /v1/pay/overview` (`total_revenue`, `total_transactions`, `active_links`, `api_keys`). The Payments chart loads `GET /v1/pay/payments/analytics` with `period` (`day` / `week` / `month`) and `type=paylink`. Volume / Transaction only switches which series is drawn. A four-step guide panel sits 20px above the stats row until profile `guideCompleted` is true.
 
 ## Guide
 

@@ -12,9 +12,12 @@ export function GuideView() {
 
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-[#f6f6f6]">
-      <header className="shrink-0 px-4 pt-[21px] md:px-9">
+      <a
+        className="block shrink-0 px-4 pt-[21px] md:px-9"
+        href="/"
+      >
         <img src="/logo.svg" alt="PAY. Stableflow" className="h-[29px] w-[95px]" />
-      </header>
+      </a>
       <main className="min-h-0 flex-1 overflow-auto px-4 pb-8 pt-10 md:px-0 md:pt-[120px]">
         <div className="mx-auto w-full max-w-[464px] md:ml-[221px] md:mr-auto">
           <h1 className="font-montserrat text-[26px] font-semibold text-black">Get Start</h1>

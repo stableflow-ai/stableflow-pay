@@ -55,7 +55,7 @@ Every mock reader must include this comment:
 
 | Domain | Mock file | Reader hook | Notes |
 | --- | --- | --- | --- |
-| `overview` | `src/mocks/overview.ts` | `src/hooks/use-overview-dashboard.ts` | Overview dashboard at `/` until `/v1/pay` overview exists. |
+| — | — | — | No mock domains. Overview `/` uses `GET /v1/pay/overview` and `GET /v1/pay/payments/analytics`. |
 
 ## Constraints
 

@@ -20,7 +20,6 @@ import { useGuideProgress } from "../hooks/use-guide-progress";
 import {
   buildGuideTestSnippet,
   formatGuideJson,
-  generateGuideOutOrderNo,
   guideErrorMessage,
 } from "../utils";
 
@@ -58,7 +57,7 @@ export function GuideTestView() {
         body: {
           amount: GUIDE_TEST_SAMPLE.amount,
           network: GUIDE_TEST_SAMPLE.network,
-          out_order_no: generateGuideOutOrderNo(),
+          out_order_no: "",
           recipient: GUIDE_TEST_SAMPLE.recipient,
           success_url: GUIDE_TEST_SAMPLE.successUrl,
           symbol: GUIDE_TEST_SAMPLE.symbol,

@@ -46,7 +46,7 @@ pnpm preview
 | --- | --- | --- |
 | `/login`, `/register` | guest | Email + password |
 | `/howitworks` | public | Marketing |
-| `/` | merchant | Overview (mock until the overview API exists) |
+| `/` | merchant | Overview (`GET /v1/pay/overview`, `GET /v1/pay/payments/analytics`) |
 | `/payment-links` | merchant | Link list API |
 | `/payment-links/create` | merchant | Create + preview |
 | `/paylink/:linkId` | payer | Checkout; no login, no sidebar |

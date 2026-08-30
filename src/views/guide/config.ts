@@ -65,7 +65,7 @@ export const GUIDE_STEPS: readonly GuideStepDef[] = [
     id: GUIDE_STEP.Test,
     number: 4,
     title: "Test",
-    description: "Run prefilled code with your link ID and API key.",
+    description: "Run prefilled code with your API key.",
     actionLabel: "Test",
     formPath: GUIDE_STEP_PATH.test,
     previewPath: GUIDE_STEP_PATH.test,
