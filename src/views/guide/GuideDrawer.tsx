@@ -27,7 +27,7 @@ export function GuideDrawer({
       panelClassName={isDesktop ? "w-[min(100%,600px)]" : undefined}
       cardClassName={
         isDesktop
-          ? "h-full w-full rounded-r-none px-[30px] py-7"
+          ? "h-full w-full md:rounded-r-none px-[30px] py-7"
           : "w-full max-h-[90vh] rounded-b-none px-4 py-4"
       }
     >
