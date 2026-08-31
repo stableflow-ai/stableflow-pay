@@ -23,9 +23,9 @@ export const IconClose = (props: IconProps) => {
         y2="-0.75"
         transform="matrix(0.707069 -0.707145 0.707069 0.707145 1.00122 12.75)"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <line
         x1="0.75"
@@ -34,9 +34,9 @@ export const IconClose = (props: IconProps) => {
         y2="-0.75"
         transform="matrix(-0.707069 -0.707145 -0.707069 0.707145 11.9985 12.75)"
         stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

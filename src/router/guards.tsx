@@ -8,7 +8,7 @@ export function RequireAuth() {
   const location = useLocation();
 
   if (!user) {
-    const dest = `${location.pathname}${location.search}`;
+    const dest = `${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={loginPathWithReturnTo(dest)} replace />;
   }
 

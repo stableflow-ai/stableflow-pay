@@ -51,6 +51,7 @@ export function AppLayout() {
           onClose={closeSidebar}
           side={DRAWER_SIDE.Right}
           title=""
+          ariaLabel="Main navigation"
           panelClassName="w-[220px]"
           cardClassName="h-full w-full gap-0 rounded-r-none p-0 [&>div:first-child]:hidden"
           contentClassName="overflow-x-hidden"

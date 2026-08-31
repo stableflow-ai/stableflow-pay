@@ -33,7 +33,7 @@ export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
   { label: "Terms of Service", to: "/terms", icon: IconRecords },
 ];
 
-export const PLACEHOLDER_ROUTES = ["/terms", "/docs"] as const;
+export const PLACEHOLDER_ROUTES = ["/terms"] as const;
 
 export function pageTitleForPath(pathname: string): string {
   const item = [...SIDEBAR_NAV_ITEMS, ...SIDEBAR_FOOTER_ITEMS].find((entry) => {

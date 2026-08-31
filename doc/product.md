@@ -18,7 +18,8 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/apiKeys`. |
 | Reports | `/reports` | shipped | Partner analytics stats and charts (`GET /v1/pay/partner/analytics`) plus a paginated usage table (`GET /v1/pay/partner/payments`). No Partner registration. |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
-| Terms / Docs | `/terms`, `/docs` | placeholder | Sidebar footer links. AppLayout also shows Terms of Service at the bottom right of authenticated pages (not login, register, or public payer). |
+| Developer Docs | `/docs` | shipped | Authenticated merchant Checkout API guide with setup, Session creation, redirects, confirmation, webhooks, supported assets, API reference, and production checklist. |
+| Terms | `/terms` | placeholder | Sidebar footer link. AppLayout also shows Terms of Service at the bottom right of authenticated pages (not login, register, or public payer). |
 
 Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and confidential helpers** live in `src/` for upcoming screens. Do not add the v2 Home / Pay / Partner page chrome.
 
@@ -28,7 +29,7 @@ Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and conf
 - Register: `name` (max 50), `email` (max 100), `password` (8–50), confirm password must match, `inviteCode` (max 10).
 - Session: Zustand `useAuthStore` with `persist` middleware. Types: `AuthUser` (`id`, `email`, `name`, `guideCompleted`). Do **not** read or write `localStorage` from feature code.
 - Unauthenticated `/` redirects to `/login`. Authenticated `/login` or `/register` redirects to `/`, or to a safe `returnTo` query when present.
-- After login or register, navigate to a safe `returnTo` (in-app path with search) or `/`.
+- After login or register, navigate to a safe `returnTo` (in-app path with search and hash) or `/`.
 - Boot: persist hydrates `{ token, user }`, then `GET /v1/pay/profile` in the background. HTTP 401 calls `logout()`. Navigation is not blocked while the profile request is in flight.
 - Reset password:
   - Guest: Login `Forgot Password?` opens a dialog. Send Code calls `POST /v1/pay/reset-password/code`. Continue calls `POST /v1/pay/reset-password`.
@@ -38,13 +39,15 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Authenticated chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. Login, register, `/howitworks`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Dashboard chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. All routes inside this layout, including `/docs`, are authenticated. Login, register, `/howitworks`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
 
 `/guide` is authenticated but does **not** use `AppLayout`. It has its own logo column and a step drawer.
 
 The sidebar user chip shows `user.name` and a three-dot control. That control opens an upward floating menu (same pattern as v2, `side="top"`): Change Password, Settings, Log out. Settings goes to `/settings`. Change Password opens `ResetPasswordDialog` (`variant="authed"`).
 
 Sidebar footer (muted): Settings, Developer Docs, Terms of Service. There is no Support item and no Webhooks item in the main nav.
+
+Developer Docs at `/docs` uses the authenticated AppLayout and documents the Checkout API. It is static product documentation and does not call the backend.
 
 ## Overview
 

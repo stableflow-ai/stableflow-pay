@@ -5,6 +5,7 @@ Record every create/update of components under `src/components/ui/` so other age
 ## 2026-08-30
 
 - **Drawer:** `panelClassName` sizes the positioned shell. Right/left default width is on the shell (`w-[min(100%,420px)]`); the Card is `w-full`. Overlay `mask={false}` uses `pointer-events-none` on the root so the page behind stays clickable; the panel is `pointer-events-auto`.
+- **Dialog / Drawer / OverlayPanel:** Masked panels move focus inside, trap Tab focus, restore the previous focus on close, and associate visible titles with the dialog. Added `ariaLabel` for titleless panels.
 - **OverlayPanel:** Title uses `min-w-0` so long titles do not widen the panel.
 
 ## 2026-08-28
