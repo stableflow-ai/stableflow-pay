@@ -17,6 +17,7 @@ export function mapPaymentLink(raw: unknown): PayPaymentLink {
     linkId: apiText(row.link_id ?? row.linkId),
     title: apiText(row.title),
     description: apiText(row.description),
+    icon: apiText(row.icon),
     amount: apiText(row.amount),
     symbol: apiText(row.symbol),
     network: apiText(row.network),

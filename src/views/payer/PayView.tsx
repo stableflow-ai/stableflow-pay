@@ -38,6 +38,7 @@ import {
   isCheckoutPayable,
   isDryQuoteStale,
   parsePositiveDecimal,
+  paymentLinkCardIconUrl,
   payoutNetworkToken,
   shouldCheckoutShowForm,
   usdFee,
@@ -324,7 +325,7 @@ export function PayView() {
   }
 
   return (
-    <PayerLayout iconUrl={isCheckout ? checkout?.organization.logo : link?.organization.logo}>
+    <PayerLayout iconUrl={isCheckout ? checkout?.organization.logo : paymentLinkCardIconUrl(link)}>
       <PayCard
         state={cardState}
         paymentTitle={payment?.title ?? ""}

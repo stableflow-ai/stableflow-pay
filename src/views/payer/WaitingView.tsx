@@ -28,6 +28,7 @@ import {
   isCheckoutFailedWithoutPayment,
   isCheckoutSuspended,
   payerWaitDetailsFromSources,
+  paymentLinkCardIconUrl,
   shouldCheckoutShowForm,
   waitStatusFromPayment,
 } from "./utils";
@@ -53,7 +54,7 @@ export function WaitingView() {
   });
   const checkout = checkoutQuery.data;
   const linkQuery = usePaymentLinkQuery(isCheckout ? undefined : linkId);
-  const iconUrl = isCheckout ? checkout?.organization.logo : linkQuery.data?.organization.logo;
+  const iconUrl = isCheckout ? checkout?.organization.logo : paymentLinkCardIconUrl(linkQuery.data);
   const checkoutPaymentsId = checkout?.paymentsId.trim() || "";
   const paymentId = queryPaymentId || (isCheckout ? checkoutPaymentsId : "");
   const paymentQuery = usePayPaymentQuery(paymentId);

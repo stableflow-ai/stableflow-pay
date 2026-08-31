@@ -2,6 +2,7 @@ export interface PayPaymentLink {
   linkId: string;
   title: string;
   description: string;
+  icon: string;
   amount: string;
   symbol: string;
   network: string;

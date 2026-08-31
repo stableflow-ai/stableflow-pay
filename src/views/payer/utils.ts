@@ -1,6 +1,7 @@
 import { ApiError } from "@/lib/api-error";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
+import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
 import {
   CHECKOUT_SUCCESS_STATUS,
@@ -31,6 +32,13 @@ const USER_REJECTED_PATTERNS = [
   "request rejected",
   "action_rejected",
 ];
+
+export function paymentLinkCardIconUrl(
+  link: Pick<PayPaymentLink, "icon" | "organization"> | null | undefined,
+): string {
+  if (!link) return "";
+  return link.icon.trim() || link.organization.logo.trim() || "";
+}
 
 export function payoutNetworkToken(token: IntentsToken): { network: string; token: string } {
   return { network: token.blockchain, token: token.symbol };
