@@ -4,6 +4,7 @@ import { mapPaymentDetail } from "@/api/payout";
 import { apiNumber, apiText, asRecord, mapOrganizationLogo } from "@/api/map";
 import type { PayPaymentDetail } from "@/types/pay";
 import type {
+  PayDefaultAddress,
   PayPaymentLink,
   PayPaymentLinkBody,
   PayPaymentLinkPaymentsQuery,
@@ -56,7 +57,40 @@ export async function listPaymentLinks(query: PayPaymentLinksQuery): Promise<Pay
 }
 
 export async function createPaymentLink(body: PayPaymentLinkBody): Promise<PayPaymentLink> {
-  return mapPaymentLink(await http<unknown>(`${PAY_API_PREFIX}/links`, { method: "POST", body }));
+  return mapPaymentLink(
+    await http<unknown>(`${PAY_API_PREFIX}/links`, {
+      method: "POST",
+      body: {
+        title: body.title,
+        description: body.description,
+        icon: body.icon,
+        amount: body.amount,
+        symbol: body.symbol,
+        network: body.network,
+        recipient: body.recipient,
+        default_address: body.defaultAddress,
+      },
+    }),
+  );
+}
+
+export function mapDefaultAddress(raw: unknown): PayDefaultAddress {
+  const row = asRecord(raw) ?? {};
+  return {
+    network: apiText(row.network),
+    recipient: apiText(row.recipient),
+  };
+}
+
+export async function listDefaultAddresses(): Promise<PayDefaultAddress[]> {
+  const data = await http<unknown>(`${PAY_API_PREFIX}/links/default-addresses`);
+  const nested = asRecord(data)?.data;
+  const list = Array.isArray(data)
+    ? data
+    : Array.isArray(nested)
+      ? nested
+      : [];
+  return list.map(mapDefaultAddress).filter((row) => row.network && row.recipient);
 }
 
 export async function getPaymentLink(linkId: string, options?: { auth?: boolean }): Promise<PayPaymentLink> {

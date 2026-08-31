@@ -3,6 +3,7 @@ import { useOrganizationQuery, useUpdateOrganizationMutation } from "@/hooks/use
 import { useWebhookMutations, useWebhooksQuery } from "@/hooks/use-webhooks-api";
 import useToast from "@/hooks/use-toast";
 import type { PayWebhook, WebhookEventType } from "@/types/webhooks";
+import { isHttpUrl } from "@/utils";
 import { AddWebhookDialog } from "./components/AddWebhookDialog";
 import { DeleteWebhookDialog } from "./components/DeleteWebhookDialog";
 import { DeveloperSection } from "./components/DeveloperSection";
@@ -49,11 +50,16 @@ export function SettingsView() {
 
   const saveProfile = (event: FormEvent) => {
     event.preventDefault();
+    const nextLogo = logo.trim();
+    if (nextLogo && !isHttpUrl(nextLogo)) {
+      toast.fail({ title: "Enter a valid logo URL" });
+      return;
+    }
     void updateOrganization
       .mutateAsync({
         name: name.trim(),
         slug: slug.trim(),
-        logo: logo.trim(),
+        logo: nextLogo,
       })
       .then(() => {
         toast.success({ title: "Settings saved" });

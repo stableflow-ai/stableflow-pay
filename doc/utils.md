@@ -5,7 +5,7 @@ Import from `@/utils`. Search this module (and `src/lib/`) before writing a new 
 After adding or changing a public util, update this file.
 
 ```ts
-import { formatAddress, formatAmount, formatDate } from "@/utils";
+import { formatAddress, formatAmount, formatDate, isHttpUrl } from "@/utils";
 ```
 
 ## Address
@@ -89,3 +89,9 @@ formatAmount("1000000", { decimals: 6, maxDecimals: 2, padDecimals: true }); // 
 ```
 
 Invalid input formats as zero (`$0` / `$0.00` when padded). Negative amounts keep the sign after the prefix: `$-1.23`.
+
+## URL
+
+Path: `src/utils/url.ts`
+
+`isHttpUrl(value)` — `trim` then `new URL`. True only for `http:` / `https:` with a non-empty hostname. Empty strings, relative paths, `javascript:`, and `data:` are false. Optional fields should use `!value.trim() || isHttpUrl(value)`.

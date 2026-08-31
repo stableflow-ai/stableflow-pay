@@ -42,6 +42,7 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.paymentLinks.all, "detail", id] as const,
     stats: (id: string) => [...queryKeys.paymentLinks.all, "stats", id] as const,
     payments: (id: string, params: unknown) => [...queryKeys.paymentLinks.all, "payments", id, params] as const,
+    defaultAddresses: ["payment-links", "default-addresses"] as const,
   },
   organization: {
     all: ["organization"] as const,

@@ -13,7 +13,7 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Overview | `/` | shipped | Authenticated home. Stats from `GET /v1/pay/overview`. Payments chart from `GET /v1/pay/payments/analytics` (`period` + `type=paylink`). Volume / Transaction is client-side. A four-step guide panel sits above the stats until profile `guideCompleted` is true. Panel Create/Test opens masked drawers on `/`. |
 | Guide | `/guide`, `/guide/payment-link`, `/guide/api-key`, `/guide/webhook`, `/guide/test` | shipped | Authenticated onboarding. Own layout (no sidebar). Step drawers: 600px right on desktop, bottom below 768px, no mask. Creates a payment link, API key, and webhook; Step 4 POSTs `/v1/pay/checkout/sessions` with `x-api-key`, then `POST /v1/pay/guide/complete`. Completion is profile `guideCompleted`. Skip All persists per user. |
 | Payment Links | `/payment-links` | shipped | Merchant payment-link list (stats, search, copy / toggle / delete). List is `GET /v1/pay/links` (`page`, `pageSize`, `q`; `revenue` / `payments`). View loads `/stats` and paginated `/payments`, plus CSV export. |
-| Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links`. |
+| Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links` (`default_address`). Non-empty icon must be an http(s) URL. |
 | Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Paylink card icon is `icon` then `organization.logo`. Checkout uses `organization.logo` only. Swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit` (`payments_id`). Both waiting pages poll `GET /v1/pay/payments/{paymentId}`. |
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/apiKeys`. |
 | Reports | `/reports` | shipped | Report analytics charts (`GET /v1/pay/report/analytics`) plus a paginated usage table (`GET /v1/pay/report/payments`) and CSV export (`GET /v1/pay/report/payments/export`). |
@@ -61,7 +61,7 @@ Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, G
 
 ## Payment Links
 
-Authenticated `/payment-links` lists merchant links from `GET /v1/pay/links` (`page`, `pageSize`, `q`). Rows show `revenue` and `payments`. Create is a nested overlay at `/payment-links/create` (form) then `/payment-links/create/preview` (generated URL + QR): 600px right drawer on desktop, bottom drawer below 768px. Toggle uses enable / disable. View opens a drawer: `GET /v1/pay/links/{linkId}/stats` and paginated `GET /v1/pay/links/{linkId}/payments`. Export CSV is `GET /v1/pay/links/{linkId}/payments/export`.
+Authenticated `/payment-links` lists merchant links from `GET /v1/pay/links` (`page`, `pageSize`, `q`). Rows show `revenue` and `payments`. Create is a nested overlay at `/payment-links/create` (form) then `/payment-links/create/preview` (generated URL + QR): 600px right drawer on desktop, bottom drawer below 768px. A non-empty Icon URL must be `http:` or `https:`. Save as default is sent as `default_address` on create and stores that network's recipient; the next create loads `GET /v1/pay/links/default-addresses` and fills Recipient Address when the selected token's network matches. Toggle uses enable / disable. View opens a drawer: `GET /v1/pay/links/{linkId}/stats` and paginated `GET /v1/pay/links/{linkId}/payments`. Export CSV is `GET /v1/pay/links/{linkId}/payments/export`.
 
 ## Public payer
 
@@ -73,7 +73,7 @@ Authenticated `/api-keys`. Signed-in users list, create, copy, edit the label, a
 
 ## Settings
 
-Authenticated `/settings` has two cards. Profile loads and saves organization `name`, `slug`, and `logo`. Developer includes a Recipient Address field that is not persisted, plus webhook endpoints: add, enable / disable, rotate secret (shown once), send test (`POST /v1/pay/dev/simulateWebhook`), and delete. Event logs and signature verification are not on this page.
+Authenticated `/settings` has two cards. Profile loads and saves organization `name`, `slug`, and `logo`. A non-empty logo must be an `http:` or `https:` URL. Developer includes a Recipient Address field that is not persisted, plus webhook endpoints: add, enable / disable, rotate secret (shown once), send test (`POST /v1/pay/dev/simulateWebhook`), and delete. Event logs and signature verification are not on this page.
 
 ## Reports
 

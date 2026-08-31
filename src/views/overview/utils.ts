@@ -21,8 +21,8 @@ export function formatChartAxis(value: number, metric: OverviewMetric): string {
   if (metric === OVERVIEW_METRIC.Transaction) return String(value);
   if (value === 0) return "$0";
   if (value >= 1000) return `$${value / 1000}K`;
-  if (value < 1) return formatAmount(value, { maxDecimals: 2 });
-  return formatAmount(value, { maxDecimals: 0 });
+  if (value < 1) return formatAmount(value, { maxDecimals: 2, showDust: true });
+  return formatAmount(value, { maxDecimals: 2, showDust: true });
 }
 
 export function formatOverviewChartLabel(iso: string, period: OverviewAnalyticsPeriod): string {

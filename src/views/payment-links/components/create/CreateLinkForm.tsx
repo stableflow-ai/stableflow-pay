@@ -4,15 +4,15 @@ import { IconAlert } from "@/components/icons/alert";
 import { IconQuestion } from "@/components/icons/question";
 import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
 import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { InputNumber } from "@/components/ui/input-number/InputNumber";
 import { Switch } from "@/components/ui/switch/Switch";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
-import { usePaymentLinkMutations } from "@/hooks/use-payment-links-api";
+import { useDefaultAddressesQuery, usePaymentLinkMutations } from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
-import { isAddressValid } from "@/utils";
+import { isAddressValid, isHttpUrl } from "@/utils";
 import {
   CREATE_LINK_AMOUNT_MAX_DECIMALS,
   CREATE_PAYMENT_LINK_PREVIEW_PATH,
@@ -39,6 +39,8 @@ export function CreateLinkForm({
   const navigate = useNavigate();
   const toast = useToast();
   const { createMutation } = usePaymentLinkMutations();
+  const defaultsQuery = useDefaultAddressesQuery();
+  const defaultAddresses = defaultsQuery.data;
   const ensureFresh = useIntentsTokensStore((state) => state.ensureFresh);
 
   const [title, setTitle] = useState("");
@@ -48,6 +50,7 @@ export function CreateLinkForm({
   const [openAmount, setOpenAmount] = useState(false);
   const [token, setToken] = useState<IntentsToken | null>(null);
   const [address, setAddress] = useState("");
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
@@ -55,13 +58,22 @@ export function CreateLinkForm({
     void ensureFresh();
   }, [ensureFresh]);
 
+  useEffect(() => {
+    if (!token || !defaultAddresses) return;
+    const fallback = defaultAddresses.find((row) => row.network === token.blockchain);
+    if (!fallback) return;
+    setAddress((current) => (current.trim() ? current : fallback.recipient));
+  }, [token, defaultAddresses]);
+
   const titleOk = title.trim().length > 0;
   const tokenOk = Boolean(token);
   const addressOk = token ? isAddressValid(address, token.chain.chainKind) : false;
   const amountOk = openAmount || isPositiveAmount(amount);
-  const canSubmit = titleOk && tokenOk && addressOk && amountOk;
+  const iconOk = !iconUrl.trim() || isHttpUrl(iconUrl);
+  const canSubmit = titleOk && tokenOk && addressOk && amountOk && iconOk;
 
   const titleInvalid = showErrors && !titleOk;
+  const iconInvalid = showErrors && Boolean(iconUrl.trim()) && !iconOk;
   const amountInvalid = !openAmount && (Boolean(amount.trim()) || showErrors) && !amountOk;
   const tokenInvalid = showErrors && !tokenOk;
   const addressInvalid = Boolean(token) && (Boolean(address.trim()) || showErrors) && !addressOk;
@@ -72,10 +84,16 @@ export function CreateLinkForm({
   }
 
   function handleSelectToken(next: IntentsToken) {
-    if (token && next.chain.chainKind !== token.chain.chainKind) {
-      setAddress("");
-    }
+    const networkChanged = !token || token.blockchain !== next.blockchain;
+    const chainChanged = !token || token.chain.chainKind !== next.chain.chainKind;
     setToken(next);
+    if (!networkChanged) return;
+    const fallback = defaultAddresses?.find((row) => row.network === next.blockchain);
+    if (fallback) {
+      setAddress(fallback.recipient);
+      return;
+    }
+    if (chainChanged) setAddress("");
   }
 
   async function handleGenerate() {
@@ -92,6 +110,7 @@ export function CreateLinkForm({
         symbol: token.symbol,
         network: token.blockchain,
         recipient: address.trim(),
+        defaultAddress: saveAsDefault,
       });
       if (onCreated) {
         onCreated({ linkId: created.linkId, title: title.trim() });
@@ -168,7 +187,11 @@ export function CreateLinkForm({
           maxLength={PAYMENT_ICON_URL_MAX_LENGTH}
           placeholder="URL of the product icon image"
           onChange={(event) => setIconUrl(event.target.value)}
-          className={cn(FIELD_INPUT_CLASS, "mt-2.5 border-[#e3e3e3] text-black")}
+          className={cn(
+            FIELD_INPUT_CLASS,
+            "mt-2.5",
+            iconInvalid ? "border-danger text-danger" : "border-[#e3e3e3] text-black",
+          )}
         />
 
         <p className="mt-8 font-montserrat text-sm font-medium capitalize text-[#606060]">
@@ -212,9 +235,22 @@ export function CreateLinkForm({
 
         <label
           htmlFor="recipient-address"
-          className="mt-5 block font-montserrat text-sm font-medium text-[#606060]"
+          className="mt-5 font-montserrat text-sm font-medium text-[#606060] flex items-center justify-between"
         >
-          Recipient Address
+          <span>Recipient Address</span>
+          <Button
+            type="button"
+            variant={saveAsDefault ? BUTTON_VARIANT.Primary : BUTTON_VARIANT.Normal}
+            size={BUTTON_SIZE.Sm}
+            aria-pressed={saveAsDefault}
+            className={cn(
+              "text-[12px] !h-[30px] !rounded-[8px] !px-[10px]",
+              saveAsDefault ? "text-white" : "text-[#606060]",
+            )}
+            onClick={() => setSaveAsDefault((current) => !current)}
+          >
+            Save as default
+          </Button>
         </label>
         <div
           className={cn(

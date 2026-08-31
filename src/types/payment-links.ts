@@ -22,6 +22,12 @@ export interface PayPaymentLinkBody {
   symbol: string;
   network: string;
   recipient: string;
+  defaultAddress: boolean;
+}
+
+export interface PayDefaultAddress {
+  network: string;
+  recipient: string;
 }
 
 export interface PayPaymentLinksQuery {

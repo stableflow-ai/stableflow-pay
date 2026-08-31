@@ -160,7 +160,8 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/webhooks/{webhookId}/rotate-secret` | yes | — | `PayWebhookRotateSecretResp` | `rotateWebhookSecret` | `useWebhookMutations` |
 | POST | `/v1/pay/dev/simulateWebhook` | yes | `SimulateWebhookBody` | `SimulateWebhookResp` | `simulateWebhook` | `useWebhookMutations` |
 | GET | `/v1/pay/links` | yes | `page`, `pageSize`, `q` | `PayPaymentLinksResp` | `listPaymentLinks` | `usePaymentLinksQuery` |
-| POST | `/v1/pay/links` | yes | `PayPaymentLinkBody` | `PayPaymentLink` | `createPaymentLink` | `usePaymentLinkMutations` |
+| POST | `/v1/pay/links` | yes | `PayPaymentLinkBody` (`default_address`) | `PayPaymentLink` | `createPaymentLink` | `usePaymentLinkMutations` |
+| GET | `/v1/pay/links/default-addresses` | yes | — | `PayDefaultAddress[]` | `listDefaultAddresses` | `useDefaultAddressesQuery` |
 | GET | `/v1/pay/links/{linkId}` | if session | — | `PayPaymentLink` (`icon`, `organization.logo`) | `getPaymentLink` | `usePaymentLinkQuery` |
 | GET | `/v1/pay/links/{linkId}/stats` | yes | — | `PayPaymentLink` | `getPaymentLinkStats` | `usePaymentLinkStatsQuery` |
 | GET | `/v1/pay/links/{linkId}/payments` | yes | `page`, `pageSize` | `{ total, totalPage, list: PayPaymentDetail[] }` | `listPaymentLinkPayments` | `usePaymentLinkPaymentsQuery` |

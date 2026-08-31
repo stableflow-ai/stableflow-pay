@@ -6,6 +6,7 @@ import {
   enablePaymentLink,
   exportPaymentLinkPayments,
   getPaymentLinkStats,
+  listDefaultAddresses,
   listPaymentLinkPayments,
   listPaymentLinks,
 } from "@/api/payment-links";
@@ -35,6 +36,15 @@ export function usePaymentLinksQuery(params: PayPaymentLinksQuery) {
   return useQuery({
     queryKey: queryKeys.paymentLinks.list(params),
     queryFn: () => listPaymentLinks(params),
+    enabled: Boolean(token),
+  });
+}
+
+export function useDefaultAddressesQuery() {
+  const token = useAuthStore((state) => state.token);
+  return useQuery({
+    queryKey: queryKeys.paymentLinks.defaultAddresses,
+    queryFn: listDefaultAddresses,
     enabled: Boolean(token),
   });
 }
