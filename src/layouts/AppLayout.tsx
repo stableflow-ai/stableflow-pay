@@ -1,5 +1,5 @@
 import { Suspense, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
 import { Drawer } from "@/components/ui/drawer/Drawer";
@@ -38,14 +38,6 @@ export function AppLayout() {
             <Outlet />
           </Suspense>
         </main>
-        <footer className="flex shrink-0 justify-end px-3 py-2 md:px-10 md:py-3">
-          <Link
-            to="/terms"
-            className="font-montserrat text-sm font-normal text-[#606060] hover:text-black"
-          >
-            Terms of Service
-          </Link>
-        </footer>
       </div>
       {isDesktop ? null : (
         <Drawer

@@ -3,7 +3,7 @@ import { IconCode } from "@/components/icons/code";
 import { IconKey } from "@/components/icons/key";
 import { IconLink } from "@/components/icons/link";
 import { IconOverview } from "@/components/icons/overview";
-import { IconRecords, IconRecords2 } from "@/components/icons/records";
+import { IconRecords2 } from "@/components/icons/records";
 import { IconSettings } from "@/components/icons/settings";
 import type { IconProps } from "@/components/icons/types";
 
@@ -30,7 +30,6 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
 export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
   { label: "Settings", to: "/settings", icon: IconSettings },
   { label: "Developer Docs", to: "/docs", icon: IconCode },
-  { label: "Terms of Service", to: "/terms", icon: IconRecords },
 ];
 
 export const PLACEHOLDER_ROUTES = ["/terms"] as const;
