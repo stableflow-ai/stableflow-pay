@@ -38,7 +38,7 @@ export function DeveloperSection(props: {
           Configure the defaults used when creating payment links.
         </p>
       </div>
-      <div>
+      {/* <div>
         <label htmlFor="recipient-address" className="font-montserrat text-sm font-medium text-[#606060]">
           Recipient Address
         </label>
@@ -51,7 +51,7 @@ export function DeveloperSection(props: {
           maxLength={RECIPIENT_ADDRESS_MAX_LENGTH}
           className="mt-2.5 h-10 w-full rounded-[6px] border border-[#e3e3e3] bg-[#f6f6f6] px-3 font-montserrat text-sm font-medium text-black outline-none placeholder:text-black/30"
         />
-      </div>
+      </div> */}
       <div className="flex flex-col gap-4">
         <p className="font-montserrat text-sm font-medium text-[#606060]">Webhooks</p>
         <WebhookList
