@@ -51,7 +51,7 @@ export const PAYMENT_LINKS_PAGE_SIZE = 20;
 export const LINK_PAYMENTS_PAGE_SIZE = 20;
 
 export const PAYMENT_LINKS_TABLE_COLUMNS =
-  "minmax(180px,1.4fr) minmax(120px,0.9fr) minmax(140px,1fr) minmax(100px,0.8fr) minmax(120px,0.85fr) minmax(72px,0.55fr) minmax(44px,0.3fr) minmax(36px,0.25fr) minmax(36px,0.25fr)";
+  "minmax(180px,1.4fr) minmax(120px,0.9fr) minmax(140px,1fr) minmax(100px,0.8fr) minmax(120px,0.85fr) minmax(72px,0.55fr) minmax(44px,0.3fr) minmax(36px,0.1fr) minmax(36px,0.1fr)  minmax(36px,0.1fr)";
 
 export const LINK_TRANSACTIONS_TABLE_COLUMNS =
   "minmax(150px,1.1fr) minmax(140px,1fr) minmax(70px,0.5fr) minmax(140px,1fr) minmax(90px,0.7fr) minmax(140px,0.9fr)";
