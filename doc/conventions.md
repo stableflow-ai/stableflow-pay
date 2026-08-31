@@ -1,6 +1,6 @@
 # Development Conventions
 
-Rules for humans and agents working in this repository. Chat with the user may be Chinese. Anything committed to `src/` or `doc/` must be English.
+Rules for humans and agents working in this repository. Anything committed to `src/` or `doc/` must be English.
 
 ## Language
 
