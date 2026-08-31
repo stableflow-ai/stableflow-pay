@@ -72,7 +72,7 @@ export function PaymentsChart() {
           value={period}
           onChange={(value) => setPeriod(value as OverviewAnalyticsPeriod)}
           options={OVERVIEW_RANGE_OPTIONS}
-          triggerClassName="h-[30px] w-[81px] rounded-[18px] border-black/10 bg-transparent px-2.5 text-xs shadow-none"
+          triggerClassName="h-[30px] w-[94px] rounded-[18px] border-black/10 bg-transparent px-2.5 text-xs shadow-none"
         />
       </div>
       <div className="mt-6 min-h-0 min-w-0 flex-1">
