@@ -30,7 +30,7 @@ export function StatsRow({ stats }: { stats: OverviewStats }) {
       <StatLinkBlock
         label="Total Transactions"
         value={String(stats.totalTransactions)}
-        to="/reports"
+        to="/payment-links"
         action="View all →"
       />
       <StatLinkBlock
