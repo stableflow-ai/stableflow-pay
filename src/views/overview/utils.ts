@@ -1,6 +1,7 @@
 import { formatAmount } from "@/utils";
 import type { OverviewAnalyticsPeriod } from "@/types/overview";
 import { OVERVIEW_METRIC, type OverviewMetric } from "./config";
+import Big from "big.js";
 
 const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -11,18 +12,23 @@ export function splitUsdAmount(value: string | number): { whole: string; fractio
   return { whole: formatted.slice(0, dot), fraction: formatted.slice(dot) };
 }
 
-export function chartYTicks(maxValue: number): number[] {
+export function chartYTicks(maxValue: number, options?: { integer?: boolean }): number[] {
   const niceMax = niceCeil(maxValue);
+  if (options?.integer) {
+    const step = Math.max(1, Math.ceil(niceMax / 5));
+    const top = step * 5;
+    return [0, step, 2 * step, 3 * step, 4 * step, top];
+  }
   const step = niceMax / 5;
   return [0, step, 2 * step, 3 * step, 4 * step, niceMax];
 }
 
 export function formatChartAxis(value: number, metric: OverviewMetric): string {
-  if (metric === OVERVIEW_METRIC.Transaction) return String(value);
+  if (metric === OVERVIEW_METRIC.Transaction) return formatAmount(value, { prefix: "", maxDecimals: 0 });
   if (value === 0) return "$0";
   if (value >= 1000) return `$${value / 1000}K`;
-  if (value < 1) return formatAmount(value, { maxDecimals: 2, showDust: true });
-  return formatAmount(value, { maxDecimals: 2, showDust: true });
+  if (value < 1) return formatAmount(value, { maxDecimals: 6 });
+  return formatAmount(value, { maxDecimals: 6 });
 }
 
 export function formatOverviewChartLabel(iso: string, period: OverviewAnalyticsPeriod): string {

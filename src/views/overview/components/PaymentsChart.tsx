@@ -39,8 +39,9 @@ export function PaymentsChart() {
   const maxValue = isEmpty
     ? 0
     : chartData.reduce((max, point) => Math.max(max, point.value), 0);
-  const ticks = isEmpty ? [0] : chartYTicks(maxValue);
-  const domain: [number, number] = [0, isEmpty ? 1 : (ticks[ticks.length - 1] ?? 0)];
+  const integerTicks = metric === OVERVIEW_METRIC.Transaction;
+  const ticks = isEmpty && !integerTicks ? [0] : chartYTicks(maxValue, { integer: integerTicks });
+  const domain: [number, number] = [0, isEmpty && !integerTicks ? 1 : (ticks[ticks.length - 1] ?? 0)];
   const lastPoint = data[data.length - 1];
 
   return (
@@ -98,6 +99,7 @@ export function PaymentsChart() {
               <YAxis
                 ticks={ticks}
                 domain={domain}
+                allowDecimals={!integerTicks}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value: number) => formatChartAxis(value, metric)}
