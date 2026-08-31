@@ -1,4 +1,5 @@
 import { checkoutSessionsUrl } from "@/api/config";
+import type { HighlightLanguage } from "@/utils";
 import {
   GUIDE_STEP,
   GUIDE_STEP_PATH,
@@ -52,6 +53,16 @@ export function truncateEnd(value: string, max: number): string {
 
 export function guideSnippetApiKey(key: string): string {
   return key.trim() || "YOUR_API_KEY";
+}
+
+const GUIDE_TEST_SNIPPET_LANG: Record<"node" | "curl" | "python", HighlightLanguage> = {
+  node: "javascript",
+  curl: "bash",
+  python: "python",
+};
+
+export function guideSnippetLanguage(lang: "node" | "curl" | "python"): HighlightLanguage {
+  return GUIDE_TEST_SNIPPET_LANG[lang];
 }
 
 export function buildGuideTestSnippet(lang: "node" | "curl" | "python", apiKey: string): string {

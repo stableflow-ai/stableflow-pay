@@ -52,6 +52,7 @@
     "react-toastify": "^11.1.0",
     "recharts": "^3.10.1",
     "rhea-wallet-connect": "^7.9.8",
+    "shiki": "^4.4.3",
     "stream-browserify": "^3.0.0",
     "tailwind-merge": "^3.6.0",
     "tronweb": "^6.0.0",

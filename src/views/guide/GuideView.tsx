@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth";
 import { useGuideStore } from "@/stores/guide";
@@ -63,7 +64,9 @@ function GuideViewBody() {
           </div>
         </div>
       </main>
-      <Outlet />
+      <Suspense fallback={null}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

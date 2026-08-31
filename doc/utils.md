@@ -42,6 +42,25 @@ Uses `date-fns`. ISO strings such as `2026-08-20T08:51:55.754Z` are parsed as `D
 
 `stampDownloadFilename(filename, now?, stampPattern?)` — inserts a local timestamp before the file extension (`transaction-history-20260825-142509.csv`). Default pattern `yyyyMMdd-HHmmss`.
 
+## Highlight
+
+Path: `src/utils/highlight.ts`
+
+Syntax highlighting backed by [Shiki](https://shiki.style) (the same TextMate engine VS Code uses). The highlighter is a lazy module-level singleton shared by every code block in the app; only the languages and themes the app actually uses are loaded.
+
+| Function / type | Notes |
+| --- | --- |
+| `highlightCode(code, language, theme?)` | Async, resolves to `HighlightedLine[]` (one array per line, each an array of `HighlightToken` `{ content, color?, fontStyle? }`). `theme` defaults to `github-dark` |
+| `HighlightLanguage` | `"bash" \| "http" \| "javascript" \| "json" \| "python" \| "text"` — `"text"` returns plain single-color lines |
+| `HighlightTheme` | `"github-dark" \| "github-light"` |
+
+Rendering: use the `useHighlightedCode(code, language, theme?)` hook (`src/hooks/use-highlighted-code.ts`). It returns `HighlightToken[][] | null` (`null` until tokens are ready, so callers can keep rendering plain text without layout shift) plus `highlightTokenStyle(token)` for the inline CSS of a token.
+
+```ts
+const tokens = useHighlightedCode(code, language);
+// <pre>{tokens ? tokens.map((line) => ...) : code}</pre>
+```
+
 ## Amount
 
 Path: `src/utils/amount.ts`

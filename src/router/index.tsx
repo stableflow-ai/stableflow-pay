@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { PLACEHOLDER_ROUTES } from "@/components/layout/config";
 import { AppLayout } from "@/layouts/AppLayout";
@@ -9,7 +10,6 @@ import { GuideApiKeyFormView } from "@/views/guide/steps/GuideApiKeyFormView";
 import { GuideApiKeyPreviewView } from "@/views/guide/steps/GuideApiKeyPreviewView";
 import { GuidePaymentLinkFormView } from "@/views/guide/steps/GuidePaymentLinkFormView";
 import { GuidePaymentLinkPreviewView } from "@/views/guide/steps/GuidePaymentLinkPreviewView";
-import { GuideTestView } from "@/views/guide/steps/GuideTestView";
 import { GuideWebhookFormView } from "@/views/guide/steps/GuideWebhookFormView";
 import { GuideWebhookPreviewView } from "@/views/guide/steps/GuideWebhookPreviewView";
 import { OverviewView } from "@/views/overview/OverviewView";
@@ -22,8 +22,15 @@ import { PayView } from "@/views/payer/PayView";
 import { WaitingView } from "@/views/payer/WaitingView";
 import { ReportsView } from "@/views/reports/ReportsView";
 import { SettingsView } from "@/views/settings/SettingsView";
-import { DocsView } from "@/views/docs/DocsView";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
+
+// Docs and the guide test step load Shiki (syntax highlighting), so they are
+// code-split to keep the highlighter out of the initial bundle. The chunks are
+// loaded on first visit; AppLayout and GuideView provide the Suspense fallbacks.
+const DocsView = lazy(() => import("@/views/docs/DocsView").then((m) => ({ default: m.DocsView })));
+const GuideTestView = lazy(() =>
+  import("@/views/guide/steps/GuideTestView").then((m) => ({ default: m.GuideTestView })),
+);
 
 export const router = createBrowserRouter([
   {

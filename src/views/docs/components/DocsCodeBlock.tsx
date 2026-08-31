@@ -1,5 +1,8 @@
+import { Fragment } from "react";
 import { IconCopy } from "@/components/icons/copy";
 import useToast from "@/hooks/use-toast";
+import { highlightTokenStyle, useHighlightedCode } from "@/hooks/use-highlighted-code";
+import type { HighlightLanguage } from "@/utils";
 
 export function DocsCodeBlock({
   code,
@@ -7,10 +10,11 @@ export function DocsCodeBlock({
   label,
 }: {
   code: string;
-  language: "bash" | "http" | "javascript" | "json" | "text";
+  language: HighlightLanguage;
   label?: string;
 }) {
   const toast = useToast();
+  const tokens = useHighlightedCode(code, language);
 
   const copyCode = async () => {
     try {
@@ -39,7 +43,18 @@ export function DocsCodeBlock({
       </div>
       <div className="h-px bg-white/10" />
       <pre className="overflow-x-auto px-4 py-4 font-mono text-[13px] leading-6 text-[#E3ECF8] md:px-5">
-        <code>{code}</code>
+        {tokens
+          ? tokens.map((line, lineIndex) => (
+              <Fragment key={lineIndex}>
+                {line.map((token, tokenIndex) => (
+                  <span key={tokenIndex} style={highlightTokenStyle(token)}>
+                    {token.content}
+                  </span>
+                ))}
+                {lineIndex < tokens.length - 1 ? "\n" : null}
+              </Fragment>
+            ))
+          : code}
       </pre>
     </div>
   );

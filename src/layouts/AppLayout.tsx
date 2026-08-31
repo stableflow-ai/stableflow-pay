@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
@@ -34,7 +34,9 @@ export function AppLayout() {
           )}
         </header>
         <main className="min-h-0 flex-1 overflow-auto px-3 py-4 md:px-10 md:py-5">
-          <Outlet />
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </main>
         <footer className="flex shrink-0 justify-end px-3 py-2 md:px-10 md:py-3">
           <Link

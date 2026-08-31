@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { IconCheck2 } from "@/components/icons/check";
 import { IconCopy } from "@/components/icons/copy";
 import { Button } from "@/components/ui/button/Button";
@@ -6,7 +6,12 @@ import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { useCreateCheckoutSessionMutation } from "@/hooks/use-checkout-api";
 import { useCompleteGuideMutation } from "@/hooks/use-guide-api";
 import useToast from "@/hooks/use-toast";
+import {
+  highlightTokenStyle,
+  useHighlightedCode,
+} from "@/hooks/use-highlighted-code";
 import { cn } from "@/lib/utils";
+import type { HighlightToken } from "@/utils";
 import {
   GUIDE_STEPS,
   GUIDE_TEST_LANG,
@@ -21,7 +26,32 @@ import {
   buildGuideTestSnippet,
   formatGuideJson,
   guideErrorMessage,
+  guideSnippetLanguage,
 } from "../utils";
+
+function HighlightedCodeLines({
+  tokens,
+  plain,
+}: {
+  tokens: HighlightToken[][] | null;
+  plain: string;
+}) {
+  if (!tokens) return <>{plain}</>;
+  return (
+    <>
+      {tokens.map((line, lineIndex) => (
+        <Fragment key={lineIndex}>
+          {line.map((token, tokenIndex) => (
+            <span key={tokenIndex} style={highlightTokenStyle(token)}>
+              {token.content}
+            </span>
+          ))}
+          {lineIndex < tokens.length - 1 ? "\n" : null}
+        </Fragment>
+      ))}
+    </>
+  );
+}
 
 export function GuideTestView() {
   const { go } = useGuideFlow();
@@ -35,6 +65,13 @@ export function GuideTestView() {
 
   const key = apiKey?.key ?? "";
   const snippet = buildGuideTestSnippet(lang, key);
+  const snippetTokens = useHighlightedCode(snippet, guideSnippetLanguage(lang));
+  const resultIsJson = result !== null && result.trim().startsWith("{");
+  const resultTokens = useHighlightedCode(
+    result ?? "",
+    resultIsJson ? "json" : "text",
+    "github-light",
+  );
   const fileName = GUIDE_TEST_LANG_OPTIONS.find((option) => option.value === lang)?.fileName ?? "server.js";
 
   async function copySnippet() {
@@ -114,7 +151,7 @@ export function GuideTestView() {
           </div>
           <div className="mt-4 h-px w-full bg-white/15" />
           <pre className="overflow-x-auto px-7 py-5 font-montserrat text-sm font-medium leading-[1.5] whitespace-pre-wrap text-white">
-            {snippet}
+            <HighlightedCodeLines tokens={snippetTokens} plain={snippet} />
           </pre>
         </div>
 
@@ -131,7 +168,7 @@ export function GuideTestView() {
           <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-6">
             {result ? (
               <pre className="w-full self-start overflow-auto font-montserrat text-sm font-medium leading-[1.5] whitespace-pre-wrap text-black">
-                {result}
+                <HighlightedCodeLines tokens={resultTokens} plain={result} />
               </pre>
             ) : (
               <p className="text-center font-montserrat text-sm font-medium text-[#AAA]">
