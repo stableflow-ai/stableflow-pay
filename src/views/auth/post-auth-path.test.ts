@@ -18,6 +18,7 @@ describe("postAuthPath", () => {
   it("prefers returnTo", () => {
     expect(postAuthPath(user(false), "/settings")).toBe("/settings");
     expect(postAuthPath(user(true), "/docs")).toBe("/docs");
+    expect(postAuthPath(user(false), "/")).toBe("/guide/payment-link");
   });
 
   it("sends unfinished users to the payment-link guide step", () => {

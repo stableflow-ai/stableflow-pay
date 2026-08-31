@@ -51,7 +51,7 @@ export function RegisterView() {
         password,
         inviteCode: inviteCode.trim(),
       });
-      navigate(postAuthPath(session.user, returnTo), { replace: true });
+      navigate(postAuthPath(session.user, null), { replace: true });
     } catch (cause) {
       toast.fail({
         title: authErrorMessage(cause, "Unable to create account"),

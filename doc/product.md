@@ -29,7 +29,9 @@ Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and conf
 - Register: `name` (max 50), `email` (max 100), `password` (8–50), confirm password must match, `inviteCode` (max 10).
 - Session: Zustand `useAuthStore` with `persist` middleware. Types: `AuthUser` (`id`, `email`, `name`, `guideCompleted`). Do **not** read or write `localStorage` from feature code.
 - Unauthenticated `/` redirects to `/login`. Authenticated `/login` or `/register` redirects via `postAuthPath`: a safe `returnTo` when present, else `/guide/payment-link` when `guideCompleted` is false and the user has not Skip-All'd, else `/`.
-- After login or register, navigate the same way (`postAuthPath`). Session restore and refresh on `/` do **not** auto-send the user to `/guide`.
+- After login, navigate the same way (`postAuthPath`). After register, `returnTo` is ignored so a leftover query from the previous session cannot skip onboarding. Session restore and refresh on `/` do **not** auto-send the user to `/guide`.
+- Manual log out (sidebar) goes to `/login` with no `returnTo`. HTTP 401 still sends `/login?returnTo=` of the current page so the same user can resume.
+- A lone `/` is not a valid `returnTo`.
 - Boot: persist hydrates `{ token, user }`, then `GET /v1/pay/profile` in the background. HTTP 401 calls `logout()`. Navigation is not blocked while the profile request is in flight.
 - Reset password:
   - Guest: Login `Forgot Password?` opens a dialog. Send Code calls `POST /v1/pay/reset-password/code`. Continue calls `POST /v1/pay/reset-password`.
@@ -55,7 +57,7 @@ One authenticated page at `/`. Stats come from `GET /v1/pay/overview` (`total_re
 
 ## Guide
 
-Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, Get Start, four step cards, Skip All. Switching a step opens a 600px right drawer on desktop and a bottom drawer below 768px, **without** a mask. Step 1 reuses the payment-link form. Step 2 creates an API key. Step 3 creates a webhook. Step 4 runs `POST /v1/pay/checkout/sessions` with `x-api-key`, then reports `POST /v1/pay/guide/complete`. Completion is `GET /v1/pay/profile` `guide_completed` (`AuthUser.guideCompleted`). Skip does not mark a step complete. Skip All returns to `/`, does not hide the Overview panel, and records the user id in the persisted guide store (`skippedAllUserIds`) so the next login does not auto-open `/guide/payment-link`. Get Ready after a successful complete report navigates to `/` (on Overview it only closes the drawer). Login also reads `user.guide_completed` from `POST /v1/pay/auth/login` and sends unfinished, non-skipped users to `/guide/payment-link`.
+Authenticated `/guide` (and nested step routes) uses a dedicated layout: logo, Get Start, four step cards, Skip All. Switching a step opens a 600px right drawer on desktop and a bottom drawer below 768px, **without** a mask. Step 1 reuses the payment-link form. Step 2 creates an API key. Step 3 creates a webhook. Step 4 runs `POST /v1/pay/checkout/sessions` with `x-api-key`, then reports `POST /v1/pay/guide/complete`. Completion is `GET /v1/pay/profile` `guide_completed` (`AuthUser.guideCompleted`). Skip does not mark a step complete. Skip All returns to `/`, does not hide the Overview panel, and records the user id in the persisted guide store (`skippedAllUserIds`) so the next login does not auto-open `/guide/payment-link`. Payment link / API key / webhook drafts in that store are keyed by user id so they do not leak across accounts. Get Ready after a successful complete report navigates to `/` (on Overview it only closes the drawer). Login also reads `user.guide_completed` from `POST /v1/pay/auth/login` and sends unfinished, non-skipped users to `/guide/payment-link`.
 
 ## Payment Links
 

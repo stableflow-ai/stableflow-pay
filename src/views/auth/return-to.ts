@@ -9,6 +9,7 @@ export function safeReturnTo(value: string | null | undefined): string | null {
   } catch {
     return null;
   }
+  if (decoded === "/") return null;
   if (!decoded.startsWith("/")) return null;
   if (decoded.startsWith("//")) return null;
   if (decoded === LOGIN_PATH || decoded.startsWith(`${LOGIN_PATH}?`) || decoded.startsWith(`${LOGIN_PATH}/`)) {
@@ -25,13 +26,15 @@ export function safeReturnTo(value: string | null | undefined): string | null {
 }
 
 export function loginPathWithReturnTo(returnTo: string | null): string {
-  if (!returnTo) return LOGIN_PATH;
-  return `${LOGIN_PATH}?returnTo=${encodeURIComponent(returnTo)}`;
+  const dest = safeReturnTo(returnTo);
+  if (!dest) return LOGIN_PATH;
+  return `${LOGIN_PATH}?returnTo=${encodeURIComponent(dest)}`;
 }
 
 export function registerPathWithReturnTo(returnTo: string | null): string {
-  if (!returnTo) return REGISTER_PATH;
-  return `${REGISTER_PATH}?returnTo=${encodeURIComponent(returnTo)}`;
+  const dest = safeReturnTo(returnTo);
+  if (!dest) return REGISTER_PATH;
+  return `${REGISTER_PATH}?returnTo=${encodeURIComponent(dest)}`;
 }
 
 export function returnToFromSearch(search: string): string | null {

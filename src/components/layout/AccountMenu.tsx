@@ -55,8 +55,8 @@ export function AccountMenu() {
 
   const closeAndLogout = () => {
     setOpen(false);
-    logout();
-    navigate("/login");
+    logout({ omitReturnTo: true });
+    navigate("/login", { replace: true });
   };
 
   const openResetPassword = () => {

@@ -10,15 +10,22 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { queryClient } from "@/lib/query-client";
+import { useGoogleDriveSessionStore } from "@/stores/google-drive-session";
 import type { AuthUser } from "@/types/auth";
 
 export const AUTH_SESSION_STORAGE_NAME = "stableflow-pay.session";
 
+export type LogoutOptions = {
+  omitReturnTo?: boolean;
+};
+
 interface AuthState {
   token: string | null;
   user: AuthUser | null;
+  omitReturnTo: boolean;
   applySession: (token: string, user: AuthUser) => void;
-  logout: () => void;
+  logout: (options?: LogoutOptions) => void;
+  clearOmitReturnTo: () => void;
 }
 
 const persistStorage: StateStorage = {
@@ -50,12 +57,21 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       user: null,
+      omitReturnTo: false,
       applySession: (token, user) => {
-        set({ token, user });
+        set({ token, user, omitReturnTo: false });
       },
-      logout: () => {
+      logout: (options) => {
         queryClient.clear();
-        set({ token: null, user: null });
+        useGoogleDriveSessionStore.getState().clear();
+        set({
+          token: null,
+          user: null,
+          omitReturnTo: options?.omitReturnTo === true,
+        });
+      },
+      clearOmitReturnTo: () => {
+        set({ omitReturnTo: false });
       },
     }),
     {

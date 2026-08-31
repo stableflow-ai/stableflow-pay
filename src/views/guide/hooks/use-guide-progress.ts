@@ -6,9 +6,16 @@ import { useGuideStore } from "@/stores/guide";
 import { buildPaymentLinkUrl } from "@/views/payment-links/utils";
 
 export function useGuideProgress() {
-  const storedPaymentLink = useGuideStore((state) => state.paymentLink);
-  const storedApiKey = useGuideStore((state) => state.apiKey);
-  const storedWebhook = useGuideStore((state) => state.webhook);
+  const userId = useAuthStore((state) => state.user?.id);
+  const storedPaymentLink = useGuideStore((state) =>
+    userId && userId > 0 ? (state.artifactsByUserId[String(userId)]?.paymentLink ?? null) : null,
+  );
+  const storedApiKey = useGuideStore((state) =>
+    userId && userId > 0 ? (state.artifactsByUserId[String(userId)]?.apiKey ?? null) : null,
+  );
+  const storedWebhook = useGuideStore((state) =>
+    userId && userId > 0 ? (state.artifactsByUserId[String(userId)]?.webhook ?? null) : null,
+  );
   const testCompleted = useAuthStore((state) => state.user?.guideCompleted === true);
 
   const linksQuery = usePaymentLinksQuery({ page: 1, pageSize: 1 });

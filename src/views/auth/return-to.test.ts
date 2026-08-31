@@ -18,6 +18,7 @@ describe("safeReturnTo", () => {
     expect(safeReturnTo("//evil.test")).toBeNull();
     expect(safeReturnTo("/login")).toBeNull();
     expect(safeReturnTo("/register?x=1")).toBeNull();
+    expect(safeReturnTo("/")).toBeNull();
     expect(safeReturnTo("")).toBeNull();
   });
 });
@@ -30,11 +31,13 @@ describe("auth links", () => {
       "/login?returnTo=%2Fsettings%23developer",
     );
     expect(loginPathWithReturnTo("/docs")).toBe("/login?returnTo=%2Fdocs");
+    expect(loginPathWithReturnTo("/")).toBe("/login");
     expect(loginPathWithReturnTo(null)).toBe("/login");
   });
 
   it("reads returnTo from a search string", () => {
     expect(returnToFromSearch("returnTo=%2Fpay%3Faddr%3D1")).toBe("/pay?addr=1");
     expect(returnToFromSearch("returnTo=%2Fdocs")).toBe("/docs");
+    expect(returnToFromSearch("returnTo=%2F")).toBeNull();
   });
 });

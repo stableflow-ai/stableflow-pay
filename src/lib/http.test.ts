@@ -43,7 +43,7 @@ function applySession(token = "tok-1") {
 }
 
 function resetSession() {
-  useAuthStore.setState({ token: null, user: null });
+  useAuthStore.setState({ token: null, user: null, omitReturnTo: false });
 }
 
 describe("http", () => {
@@ -52,6 +52,7 @@ describe("http", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_API_BASE_URL", API_BASE);
     vi.stubGlobal("localStorage", createMemoryStorage());
+    vi.stubGlobal("sessionStorage", createMemoryStorage());
     vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockReset();
     resetSession();
@@ -221,6 +222,7 @@ describe("httpBlob", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_API_BASE_URL", API_BASE);
     vi.stubGlobal("localStorage", createMemoryStorage());
+    vi.stubGlobal("sessionStorage", createMemoryStorage());
     vi.stubGlobal("fetch", fetchMock);
     fetchMock.mockReset();
     resetSession();

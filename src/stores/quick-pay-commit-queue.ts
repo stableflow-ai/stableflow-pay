@@ -94,10 +94,9 @@ async function processCommit(id: string, item: QuickPayCommitItem, retryCount = 
 
   try {
     const { paySwapSubmit } = await import("@/api/pay");
-    const { useAuthStore } = await import("@/stores/auth");
     const submitted = await paySwapSubmit(
       { swapId: item.swapId, txHash: item.txHash },
-      { auth: Boolean(useAuthStore.getState().token) },
+      { auth: false },
     );
     useQuickPayCommitQueueStore.getState().remove(id);
     clearTaskMeta(id);
