@@ -6,12 +6,13 @@ describe("address validation", () => {
     expect(isAddressValid("0x1111111111111111111111111111111111111111", "evm")).toBe(true);
   });
 
-  it("accepts named Near accounts, hyphen labels, DAO accounts, and implicit hex", () => {
+  it("accepts named Near accounts, hyphen labels, DAO accounts, implicit hex, and 0x Aurora-mapped accounts", () => {
     expect(isAddressValid("alice.near", "near")).toBe(true);
     expect(isAddressValid("a-b.near", "near")).toBe(true);
     expect(isAddressValid("burrow.sputnik-dao.near", "near")).toBe(true);
     expect(isAddressValid("a".repeat(64), "near")).toBe(true);
-    expect(isAddressValid("0x1111111111111111111111111111111111111111", "near")).toBe(false);
+    expect(isAddressValid("0x1111111111111111111111111111111111111111", "near")).toBe(true);
+    expect(isAddressValid("0x1234", "near")).toBe(false);
   });
 
   it("accepts a Tron base58 address and still treats it as valid Near syntax", () => {

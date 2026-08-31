@@ -77,6 +77,7 @@ function validateNearAddress(address: string): AddressValidationResult {
     return { isValid: true };
   }
   if (address.startsWith("0x") || address.startsWith("0X")) {
+    if (isAddress(address)) return { isValid: true };
     return { isValid: false, error: "Invalid NEAR address" };
   }
   if (!/^[a-zA-Z0-9._-]+$/.test(address)) {
