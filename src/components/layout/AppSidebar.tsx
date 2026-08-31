@@ -15,9 +15,9 @@ export function AppSidebar({
 }) {
   return (
     <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-y-auto border-r border-black/10">
-      <div className="px-[27px] pt-[21px]">
+      <a href="/" className="block px-[27px] pt-[21px]">
         <img src="/logo.svg" alt="PAY. Stableflow" className="h-[29px] w-[95px]" />
-      </div>
+      </a>
       <nav className="mt-8 flex flex-col items-center gap-1.5 px-2.5">
         {SIDEBAR_NAV_ITEMS.map((item) => (
           <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
