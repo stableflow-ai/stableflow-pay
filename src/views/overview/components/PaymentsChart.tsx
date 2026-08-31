@@ -32,8 +32,15 @@ export function PaymentsChart() {
     label: formatOverviewChartLabel(point.startAt, period),
     value: overviewChartValue(point.volume, point.transactions, metric),
   }));
-  const maxValue = data.reduce((max, point) => Math.max(max, point.value), 0);
-  const ticks = chartYTicks(maxValue);
+  // Render an empty zero-valued chart instead of a placeholder when there is
+  // no data yet, so the card keeps its chart frame (axes + grid) at all times.
+  const isEmpty = data.length === 0;
+  const chartData = isEmpty ? [{ label: "", value: 0 }] : data;
+  const maxValue = isEmpty
+    ? 0
+    : chartData.reduce((max, point) => Math.max(max, point.value), 0);
+  const ticks = isEmpty ? [0] : chartYTicks(maxValue);
+  const domain: [number, number] = [0, isEmpty ? 1 : (ticks[ticks.length - 1] ?? 0)];
   const lastPoint = data[data.length - 1];
 
   return (
@@ -68,65 +75,71 @@ export function PaymentsChart() {
         />
       </div>
       <div className="mt-6 min-h-0 min-w-0 flex-1">
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="overviewPaymentsFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={OVERVIEW_CHART_COLOR} stopOpacity={0.28} />
-                <stop offset="100%" stopColor={OVERVIEW_CHART_COLOR} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid vertical={false} stroke="#eee" />
-            <XAxis
-              dataKey="label"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fill: "#aaa", fontSize: 12, fontFamily: "Montserrat" }}
-            />
-            <YAxis
-              ticks={ticks}
-              domain={[0, ticks[ticks.length - 1] ?? 0]}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value: number) => formatChartAxis(value, metric)}
-              tick={{ fill: "#aaa", fontSize: 12, fontFamily: "Montserrat" }}
-              width={48}
-            />
-            <Tooltip
-              formatter={(value) => [
-                formatChartAxis(Number(value), metric),
-                metric === OVERVIEW_METRIC.Volume ? "Volume" : "Transaction",
-              ]}
-              labelStyle={{ fontFamily: "Montserrat", fontSize: 12 }}
-              contentStyle={{
-                borderRadius: 12,
-                border: "1px solid #E0E0E0",
-                fontFamily: "Montserrat",
-                fontSize: 12,
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={OVERVIEW_CHART_COLOR}
-              strokeWidth={2}
-              fill="url(#overviewPaymentsFill)"
-              fillOpacity={1}
-              dot={false}
-              activeDot={{ r: 5, stroke: OVERVIEW_CHART_COLOR, fill: "#fff" }}
-            />
-            {lastPoint ? (
-              <ReferenceDot
-                x={lastPoint.label}
-                y={lastPoint.value}
-                r={5}
-                fill="#fff"
+        {analyticsQuery.isPending ? (
+          <div className="flex h-[300px] items-center justify-center">
+            <p className="font-montserrat text-sm font-medium text-[#aaa]">Loading…</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="overviewPaymentsFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={OVERVIEW_CHART_COLOR} stopOpacity={0.28} />
+                  <stop offset="100%" stopColor={OVERVIEW_CHART_COLOR} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke="#eee" />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#aaa", fontSize: 12, fontFamily: "Montserrat" }}
+              />
+              <YAxis
+                ticks={ticks}
+                domain={domain}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value: number) => formatChartAxis(value, metric)}
+                tick={{ fill: "#aaa", fontSize: 12, fontFamily: "Montserrat" }}
+                width={48}
+              />
+              <Tooltip
+                formatter={(value) => [
+                  formatChartAxis(Number(value), metric),
+                  metric === OVERVIEW_METRIC.Volume ? "Volume" : "Transaction",
+                ]}
+                labelStyle={{ fontFamily: "Montserrat", fontSize: 12 }}
+                contentStyle={{
+                  borderRadius: 12,
+                  border: "1px solid #E0E0E0",
+                  fontFamily: "Montserrat",
+                  fontSize: 12,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
                 stroke={OVERVIEW_CHART_COLOR}
                 strokeWidth={2}
+                fill="url(#overviewPaymentsFill)"
+                fillOpacity={1}
+                dot={false}
+                activeDot={{ r: 5, stroke: OVERVIEW_CHART_COLOR, fill: "#fff" }}
               />
-            ) : null}
-          </AreaChart>
-        </ResponsiveContainer>
+              {lastPoint ? (
+                <ReferenceDot
+                  x={lastPoint.label}
+                  y={lastPoint.value}
+                  r={5}
+                  fill="#fff"
+                  stroke={OVERVIEW_CHART_COLOR}
+                  strokeWidth={2}
+                />
+              ) : null}
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </Card>
   );
