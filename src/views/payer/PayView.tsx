@@ -99,7 +99,7 @@ export function PayView() {
       return {
         kind: PAYER_KIND.Checkout,
         id: checkout.sessionId || sessionId,
-        title: checkout.outOrderNo.trim() || "Payment",
+        title: "",
         amount: checkout.amount,
         symbol: checkout.symbol,
         network: checkout.network,

@@ -77,10 +77,14 @@ export function PayCard(props: {
               )}
             />
           </button>
-          <h1 className="mx-auto max-w-full text-center font-montserrat text-lg font-medium text-[#606060]">
-            <span>Pay </span>
-            <span className="font-bold text-black">{props.paymentTitle}</span>
-          </h1>
+          {
+            !!props.paymentTitle && (
+              <h1 className="mx-auto max-w-full text-center font-montserrat text-lg font-medium text-[#606060]">
+                <span>Pay </span>
+                <span className="font-bold text-black">{props.paymentTitle}</span>
+              </h1>
+            )
+          }
           {props.isOpenAmount ? (
             <InputNumber
               value={props.amount}
