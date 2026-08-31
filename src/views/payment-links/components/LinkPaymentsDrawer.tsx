@@ -134,7 +134,7 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
         <SummaryField label="Payment Token">
           {formatTokenNetwork(detail.symbol, detail.network)}
         </SummaryField>
-        <SummaryField label="Price">
+        <SummaryField label="Amount">
           {isPaymentLinkOpen(detail) ? "No limit" : formatAmount(detail.amount, { prefix: "", maxDecimals: 2, showDust: true })}
         </SummaryField>
         <SummaryField label="Revenue">{detail.revenue || "0"}</SummaryField>
