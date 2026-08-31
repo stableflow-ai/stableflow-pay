@@ -43,6 +43,10 @@ export function PaymentLinksView() {
     }
   }
 
+  async function openLink(link: PayPaymentLink) {
+    window.open(buildPaymentLinkUrl(window.location.origin, link.linkId), "_blank");
+  }
+
   function toggleStatus(link: PayPaymentLink, nextActive: boolean) {
     const action = nextActive
       ? enableMutation.mutateAsync(link.linkId)
@@ -83,6 +87,7 @@ export function PaymentLinksView() {
         onPageChange={setPage}
         onView={setViewing}
         onCopyLink={(link) => void copyLink(link)}
+        onOpenLink={(link) => void openLink(link)}
         onToggleStatus={toggleStatus}
         onDelete={setDeleting}
         loading={linksQuery.isPending}

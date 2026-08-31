@@ -1,5 +1,5 @@
 import { IconDelete } from "@/components/icons/delete";
-import { IconLink } from "@/components/icons/link";
+import { IconLink, IconOutLink } from "@/components/icons/link";
 import { Pagination } from "@/components/ui/pagination/Pagination";
 import { SearchInput } from "@/components/ui/search-input/SearchInput";
 import { Switch } from "@/components/ui/switch/Switch";
@@ -32,6 +32,7 @@ export function PaymentLinksTable({
   onPageChange,
   onView,
   onCopyLink,
+  onOpenLink,
   onToggleStatus,
   onDelete,
   loading,
@@ -45,6 +46,7 @@ export function PaymentLinksTable({
   onPageChange: (page: number) => void;
   onView: (link: PayPaymentLink) => void;
   onCopyLink: (link: PayPaymentLink) => void;
+  onOpenLink: (link: PayPaymentLink) => void;
   onToggleStatus: (link: PayPaymentLink, active: boolean) => void;
   onDelete: (link: PayPaymentLink) => void;
 }) {
@@ -82,6 +84,7 @@ export function PaymentLinksTable({
         <TableHead>Status</TableHead>
         <TableHead />
         <TableHead />
+        <TableHead />
         <TableHead className="last:pr-3" />
       </TableHeader>
       <TableBody className="flex flex-col gap-3.5 pt-1">
@@ -100,6 +103,7 @@ export function PaymentLinksTable({
               link={link}
               onView={() => onView(link)}
               onCopyLink={() => onCopyLink(link)}
+              onOpenLink={() => onOpenLink(link)}
               onToggleStatus={(active) => onToggleStatus(link, active)}
               onDelete={() => onDelete(link)}
             />
@@ -114,12 +118,14 @@ function PaymentLinkRow({
   link,
   onView,
   onCopyLink,
+  onOpenLink,
   onToggleStatus,
   onDelete,
 }: {
   link: PayPaymentLink;
   onView: () => void;
   onCopyLink: () => void;
+  onOpenLink: () => void;
   onToggleStatus: (active: boolean) => void;
   onDelete: () => void;
 }) {
@@ -161,15 +167,15 @@ function PaymentLinkRow({
           />
         </Tooltip>
       </TableCell>
-      <TableCell className="py-0">
-        <Tooltip content="Delete">
+      <TableCell className="py-0 last:pr-3">
+        <Tooltip content="Open link">
           <button
             type="button"
-            aria-label="Delete"
-            className="cursor-pointer text-[#aaa] hover:text-danger"
-            onClick={onDelete}
+            aria-label="Open link"
+            className="cursor-pointer text-[#aaa] hover:text-black"
+            onClick={onOpenLink}
           >
-            <IconDelete className="size-3.5" />
+            <IconOutLink className="size-3.5" />
           </button>
         </Tooltip>
       </TableCell>
@@ -182,6 +188,18 @@ function PaymentLinkRow({
             onClick={onCopyLink}
           >
             <IconLink className="size-3.5" />
+          </button>
+        </Tooltip>
+      </TableCell>
+      <TableCell className="py-0">
+        <Tooltip content="Delete">
+          <button
+            type="button"
+            aria-label="Delete"
+            className="cursor-pointer text-[#aaa] hover:text-danger"
+            onClick={onDelete}
+          >
+            <IconDelete className="size-3.5" />
           </button>
         </Tooltip>
       </TableCell>
