@@ -3,6 +3,7 @@ import type { IntentsToken } from "@/stores/intents-tokens";
 import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
+import { SOLANA_EXPIRED_MESSAGE } from "@/wallet/solana/config";
 import {
   CHECKOUT_SUCCESS_STATUS,
   PAY_CHECKOUT_SESSION_STATUS,
@@ -119,7 +120,10 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
     }
   }
   if (/No liquidity available/i.test(message)) return "No liquidity available";
-  if (message.length > 80 || /Cross-chain quote failed/i.test(message)) return "Quote failed";
+  if (/block height exceeded|blockhash not found|blockhash.*expired/i.test(message)) {
+    return SOLANA_EXPIRED_MESSAGE;
+  }
+  if (/Cross-chain quote failed/i.test(message)) return "Quote failed";
   return message;
 }
 

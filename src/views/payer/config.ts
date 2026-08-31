@@ -12,6 +12,7 @@ export const AMOUNT_MAX_DECIMALS = 6;
 export const QUOTE_DEBOUNCE_MS = 900;
 export const ORIGIN_BALANCE_POLL_MS = 20_000;
 export const STATUS_POLL_MS = 4_000;
+export const SPENT_QUOTE_MESSAGE = "This quote was already used. Refreshing the quote.";
 
 export const PAYER_KIND = {
   Paylink: "paylink",

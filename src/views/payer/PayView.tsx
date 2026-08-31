@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
@@ -11,6 +11,7 @@ import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
+import { isSwapConsumed, markSwapConsumed, useConsumedSwapsStore } from "@/stores/consumed-swaps";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
 import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
@@ -29,6 +30,7 @@ import {
   PAYER_KIND,
   PAYER_WAITING_STATE,
   QUOTE_DEBOUNCE_MS,
+  SPENT_QUOTE_MESSAGE,
   checkoutWaitingPath,
   payerWaitingPath,
 } from "./config";
@@ -180,6 +182,22 @@ export function PayView() {
     guestAuth,
   );
   const swap = amountForQuote && destinationAddress && destToken ? swapQuery.data : undefined;
+  const swapId = swap?.swapId ?? "";
+  const swapConsumed = useConsumedSwapsStore(
+    (state) => Boolean(swapId) && state.items.some((item) => item.swapId === swapId),
+  );
+  const refetchSwap = swapQuery.refetch;
+  const refreshedForSwapId = useRef("");
+
+  // A spent quote can never be paid again, so pull a fresh one as soon as the
+  // payer lands back on this page with one.
+  useEffect(() => {
+    if (!swapConsumed || !swapId) return;
+    if (refreshedForSwapId.current === swapId) return;
+    refreshedForSwapId.current = swapId;
+    void refetchSwap();
+  }, [refetchSwap, swapConsumed, swapId]);
+
   const swapStale = isDryQuoteStale({
     amountForQuote,
     debouncedAmountForQuote,
@@ -216,6 +234,9 @@ export function PayView() {
         throw new Error("Missing deposit address");
       }
       const amountIn = BigInt(swap.amountIn || "0");
+      if (isSwapConsumed(swap.swapId)) {
+        throw new Error(SPENT_QUOTE_MESSAGE);
+      }
 
       const balance = await fetchOneBalance(paymentWalletAddress, originToken);
       if (!balance || balance.status !== "success" || balance.raw == null) {
@@ -227,6 +248,10 @@ export function PayView() {
         throw new BalanceGateError("Insufficient balance");
       }
       setPhase("sending");
+      // Claimed before broadcasting: a failing `sendRawTransaction` may still
+      // have reached the network, and 1Click keeps a second transfer to the
+      // same deposit address.
+      markSwapConsumed(swap.swapId);
       const txHash = await transferToDepositAddress({
         token: originToken,
         depositAddress,
@@ -275,6 +300,7 @@ export function PayView() {
     && originToken
     && swap
     && !swapStale
+    && !swapConsumed
     && !quoteError
     && !sending
     && payable,
@@ -312,7 +338,7 @@ export function PayView() {
       toast.fail({ title: "This payment is not available" });
       return;
     }
-    void settleMutation.mutateAsync();
+    settleMutation.mutate();
   }
 
   if (isCheckout && checkout && !shouldCheckoutShowForm(checkout)) {

@@ -19,6 +19,7 @@ import {
 } from "@solana/web3.js";
 import { Buffer } from "buffer";
 import { getSolanaConnection } from "@/lib/rpc/solana";
+import { SOLANA_EXPIRED_MESSAGE, SOLANA_SEND_MAX_RETRIES } from "./config";
 import { getSolanaSigner } from "./session";
 
 function requireSigner() {
@@ -27,25 +28,23 @@ function requireSigner() {
   return signer;
 }
 
+/**
+ * Broadcast and return, matching the EVM and Tron transfers. Preflight is kept
+ * so an underfunded transfer fails before the wallet moves anything; landing is
+ * settled by the commit queue and the waiting page, not here.
+ */
 async function sendSigned(transaction: Transaction): Promise<string> {
   const signer = requireSigner();
   const connection = getSolanaConnection();
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+  const { blockhash } = await connection.getLatestBlockhash();
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = signer.publicKey;
   const signed = await signer.signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(signed.serialize());
-  const confirmation = await connection.confirmTransaction(
-    { signature, blockhash, lastValidBlockHeight },
-    "confirmed",
-  );
-  if (confirmation.value.err) {
-    throw new Error("Solana transfer failed");
-  }
-  return signature;
+  return connection.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    maxRetries: SOLANA_SEND_MAX_RETRIES,
+  });
 }
-
-const SOLANA_EXPIRED_MESSAGE = "Solana transaction expired. Confirm again to retry.";
 
 function recentBlockhashOf(tx: Transaction | VersionedTransaction): string {
   if (tx instanceof VersionedTransaction) return tx.message.recentBlockhash;
