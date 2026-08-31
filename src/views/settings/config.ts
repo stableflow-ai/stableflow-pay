@@ -21,10 +21,10 @@ export const WEBHOOK_EVENT_OPTIONS: { value: WebhookEventType; label: string }[]
     value: WEBHOOK_EVENT_TYPE.PaymentFailed,
     label: WEBHOOK_EVENT_TYPE_LABEL[WEBHOOK_EVENT_TYPE.PaymentFailed],
   },
-  {
-    value: WEBHOOK_EVENT_TYPE.PaymentAbandoned,
-    label: WEBHOOK_EVENT_TYPE_LABEL[WEBHOOK_EVENT_TYPE.PaymentAbandoned],
-  },
+  // {
+  //   value: WEBHOOK_EVENT_TYPE.PaymentAbandoned,
+  //   label: WEBHOOK_EVENT_TYPE_LABEL[WEBHOOK_EVENT_TYPE.PaymentAbandoned],
+  // },
 ];
 
 export const WEBHOOK_SIGNING_SECRET_SUBTITLE =
