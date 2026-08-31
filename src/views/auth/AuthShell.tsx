@@ -92,7 +92,7 @@ export function AuthShell({
             })}
           </ul>
 
-          <Link
+          {/* <Link
             to="/howitworks"
             className="mt-8 inline-flex items-center gap-1.5 font-montserrat text-sm font-normal text-white transition-opacity hover:opacity-70 md:mt-auto md:pt-10"
           >
@@ -112,7 +112,7 @@ export function AuthShell({
                 strokeLinejoin="round"
               />
             </svg>
-          </Link>
+          </Link> */}
         </div>
       </aside>
 
