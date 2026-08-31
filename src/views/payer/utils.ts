@@ -160,8 +160,6 @@ function isCheckoutExpired(session: Pick<PayCheckoutSession, "expiresAt">) {
 
 export function isCheckoutPayable(session: PayCheckoutSession) {
   if (session.paymentsId.trim()) return false;
-  const status = session.status.trim().toLowerCase();
-  if (status && status !== PAY_CHECKOUT_SESSION_STATUS.Created) return false;
   return !isCheckoutExpired(session);
 }
 
