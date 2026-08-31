@@ -20,6 +20,7 @@ export type CreatePaymentLinkPreviewState = {
 
 export const PAYMENT_TITLE_MAX_LENGTH = 50;
 export const PAYMENT_DESCRIPTION_MAX_LENGTH = 200;
+export const PAYMENT_ICON_URL_MAX_LENGTH = 500;
 export const CREATE_LINK_AMOUNT_MAX_DECIMALS = 6;
 export const CREATE_LINK_QR_SIZE_PX = 147;
 

@@ -18,6 +18,7 @@ import {
   CREATE_PAYMENT_LINK_PREVIEW_PATH,
   CREATE_PAYMENT_LINK_STEP,
   PAYMENT_DESCRIPTION_MAX_LENGTH,
+  PAYMENT_ICON_URL_MAX_LENGTH,
   PAYMENT_TITLE_MAX_LENGTH,
   type CreatePaymentLinkPreviewState,
 } from "../../config";
@@ -42,6 +43,7 @@ export function CreateLinkForm({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [iconUrl, setIconUrl] = useState("");
   const [amount, setAmount] = useState("");
   const [openAmount, setOpenAmount] = useState(false);
   const [token, setToken] = useState<IntentsToken | null>(null);
@@ -85,6 +87,7 @@ export function CreateLinkForm({
       const created = await createMutation.mutateAsync({
         title: title.trim(),
         description: description.trim(),
+        icon: iconUrl.trim(),
         amount: openAmount ? "" : amount,
         symbol: token.symbol,
         network: token.blockchain,
@@ -146,6 +149,25 @@ export function CreateLinkForm({
           maxLength={PAYMENT_DESCRIPTION_MAX_LENGTH}
           placeholder="e.g. detail of invoice or attachment link"
           onChange={(event) => setDescription(event.target.value)}
+          className={cn(FIELD_INPUT_CLASS, "mt-2.5 border-[#e3e3e3] text-black")}
+        />
+
+        <div className="mt-5 flex items-center gap-2">
+          <label
+            htmlFor="payment-iconUrl"
+            className="font-montserrat text-sm font-medium capitalize text-[#606060]"
+          >
+            Icon URL
+          </label>
+          <span className="font-montserrat text-sm font-medium capitalize text-[#aaa]">Optional</span>
+        </div>
+        <input
+          id="payment-iconUrl"
+          type="text"
+          value={iconUrl}
+          maxLength={PAYMENT_ICON_URL_MAX_LENGTH}
+          placeholder="URL of the product icon image"
+          onChange={(event) => setIconUrl(event.target.value)}
           className={cn(FIELD_INPUT_CLASS, "mt-2.5 border-[#e3e3e3] text-black")}
         />
 

@@ -16,6 +16,7 @@ export interface PayPaymentLink {
 export interface PayPaymentLinkBody {
   title: string;
   description: string;
+  icon: string;
   amount: string;
   symbol: string;
   network: string;

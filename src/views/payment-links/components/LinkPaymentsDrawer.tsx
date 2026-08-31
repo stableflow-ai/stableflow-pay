@@ -66,7 +66,7 @@ export function LinkPaymentsDrawer({
       panelClassName={isDesktop ? "w-[min(100%,948px)]" : undefined}
       cardClassName={
         isDesktop
-          ? "w-full rounded-r-none"
+          ? "w-full md:rounded-r-none"
           : "w-full max-h-[90vh] rounded-b-none"
       }
       titleClassName="min-h-0 min-w-0 flex-1"
