@@ -31,23 +31,17 @@ export const WEBHOOK_SIGNING_SECRET_SUBTITLE =
   "Copy this secret now. For security reasons, please save it carefully.";
 
 export const TEST_PAYLOAD_SUCCESS: Record<string, unknown> = {
-  paymentId: "pay_test123",
-  status: "SUCCESS",
-  amount: "1000000",
-  assetId: "usdc.near",
-  payerAddress: "test-payer.near",
-  recipientAddress: "test-merchant.near",
-  merchantId: "test-merchant.near",
+  payments_id: "pay_test123",
+  status: "success",
+  session_id: "cs_test123",
+  out_order_no: "order_test123",
 };
 
 export const TEST_PAYLOAD_FAILED: Record<string, unknown> = {
-  paymentId: "pay_test123",
-  status: "FAILED",
-  amount: "1000000",
-  assetId: "usdc.near",
-  payerAddress: "test-payer.near",
-  recipientAddress: "test-merchant.near",
-  merchantId: "test-merchant.near",
+  payments_id: "pay_test123",
+  status: "failed",
+  session_id: "cs_test123",
+  out_order_no: "order_test123",
 };
 
 export const TEST_PAYLOAD_ABANDONED: Record<string, unknown> = {};
