@@ -4,6 +4,7 @@ export type OverlayChromeProps = {
   open: boolean;
   onClose?: () => void;
   title?: ReactNode;
+  ariaLabel?: string;
   children?: ReactNode;
   mask?: boolean;
   maskClassName?: string;

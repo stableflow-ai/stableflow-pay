@@ -18,6 +18,7 @@ export function Drawer(props: DrawerProps) {
     open,
     onClose,
     title,
+    ariaLabel,
     children,
     mask = true,
     maskClassName,
@@ -57,6 +58,7 @@ export function Drawer(props: DrawerProps) {
       >
         <OverlayPanel
           title={title}
+          ariaLabel={ariaLabel}
           titleClassName={titleClassName}
           closeClassName={closeClassName}
           closeIcon={closeIcon}
@@ -64,6 +66,7 @@ export function Drawer(props: DrawerProps) {
           onClose={onClose}
           cardClassName={cn(getDrawerPanelClassName(side), cardClassName)}
           contentClassName={contentClassName}
+          trapFocus={mask}
         >
           {children}
         </OverlayPanel>

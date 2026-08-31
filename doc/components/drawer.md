@@ -2,7 +2,7 @@
 
 Path: `src/components/ui/drawer/Drawer.tsx`
 
-Same chrome as [Dialog](dialog.md) (Card panel, title row, close icon, mask, stacking, scrollable body). Slides from one edge instead of centering.
+Same chrome as [Dialog](dialog.md) (Card panel, title row, close icon, mask, stacking, scrollable body). Slides from one edge instead of centering. Masked drawers move focus into the panel, trap Tab focus, restore focus on close, and use the visible title as their accessible name.
 
 Open: mask fades in first, then the panel slides in from its edge. Close: the panel slides back off that edge, then the mask fades out. Durations live in [overlay/config.ts](../../src/components/ui/overlay/config.ts) (`OVERLAY_MASK_FADE_SECONDS`, `OVERLAY_PANEL_SLIDE_SECONDS`).
 
@@ -13,6 +13,7 @@ All Dialog chrome props, plus:
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `side` | `"top" \| "right" \| "bottom" \| "left"` | `"right"` | Use `DRAWER_SIDE` from `./config` |
+| `ariaLabel` | `string` | — | Accessible name when `title` is empty |
 | `cardClassName` | `string` | — | Override padding, radius on the Card |
 | `panelClassName` | `string` | — | Override the positioned shell width (right/left default `w-[min(100%,420px)]`) |
 
@@ -44,3 +45,4 @@ import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 
 - Dialog on mobile is implemented as `Drawer` with `side="bottom"`.
 - Overlays stack with Dialog instances (shared z-index stack).
+- A transparent `mask={false}` drawer stays non-modal and does not trap focus.

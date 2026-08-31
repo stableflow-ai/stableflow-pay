@@ -45,7 +45,8 @@ src/
     settings/             # Settings page at /settings (profile + webhooks)
     api-keys/             # Merchant API-key list at /api-keys
     reports/              # Merchant reports at /reports
-    placeholder/          # Sidebar routes without product UI yet
+    docs/                 # Checkout API documentation at /docs
+    placeholder/          # Sidebar routes without product UI yet (Terms)
   layouts/                # AppLayout (sidebar + title + outlet)
   components/
     ui/                   # Public, non-business UI (see doc/components)

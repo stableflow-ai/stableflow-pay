@@ -51,6 +51,8 @@ export function AccountMenu() {
     };
   }, [open]);
 
+  if (!user) return null;
+
   const closeAndLogout = () => {
     setOpen(false);
     logout();

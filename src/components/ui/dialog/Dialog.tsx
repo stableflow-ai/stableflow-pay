@@ -14,6 +14,7 @@ export function Dialog(props: DialogProps) {
     open,
     onClose,
     title,
+    ariaLabel,
     children,
     mask = true,
     maskClassName,
@@ -48,12 +49,14 @@ export function Dialog(props: DialogProps) {
         <div className="pointer-events-auto">
           <OverlayPanel
             title={title}
+            ariaLabel={ariaLabel}
             titleClassName={titleClassName}
             closeClassName={closeClassName}
             closeIcon={closeIcon}
             headerAction={headerAction}
             onClose={onClose}
             cardClassName={cn("w-full md:w-[500px] max-h-[90vh]", cardClassName)}
+            trapFocus={mask}
           >
             {children}
           </OverlayPanel>

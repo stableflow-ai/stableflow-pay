@@ -22,6 +22,7 @@ import { PayView } from "@/views/payer/PayView";
 import { WaitingView } from "@/views/payer/WaitingView";
 import { ReportsView } from "@/views/reports/ReportsView";
 import { SettingsView } from "@/views/settings/SettingsView";
+import { DocsView } from "@/views/docs/DocsView";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
 
 export const router = createBrowserRouter([
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <OverviewView /> },
+          { path: "/docs", element: <DocsView /> },
           {
             path: "/payment-links",
             element: <PaymentLinksView />,
