@@ -118,8 +118,6 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
     });
   }
 
-  console.log(rows)
-
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 gap-4 rounded-[12px] bg-[#f6f6f6] px-4 py-3 md:grid-cols-5 md:gap-6">

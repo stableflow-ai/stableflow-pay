@@ -69,6 +69,8 @@ export function usePaymentLinkPaymentsQuery(
     queryKey: queryKeys.paymentLinks.payments(id, params),
     queryFn: () => listPaymentLinkPayments(id, params),
     enabled: Boolean(token && id),
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 
