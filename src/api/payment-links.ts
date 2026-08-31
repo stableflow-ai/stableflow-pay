@@ -8,6 +8,7 @@ import type {
   PayPaymentLink,
   PayPaymentLinkBody,
   PayPaymentLinkPaymentsQuery,
+  PayPaymentLinksOverview,
   PayPaymentLinksQuery,
   PayPaymentLinksResp,
 } from "@/types/payment-links";
@@ -38,6 +39,15 @@ function mapPaymentLinkList(data: unknown): PayPaymentLink[] {
       ? (asRecord(data)?.list as unknown[])
       : [];
   return list.map(mapPaymentLink).filter((row) => row.linkId);
+}
+
+export async function getPaymentLinksOverview(): Promise<PayPaymentLinksOverview> {
+  const data = asRecord(await http<unknown>(`${PAY_API_PREFIX}/links/overview`)) ?? {};
+  return {
+    activeLinks: apiNumber(data.active_links ?? data.activeLinks) ?? 0,
+    inactiveLinks: apiNumber(data.inactive_links ?? data.inactiveLinks) ?? 0,
+    totalLinks: apiNumber(data.total_links ?? data.totalLinks) ?? 0,
+  };
 }
 
 export async function listPaymentLinks(query: PayPaymentLinksQuery): Promise<PayPaymentLinksResp> {

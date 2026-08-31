@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Dialog } from "@/components/ui/dialog/Dialog";
-import { usePaymentLinkMutations, usePaymentLinksQuery } from "@/hooks/use-payment-links-api";
+import { usePaymentLinkMutations, usePaymentLinksOverviewQuery, usePaymentLinksQuery } from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { CreatePaymentLinkDrawer } from "./components/create/CreatePaymentLinkDrawer";
@@ -11,7 +11,7 @@ import { LinkPaymentsDrawer } from "./components/LinkPaymentsDrawer";
 import { LinksStatsCard } from "./components/LinksStatsCard";
 import { PaymentLinksTable } from "./components/PaymentLinksTable";
 import { isCreatePaymentLinkPath, PAYMENT_LINKS_PAGE_SIZE, PAYMENT_LINKS_PATH } from "./config";
-import { buildPaymentLinkUrl, isPaymentLinkActive, paymentLinksError } from "./utils";
+import { buildPaymentLinkUrl, paymentLinksError } from "./utils";
 
 export function PaymentLinksView() {
   const { pathname } = useLocation();
@@ -26,13 +26,14 @@ export function PaymentLinksView() {
     pageSize: PAYMENT_LINKS_PAGE_SIZE,
     q: query.trim() || undefined,
   });
+  const overviewQuery = usePaymentLinksOverviewQuery();
   const { deleteMutation, enableMutation, disableMutation } = usePaymentLinkMutations();
   const links = linksQuery.data?.list ?? [];
-  const total = linksQuery.data?.total ?? 0;
   const totalPage = Math.max(1, linksQuery.data?.totalPage ?? 1);
   const safePage = Math.min(page, totalPage);
-  const active = links.filter((link) => isPaymentLinkActive(link.status)).length;
-  const inactive = links.length - active;
+  const total = overviewQuery.data?.totalLinks ?? 0;
+  const active = overviewQuery.data?.activeLinks ?? 0;
+  const inactive = overviewQuery.data?.inactiveLinks ?? 0;
 
   async function copyLink(link: PayPaymentLink) {
     try {

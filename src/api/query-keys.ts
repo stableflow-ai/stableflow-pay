@@ -39,6 +39,7 @@ export const queryKeys = {
   paymentLinks: {
     all: ["payment-links"] as const,
     list: (params: unknown) => [...queryKeys.paymentLinks.all, "list", params] as const,
+    overview: ["payment-links", "overview"] as const,
     detail: (id: string) => [...queryKeys.paymentLinks.all, "detail", id] as const,
     stats: (id: string) => [...queryKeys.paymentLinks.all, "stats", id] as const,
     payments: (id: string, params: unknown) => [...queryKeys.paymentLinks.all, "payments", id, params] as const,

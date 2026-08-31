@@ -42,6 +42,12 @@ export interface PayPaymentLinksResp {
   list: PayPaymentLink[];
 }
 
+export interface PayPaymentLinksOverview {
+  activeLinks: number;
+  inactiveLinks: number;
+  totalLinks: number;
+}
+
 export interface PayPaymentLinkPaymentsQuery {
   page: number;
   pageSize: number;

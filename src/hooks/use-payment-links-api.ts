@@ -6,6 +6,7 @@ import {
   enablePaymentLink,
   exportPaymentLinkPayments,
   getPaymentLinkStats,
+  getPaymentLinksOverview,
   listDefaultAddresses,
   listPaymentLinkPayments,
   listPaymentLinks,
@@ -36,6 +37,15 @@ export function usePaymentLinksQuery(params: PayPaymentLinksQuery) {
   return useQuery({
     queryKey: queryKeys.paymentLinks.list(params),
     queryFn: () => listPaymentLinks(params),
+    enabled: Boolean(token),
+  });
+}
+
+export function usePaymentLinksOverviewQuery() {
+  const token = useAuthStore((state) => state.token);
+  return useQuery({
+    queryKey: queryKeys.paymentLinks.overview,
+    queryFn: getPaymentLinksOverview,
     enabled: Boolean(token),
   });
 }

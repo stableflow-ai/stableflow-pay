@@ -10,6 +10,7 @@ import { CouponShell } from "./CouponShell";
 import { ResultRow } from "./ResultRow";
 import { TokenMark } from "./TokenMark";
 import { YouPaySection } from "./YouPaySection";
+import Big from "big.js";
 
 export function PayCard(props: {
   state: PayerCardState;
@@ -39,7 +40,9 @@ export function PayCard(props: {
   onRefreshSwap: () => void;
   onPay: () => void;
 }) {
-  const couponAmount = formatCouponAmount(props.amount || "0");
+  const couponAmountDecimals = 6;
+  const couponAmount = formatCouponAmount(props.amount || "0", { maxDecimals: couponAmountDecimals, padDecimals: false });
+  const isDust = Big(props.amount || "0").gt(0) && Big(props.amount || "0").lt(Big(1).div(10 ** couponAmountDecimals));
   const buttonLabel = props.walletReady ? "Pay Now" : props.connecting ? "Connecting…" : "Connect wallet";
 
   if (props.state === PAYER_CARD_STATE.Unavailable || props.state === PAYER_CARD_STATE.Loading) {
@@ -97,10 +100,17 @@ export function PayCard(props: {
             />
           ) : (
             <p className="mt-4 text-center font-montserrat text-[46px] leading-none font-semibold text-black">
+              {isDust ? "<" : ""}
               {couponAmount.whole}
-              {couponAmount.fraction ? (
-                <span className="text-[#aaa]">.{couponAmount.fraction}</span>
-              ) : null}
+              {
+                isDust ? (
+                  <span className="text-[#aaa]">.{Big(1).div(10 ** couponAmountDecimals).toFixed(couponAmountDecimals, 0)}</span>
+                ) : (
+                  couponAmount.fraction ? (
+                    <span className="text-[#aaa]">.{couponAmount.fraction}</span>
+                  ) : null
+                )
+              }
             </p>
           )}
           {props.destToken ? (

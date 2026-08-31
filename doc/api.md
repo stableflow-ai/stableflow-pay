@@ -160,6 +160,7 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/webhooks/{webhookId}/rotate-secret` | yes | — | `PayWebhookRotateSecretResp` | `rotateWebhookSecret` | `useWebhookMutations` |
 | POST | `/v1/pay/dev/simulateWebhook` | yes | `SimulateWebhookBody` | `SimulateWebhookResp` | `simulateWebhook` | `useWebhookMutations` |
 | GET | `/v1/pay/links` | yes | `page`, `pageSize`, `q` | `PayPaymentLinksResp` | `listPaymentLinks` | `usePaymentLinksQuery` |
+| GET | `/v1/pay/links/overview` | yes | — | `PayPaymentLinksOverview` | `getPaymentLinksOverview` | `usePaymentLinksOverviewQuery` |
 | POST | `/v1/pay/links` | yes | `PayPaymentLinkBody` (`default_address`) | `PayPaymentLink` | `createPaymentLink` | `usePaymentLinkMutations` |
 | GET | `/v1/pay/links/default-addresses` | yes | — | `PayDefaultAddress[]` | `listDefaultAddresses` | `useDefaultAddressesQuery` |
 | GET | `/v1/pay/links/{linkId}` | if session | — | `PayPaymentLink` (`icon`, `organization.logo`) | `getPaymentLink` | `usePaymentLinkQuery` |

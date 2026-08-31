@@ -127,8 +127,10 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
   return message;
 }
 
-export function formatCouponAmount(amount: string): { whole: string; fraction: string } {
-  const formatted = formatAmount(amount, { prefix: "", maxDecimals: 2, padDecimals: true });
+export function formatCouponAmount(amount: string, options?: { maxDecimals?: number; padDecimals?: boolean; }): { whole: string; fraction: string } {
+  const maxDecimals = options?.maxDecimals ?? 2;
+  const padDecimals = options?.padDecimals ?? true;
+  const formatted = formatAmount(amount, { prefix: "", maxDecimals, padDecimals });
   const [whole, fraction = ""] = formatted.split(".");
   return { whole, fraction };
 }
