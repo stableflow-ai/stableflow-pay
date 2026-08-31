@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { GUIDE_PATH } from "./config";
+import { useGuideFlow } from "./guide-flow";
 
 export function GuideDrawer({
   title,
@@ -13,16 +12,16 @@ export function GuideDrawer({
   title: string;
   children: ReactNode;
 }) {
-  const navigate = useNavigate();
+  const { close, mask } = useGuideFlow();
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
 
   return (
     <Drawer
       open
-      onClose={() => navigate(GUIDE_PATH)}
+      onClose={close}
       side={isDesktop ? DRAWER_SIDE.Right : DRAWER_SIDE.Bottom}
-      mask={false}
-      closeOnMaskClick={false}
+      mask={mask}
+      closeOnMaskClick={mask}
       title={title}
       titleClassName="text-[26px] font-semibold"
       panelClassName={isDesktop ? "w-[min(100%,600px)]" : undefined}

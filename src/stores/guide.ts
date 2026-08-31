@@ -24,9 +24,12 @@ interface GuideState {
   paymentLink: GuidePaymentLink | null;
   apiKey: GuideApiKey | null;
   webhook: GuideWebhook | null;
+  skippedAllUserIds: number[];
   setPaymentLink: (value: GuidePaymentLink) => void;
   setApiKey: (value: GuideApiKey) => void;
   setWebhook: (value: GuideWebhook) => void;
+  skipAll: (userId: number) => void;
+  hasSkippedAll: (userId: number) => boolean;
 }
 
 const persistStorage: StateStorage = {
@@ -55,13 +58,22 @@ const persistStorage: StateStorage = {
 
 export const useGuideStore = create<GuideState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       paymentLink: null,
       apiKey: null,
       webhook: null,
+      skippedAllUserIds: [],
       setPaymentLink: (paymentLink) => set({ paymentLink }),
       setApiKey: (apiKey) => set({ apiKey }),
       setWebhook: (webhook) => set({ webhook }),
+      skipAll: (userId) => {
+        if (!Number.isFinite(userId) || userId <= 0) return;
+        set((state) => {
+          if (state.skippedAllUserIds.includes(userId)) return state;
+          return { skippedAllUserIds: [...state.skippedAllUserIds, userId] };
+        });
+      },
+      hasSkippedAll: (userId) => get().skippedAllUserIds.includes(userId),
     }),
     {
       name: GUIDE_STORAGE_NAME,
@@ -70,6 +82,7 @@ export const useGuideStore = create<GuideState>()(
         paymentLink: state.paymentLink,
         apiKey: state.apiKey,
         webhook: state.webhook,
+        skippedAllUserIds: state.skippedAllUserIds,
       }),
     },
   ),

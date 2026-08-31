@@ -1,14 +1,27 @@
 import { Outlet, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/auth";
+import { useGuideStore } from "@/stores/guide";
 import { GUIDE_STEPS } from "./config";
 import { GuideSkipLink } from "./components/GuideSkipLink";
 import { GuideStepCard } from "./components/GuideStepCard";
+import { GuideRouteFlow } from "./guide-flow";
 import { useGuideProgress } from "./hooks/use-guide-progress";
 import { guideStepFromPath, guideStepHref, isGuideStepDone } from "./utils";
 
 export function GuideView() {
+  return (
+    <GuideRouteFlow>
+      <GuideViewBody />
+    </GuideRouteFlow>
+  );
+}
+
+function GuideViewBody() {
   const { pathname } = useLocation();
   const current = guideStepFromPath(pathname);
   const progress = useGuideProgress();
+  const userId = useAuthStore((state) => state.user?.id);
+  const skipAll = useGuideStore((state) => state.skipAll);
 
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-[#f6f6f6]">
@@ -40,7 +53,13 @@ export function GuideView() {
             })}
           </div>
           <div className="mt-8 flex justify-start md:justify-center">
-            <GuideSkipLink to="/" label="Skip All" />
+            <GuideSkipLink
+              to="/"
+              label="Skip All"
+              onClick={() => {
+                if (userId) skipAll(userId);
+              }}
+            />
           </div>
         </div>
       </main>

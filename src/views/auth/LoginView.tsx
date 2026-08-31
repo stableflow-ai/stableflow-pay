@@ -21,6 +21,7 @@ import {
   RESET_PASSWORD_VARIANT,
   loginFormError,
 } from "./config";
+import { postAuthPath } from "./post-auth-path";
 import { registerPathWithReturnTo, returnToFromSearch } from "./return-to";
 
 export function LoginView() {
@@ -42,8 +43,8 @@ export function LoginView() {
       return;
     }
     try {
-      await loginMutation.mutateAsync({ email: email.trim(), password });
-      navigate(returnTo ?? "/", { replace: true });
+      const session = await loginMutation.mutateAsync({ email: email.trim(), password });
+      navigate(postAuthPath(session.user, returnTo), { replace: true });
     } catch (cause) {
       toast.fail({
         title: authErrorMessage(cause, "Unable to sign in"),

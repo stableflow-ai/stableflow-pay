@@ -10,6 +10,7 @@ export interface PayPaymentLink {
   createdAt: string;
   revenue: string;
   payments: number;
+  organization: { logo: string };
 }
 
 export interface PayPaymentLinkBody {

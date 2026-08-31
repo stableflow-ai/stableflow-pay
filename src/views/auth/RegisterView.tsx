@@ -21,6 +21,7 @@ import {
   PASSWORD_MIN_LENGTH,
   registerFormError,
 } from "./config";
+import { postAuthPath } from "./post-auth-path";
 import { loginPathWithReturnTo, returnToFromSearch } from "./return-to";
 
 export function RegisterView() {
@@ -44,13 +45,13 @@ export function RegisterView() {
       return;
     }
     try {
-      await registerMutation.mutateAsync({
+      const session = await registerMutation.mutateAsync({
         name: name.trim(),
         email: email.trim(),
         password,
         inviteCode: inviteCode.trim(),
       });
-      navigate(returnTo ?? "/", { replace: true });
+      navigate(postAuthPath(session.user, returnTo), { replace: true });
     } catch (cause) {
       toast.fail({
         title: authErrorMessage(cause, "Unable to create account"),

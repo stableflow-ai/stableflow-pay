@@ -1,5 +1,4 @@
 import type { MouseEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import { IconCopy } from "@/components/icons/copy";
 import { IconOutLink } from "@/components/icons/link";
 import { Button } from "@/components/ui/button/Button";
@@ -17,8 +16,7 @@ import {
 import { useGuideProgress } from "@/views/guide/hooks/use-guide-progress";
 import { guideStepHref, isGuideStepDone, truncateEnd } from "@/views/guide/utils";
 
-export function OverviewGuidePanel() {
-  const navigate = useNavigate();
+export function OverviewGuidePanel({ onOpenStep }: { onOpenStep: (href: string) => void }) {
   const toast = useToast();
   const progress = useGuideProgress();
 
@@ -62,7 +60,7 @@ export function OverviewGuidePanel() {
                     stop(event);
                     void copy(progress.paymentLink!.url);
                   }}
-                  onClick={() => navigate(target)}
+                  onClick={() => onOpenStep(target)}
                 />
               ) : done && step.number === 2 && progress.apiKey ? (
                 <CompletedKey
@@ -72,13 +70,13 @@ export function OverviewGuidePanel() {
                     stop(event);
                     void copy(progress.apiKey!.key);
                   }}
-                  onClick={() => navigate(target)}
+                  onClick={() => onOpenStep(target)}
                 />
               ) : done && step.number === 3 ? (
                 <button
                   type="button"
                   className="text-left font-montserrat text-sm font-medium text-black"
-                  onClick={() => navigate(target)}
+                  onClick={() => onOpenStep(target)}
                 >
                   {activeWebhookEndpointsCopy(progress.webhookCount)}
                 </button>
@@ -86,7 +84,7 @@ export function OverviewGuidePanel() {
                 <ActionButton
                   step={step}
                   disabled={testLocked}
-                  onClick={() => navigate(target)}
+                  onClick={() => onOpenStep(target)}
                 />
               )}
             </div>

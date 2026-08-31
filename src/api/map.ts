@@ -17,3 +17,8 @@ export function apiNumber(value: unknown): number | null {
   }
   return null;
 }
+
+export function mapOrganizationLogo(raw: unknown): { logo: string } {
+  const row = asRecord(raw) ?? {};
+  return { logo: apiText(row.logo) };
+}

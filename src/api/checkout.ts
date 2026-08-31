@@ -1,6 +1,6 @@
 import { http } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
-import { apiText, asRecord } from "@/api/map";
+import { apiText, asRecord, mapOrganizationLogo } from "@/api/map";
 import type { PayCheckoutSession, PayCheckoutSessionBody } from "@/types/pay";
 
 export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
@@ -17,6 +17,7 @@ export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
     status: apiText(row.status),
     successUrl: apiText(row.success_url ?? row.successUrl),
     symbol: apiText(row.symbol),
+    organization: mapOrganizationLogo(row.organization),
   };
 }
 

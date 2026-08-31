@@ -324,7 +324,7 @@ export function PayView() {
   }
 
   return (
-    <PayerLayout>
+    <PayerLayout iconUrl={isCheckout ? checkout?.organization.logo : link?.organization.logo}>
       <PayCard
         state={cardState}
         paymentTitle={payment?.title ?? ""}

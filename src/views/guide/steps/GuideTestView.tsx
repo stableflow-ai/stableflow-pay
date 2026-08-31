@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { IconCheck2 } from "@/components/icons/check";
 import { IconCopy } from "@/components/icons/copy";
 import { Button } from "@/components/ui/button/Button";
@@ -16,6 +15,7 @@ import {
   type GuideTestLang,
 } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
+import { useGuideFlow } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 import {
   buildGuideTestSnippet,
@@ -24,7 +24,7 @@ import {
 } from "../utils";
 
 export function GuideTestView() {
-  const navigate = useNavigate();
+  const { go } = useGuideFlow();
   const toast = useToast();
   const { apiKey } = useGuideProgress();
   const createSession = useCreateCheckoutSessionMutation();
@@ -78,7 +78,7 @@ export function GuideTestView() {
   }
 
   function finish() {
-    navigate("/");
+    go("/");
   }
 
   return (

@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import { IconLink, IconOutLink } from "@/components/icons/link";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
@@ -7,6 +6,7 @@ import { GUIDE_STEP, GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSkipLink } from "../components/GuideSkipLink";
 import { GuideSuccessMark } from "../components/GuideSuccessMark";
+import { GuideRedirect } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 import { nextGuideStepHref } from "../utils";
 
@@ -17,7 +17,7 @@ export function GuidePaymentLinkPreviewView() {
   const nextTo = nextGuideStepHref(GUIDE_STEP.PaymentLink, progress) ?? GUIDE_STEP_PATH.apiKey;
 
   if (!paymentLink) {
-    return <Navigate to={GUIDE_STEP_PATH.paymentLink} replace />;
+    return <GuideRedirect to={GUIDE_STEP_PATH.paymentLink} />;
   }
 
   const linkUrl = paymentLink.url;

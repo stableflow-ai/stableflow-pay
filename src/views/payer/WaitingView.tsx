@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayPaymentQuery } from "@/hooks/use-pay-payment";
+import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { txExplorerUrl } from "@/config/chains";
 import { onQuickPayCommitSuccess, peekLastQuickPayCommitSuccess } from "@/stores/quick-pay-commit-queue";
@@ -51,6 +52,8 @@ export function WaitingView() {
     poll: isCheckout && !queryPaymentId,
   });
   const checkout = checkoutQuery.data;
+  const linkQuery = usePaymentLinkQuery(isCheckout ? undefined : linkId);
+  const iconUrl = isCheckout ? checkout?.organization.logo : linkQuery.data?.organization.logo;
   const checkoutPaymentsId = checkout?.paymentsId.trim() || "";
   const paymentId = queryPaymentId || (isCheckout ? checkoutPaymentsId : "");
   const paymentQuery = usePayPaymentQuery(paymentId);
@@ -142,7 +145,7 @@ export function WaitingView() {
       return <Navigate to={CHECKOUT_PATH} replace />;
     }
     if (!queryPaymentId && checkoutQuery.isPending) {
-      return <PayerLayout />;
+      return <PayerLayout iconUrl={iconUrl} />;
     }
     if (!queryPaymentId && (checkoutQuery.isError || !checkout)) {
       return <Navigate to={checkoutPath(sessionId)} replace />;
@@ -163,6 +166,7 @@ export function WaitingView() {
 
   return (
     <PayerLayout
+      iconUrl={iconUrl}
       footer={
         waitStatus === PAYER_WAIT_STATUS.Pending
           ? "You will be redirected once your transaction is complete."

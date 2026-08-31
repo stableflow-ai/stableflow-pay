@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import { IconCopy } from "@/components/icons/copy";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
@@ -7,6 +6,7 @@ import { GUIDE_STEP, GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSkipLink } from "../components/GuideSkipLink";
 import { GuideSuccessMark } from "../components/GuideSuccessMark";
+import { GuideRedirect } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 import { nextGuideStepHref } from "../utils";
 
@@ -17,7 +17,7 @@ export function GuideApiKeyPreviewView() {
   const nextTo = nextGuideStepHref(GUIDE_STEP.ApiKey, progress) ?? GUIDE_STEP_PATH.webhook;
 
   if (!apiKey) {
-    return <Navigate to={GUIDE_STEP_PATH.apiKey} replace />;
+    return <GuideRedirect to={GUIDE_STEP_PATH.apiKey} />;
   }
 
   const keyValue = apiKey.key;

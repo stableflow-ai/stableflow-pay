@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth";
+import { postAuthPath } from "@/views/auth/post-auth-path";
 import { loginPathWithReturnTo, returnToFromSearch } from "@/views/auth/return-to";
 
 export function RequireAuth() {
@@ -20,7 +21,7 @@ export function RedirectIfAuthed({ children }: { children: ReactNode }) {
   const [params] = useSearchParams();
 
   if (user) {
-    return <Navigate to={returnToFromSearch(params.toString()) ?? "/"} replace />;
+    return <Navigate to={postAuthPath(user, returnToFromSearch(params.toString()))} replace />;
   }
 
   return children;

@@ -1,21 +1,21 @@
-import { Navigate, useNavigate } from "react-router-dom";
 import { useGuideStore } from "@/stores/guide";
 import { buildPaymentLinkUrl } from "@/views/payment-links/utils";
 import { CreateLinkForm } from "@/views/payment-links/components/create/CreateLinkForm";
 import { GUIDE_STEP, GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSkipLink } from "../components/GuideSkipLink";
+import { GuideRedirect, useGuideFlow } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 import { nextGuideStepHref } from "../utils";
 
 export function GuidePaymentLinkFormView() {
-  const navigate = useNavigate();
+  const { go } = useGuideFlow();
   const setPaymentLink = useGuideStore((state) => state.setPaymentLink);
   const progress = useGuideProgress();
   const step = GUIDE_STEPS[0];
 
   if (progress.paymentLinkDone) {
-    return <Navigate to={GUIDE_STEP_PATH.paymentLinkPreview} replace />;
+    return <GuideRedirect to={GUIDE_STEP_PATH.paymentLinkPreview} />;
   }
 
   return (
@@ -28,7 +28,7 @@ export function GuidePaymentLinkFormView() {
             title,
             url: buildPaymentLinkUrl(window.location.origin, linkId),
           });
-          navigate(GUIDE_STEP_PATH.paymentLinkPreview);
+          go(GUIDE_STEP_PATH.paymentLinkPreview);
         }}
       />
       <div className="mt-5 flex justify-center">

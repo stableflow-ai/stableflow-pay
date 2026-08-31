@@ -1,7 +1,7 @@
 import { http, httpBlob } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { mapPaymentDetail } from "@/api/payout";
-import { apiNumber, apiText, asRecord } from "@/api/map";
+import { apiNumber, apiText, asRecord, mapOrganizationLogo } from "@/api/map";
 import type { PayPaymentDetail } from "@/types/pay";
 import type {
   PayPaymentLink,
@@ -25,6 +25,7 @@ export function mapPaymentLink(raw: unknown): PayPaymentLink {
     createdAt: apiText(row.created_at ?? row.createdAt),
     revenue: apiText(row.revenue),
     payments: apiNumber(row.payments ?? row.transactions) ?? 0,
+    organization: mapOrganizationLogo(row.organization),
   };
 }
 

@@ -68,6 +68,7 @@ export interface PayCheckoutSession {
   status: string;
   successUrl: string;
   symbol: string;
+  organization: { logo: string };
 }
 
 export interface PayPaymentDetail {

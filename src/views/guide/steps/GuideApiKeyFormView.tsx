@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { useApiKeyMutations } from "@/hooks/use-api-keys-api";
@@ -10,11 +9,12 @@ import { apiKeysError } from "@/views/api-keys/utils";
 import { GUIDE_STEP, GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSkipLink } from "../components/GuideSkipLink";
+import { GuideRedirect, useGuideFlow } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 import { nextGuideStepHref } from "../utils";
 
 export function GuideApiKeyFormView() {
-  const navigate = useNavigate();
+  const { go } = useGuideFlow();
   const toast = useToast();
   const { createMutation } = useApiKeyMutations();
   const setApiKey = useGuideStore((state) => state.setApiKey);
@@ -22,7 +22,7 @@ export function GuideApiKeyFormView() {
   const [label, setLabel] = useState("");
 
   if (progress.apiKeyDone) {
-    return <Navigate to={GUIDE_STEP_PATH.apiKeyPreview} replace />;
+    return <GuideRedirect to={GUIDE_STEP_PATH.apiKeyPreview} />;
   }
 
   async function submit() {
@@ -38,7 +38,7 @@ export function GuideApiKeyFormView() {
         label: created.name || next,
         key: created.apiKey,
       });
-      navigate(GUIDE_STEP_PATH.apiKeyPreview);
+      go(GUIDE_STEP_PATH.apiKeyPreview);
     } catch (error) {
       toast.fail({ title: apiKeysError(error, "Could not create API key") });
     }

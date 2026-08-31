@@ -1,20 +1,18 @@
-import { Navigate, useNavigate } from "react-router-dom";
-import { IconDelete } from "@/components/icons/delete";
-import { IconResetPassword } from "@/components/icons/reset-password";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { formatWebhookEvents } from "@/views/settings/utils";
 import { GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSuccessMark } from "../components/GuideSuccessMark";
+import { GuideRedirect, useGuideFlow } from "../guide-flow";
 import { useGuideProgress } from "../hooks/use-guide-progress";
 
 export function GuideWebhookPreviewView() {
-  const navigate = useNavigate();
+  const { go } = useGuideFlow();
   const { webhook } = useGuideProgress();
 
   if (!webhook) {
-    return <Navigate to={GUIDE_STEP_PATH.webhook} replace />;
+    return <GuideRedirect to={GUIDE_STEP_PATH.webhook} />;
   }
 
   return (
@@ -33,20 +31,12 @@ export function GuideWebhookPreviewView() {
                 {formatWebhookEvents(webhook.events)}
               </p>
             </div>
-            {/* <div className="flex shrink-0 items-center gap-3 pt-1">
-              <span className="text-[#aaa]" aria-hidden>
-                <IconResetPassword className="h-[18px] w-[15px]" />
-              </span>
-              <span className="text-[#aaa]" aria-hidden>
-                <IconDelete className="size-3.5" />
-              </span>
-            </div> */}
           </div>
         </div>
         <Button
           size={BUTTON_SIZE.Lg}
           className="mt-8 w-full"
-          onClick={() => navigate(GUIDE_STEP_PATH.test)}
+          onClick={() => go(GUIDE_STEP_PATH.test)}
         >
           Continue to test
         </Button>
