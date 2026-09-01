@@ -1,10 +1,12 @@
+export type ReportPaymentType = "api_key" | "link";
+
 export interface ReportAnalyticsQuery {
   start_time?: number;
   end_time?: number;
   api_key_id?: number;
   link_id?: string;
   network?: string;
-  type?: "api_key" | "link";
+  type?: ReportPaymentType;
 }
 
 export interface ReportAnalyticsDailyItem {
@@ -22,6 +24,9 @@ export interface ReportAnalyticsResp {
 export interface ReportPaymentsQuery {
   page: number;
   pageSize: number;
+  type?: ReportPaymentType;
+  api_key_id?: number;
+  link_id?: string;
   network?: string;
   symbol?: string;
   destination_network?: string;

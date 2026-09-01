@@ -16,7 +16,7 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Create Payment Link | `/payment-links/create`, `/payment-links/create/preview` | shipped | Nested on the Payment Links list. Desktop is a 600px right drawer; below 768px it is a bottom drawer. Form then preview. Overview header CTA goes here. Create calls `POST /v1/pay/links` (`default_address`). Non-empty icon must be an http(s) URL. |
 | Public payer | `/paylink/:linkId`, `/paylink/:linkId/waiting`, `/checkout`, `/checkout/waiting` | shipped | No login, no sidebar. Link detail from `GET /v1/pay/links/{linkId}`. Checkout from `GET /v1/pay/checkout/sessions/{sessionId}`. Paylink card icon is `icon` then `organization.logo`. Checkout uses `organization.logo` only. Swap `POST /v1/pay/swap/link/{linkId}` or `POST /v1/pay/swap/checkout/{sessionId}`, submit `POST /v1/pay/swap/submit` (`payments_id`). Both waiting pages poll `GET /v1/pay/payments/{paymentId}`. |
 | API Keys | `/api-keys` | shipped | Merchant API-key list (Label, Key, Created — no Members). Create, copy, edit label, delete. Signed-in users call `/v1/pay/apiKeys`. |
-| Reports | `/reports` | shipped | Report analytics charts (`GET /v1/pay/report/analytics`) plus a paginated usage table (`GET /v1/pay/report/payments`) and CSV export (`GET /v1/pay/report/payments/export`). Top filters include time, API key, payment link, and network. |
+| Reports | `/reports` | shipped | Report analytics charts (`GET /v1/pay/report/analytics`) plus a paginated usage table (`GET /v1/pay/report/payments`) and CSV export (`GET /v1/pay/report/payments/export`). Top and table filters include Key / Link source (`type`), API key, payment link, network, and time. |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
 | Developer Docs | `/docs` | shipped | Authenticated merchant Checkout API guide with setup, Session creation, redirects, confirmation, webhooks, supported assets, API reference, and production checklist. |
 | Terms | `/terms` | placeholder | Sidebar footer link. AppLayout also shows Terms of Service at the bottom right of authenticated pages (not login, register, or public payer). |
@@ -77,7 +77,7 @@ Authenticated `/settings` has two cards. Profile loads and saves organization `n
 
 ## Reports
 
-Authenticated `/reports`. Top time / API key / payment link / network filters drive volume stats and charts (`GET /v1/pay/report/analytics`). A paginated usage table has source / destination / amount filters (`GET /v1/pay/report/payments`; no table API key filter). Export CSV is `GET /v1/pay/report/payments/export` with the same table filters (no pagination).
+Authenticated `/reports`. Top Key / Link, API key or payment link, network, and time filters drive volume stats and charts (`GET /v1/pay/report/analytics` with `type`, `api_key_id`, `link_id`). A paginated usage table has Key / Link, API key or payment link, source / destination / amount filters (`GET /v1/pay/report/payments`). Export CSV is `GET /v1/pay/report/payments/export` with the same table filters (no pagination).
 
 ## Wallet and payout capability
 

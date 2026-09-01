@@ -1,8 +1,13 @@
 import { differenceInCalendarDays, format, startOfDay, subDays } from "date-fns";
 import type { DateRangeValue } from "@/components/date-range-picker/utils";
 import { ApiError } from "@/lib/api-error";
-import type { ReportPaymentsExportQuery } from "@/types/report";
-import { REPORT_AMOUNT_FILTER, REPORT_FILTER_ALL, REPORT_PAGE_SIZE } from "./config";
+import type { ReportPaymentType, ReportPaymentsExportQuery } from "@/types/report";
+import {
+  REPORT_AMOUNT_FILTER,
+  REPORT_FILTER_ALL,
+  REPORT_PAGE_SIZE,
+  REPORT_SOURCE,
+} from "./config";
 
 export function reportsError(error: unknown, fallback: string): string {
   if (error instanceof ApiError) return error.message;
@@ -34,13 +39,20 @@ export function reportAmountQuery(filter: string): { min_amount?: number; max_am
 }
 
 export function reportPaymentsFilters(input: {
+  source: ReportPaymentType;
+  apiKey: string;
+  linkId: string;
   sourceNetwork: string;
   sourceToken: string;
   destNetwork: string;
   destToken: string;
   amountFilter: string;
 }): ReportPaymentsExportQuery {
+  const isApiKey = input.source === REPORT_SOURCE.ApiKey;
   return {
+    type: input.source,
+    api_key_id: isApiKey ? reportOptionalApiKeyId(input.apiKey) : undefined,
+    link_id: isApiKey ? undefined : reportOptionalLinkId(input.linkId),
     network: reportOptionalFilter(input.sourceNetwork),
     symbol: reportOptionalFilter(input.sourceToken),
     destination_network: reportOptionalFilter(input.destNetwork),

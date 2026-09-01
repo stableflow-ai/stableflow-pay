@@ -29,16 +29,19 @@ import { formatAmount, formatDate } from "@/utils";
 import { ReportsAddressCell } from "./components/ReportsAddressCell";
 import { ReportsAssetCell } from "./components/ReportsAssetCell";
 import { ReportsLineChart } from "./components/ReportsLineChart";
+import { ReportsSourceToggle } from "./components/ReportsSourceToggle";
 import {
   REPORT_AMOUNT_FILTER,
   REPORT_AMOUNT_OPTIONS,
   REPORT_FILTER_ALL,
   REPORT_LINKS_PAGE_SIZE,
+  REPORT_SOURCE,
   REPORT_TABLE_COLUMNS,
   REPORT_TIME_PRESET,
   REPORT_TOKENS,
   REPORT_TX_CHART_COLOR,
   REPORT_VOLUME_CHART_COLOR,
+  type ReportSource,
 } from "./config";
 import {
   eachDateKey,
@@ -50,7 +53,6 @@ import {
   reportPaymentsListQuery,
   reportsError,
 } from "./utils";
-import { cn } from "@/lib/utils";
 
 const NETWORK_OPTIONS = [
   { value: REPORT_FILTER_ALL, label: "All" },
@@ -60,11 +62,6 @@ const NETWORK_OPTIONS = [
 const TOKEN_OPTIONS = [
   { value: REPORT_FILTER_ALL, label: "All" },
   ...REPORT_TOKENS.map((symbol) => ({ value: symbol, label: symbol })),
-];
-
-const REPORT_SOURCE_OPTIONS: { value: "api_key" | "link"; label: string }[] = [
-  { value: "api_key", label: "Key" },
-  { value: "link", label: "Link" },
 ];
 
 function chartNumber(value: string): number {
@@ -86,7 +83,10 @@ export function ReportsView() {
   const [destToken, setDestToken] = useState(REPORT_FILTER_ALL);
   const [amountFilter, setAmountFilter] = useState<string>(REPORT_AMOUNT_FILTER.All);
   const [page, setPage] = useState(1);
-  const [reportSource, setReportSource] = useState(REPORT_SOURCE_OPTIONS[0]);
+  const [reportSource, setReportSource] = useState<ReportSource>(REPORT_SOURCE.ApiKey);
+  const [tableSource, setTableSource] = useState<ReportSource>(REPORT_SOURCE.ApiKey);
+  const [tableApiKey, setTableApiKey] = useState(REPORT_FILTER_ALL);
+  const [tableLinkId, setTableLinkId] = useState(REPORT_FILTER_ALL);
 
   const apiKeyOptions = useMemo(() => {
     return [
@@ -118,19 +118,22 @@ export function ReportsView() {
     api_key_id: reportOptionalApiKeyId(apiKey),
     link_id: reportOptionalLinkId(linkId),
     network: reportOptionalFilter(network),
-    type: reportSource.value,
+    type: reportSource,
   });
 
   const paymentFilters = useMemo(
     () =>
       reportPaymentsFilters({
+        source: tableSource,
+        apiKey: tableApiKey,
+        linkId: tableLinkId,
         sourceNetwork,
         sourceToken,
         destNetwork,
         destToken,
         amountFilter,
       }),
-    [amountFilter, destNetwork, destToken, sourceNetwork, sourceToken],
+    [amountFilter, destNetwork, destToken, sourceNetwork, sourceToken, tableApiKey, tableLinkId, tableSource],
   );
   const paymentsQuery = useReportPaymentsQuery(reportPaymentsListQuery(page, paymentFilters));
   const exportMutation = useExportReportPaymentsMutation();
@@ -185,57 +188,36 @@ export function ReportsView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-1 flex-wrap items-center gap-3">
-        <div className="flex items-center justify-center text-[#606060] text-sm px-1 py-1 h-9 rounded-[6px] bg-white border border-[#E3E3E3]">
-          {
-            REPORT_SOURCE_OPTIONS.map((option) => (
-              <button
-                type="button"
-                className={cn(
-                  "flex justify-center items-center px-4 h-full flex-1 rounded-[6px]",
-                  reportSource.value === option.value ? "bg-[#eee] text-black cursor-default" : "cursor-pointer",
-                )}
-                onClick={() => {
-                  setReportSource(option);
-                  if (option.value === "api_key") {
-                    setLinkId(REPORT_FILTER_ALL);
-                  }
-                  if (option.value === "link") {
-                    setApiKey(REPORT_FILTER_ALL);
-                  }
-                }}
-              >
-                {option.label}
-              </button>
-            ))
-          }
-        </div>
-        {
-          reportSource.value === "api_key" && (
-            <Dropdown
-              label="API Key"
-              value={apiKey}
-              onChange={setApiKey}
-              options={apiKeyOptions}
-              className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
-              triggerClassName="w-full"
-            />
-          )
-        }
-        {
-          reportSource.value === "link" && (
-            <Dropdown
-              label="Payment Link"
-              value={linkId}
-              onChange={setLinkId}
-              options={linkOptions}
-              onReachEnd={loadMoreLinks}
-              loadingMore={linksQuery.isFetchingNextPage}
-              className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
-              triggerClassName="w-full"
-              panelClassName="max-h-60 overflow-y-auto"
-            />
-          )
-        }
+        <ReportsSourceToggle
+          value={reportSource}
+          onChange={(value) => {
+            setReportSource(value);
+            if (value === REPORT_SOURCE.ApiKey) setLinkId(REPORT_FILTER_ALL);
+            if (value === REPORT_SOURCE.Link) setApiKey(REPORT_FILTER_ALL);
+          }}
+        />
+        {reportSource === REPORT_SOURCE.ApiKey ? (
+          <Dropdown
+            label="API Key"
+            value={apiKey}
+            onChange={setApiKey}
+            options={apiKeyOptions}
+            className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
+            triggerClassName="w-full"
+          />
+        ) : (
+          <Dropdown
+            label="Payment Link"
+            value={linkId}
+            onChange={setLinkId}
+            options={linkOptions}
+            onReachEnd={loadMoreLinks}
+            loadingMore={linksQuery.isFetchingNextPage}
+            className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
+            triggerClassName="w-full"
+            panelClassName="max-h-60 overflow-y-auto"
+          />
+        )}
         <Dropdown
           label="Networks"
           value={network}
@@ -304,7 +286,44 @@ export function ReportsView() {
                 <IconExportLink className="size-3.5 shrink-0" />
               </Button>
             </div>
-            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <ReportsSourceToggle
+                value={tableSource}
+                onChange={(value) => {
+                  setTableSource(value);
+                  if (value === REPORT_SOURCE.ApiKey) setTableLinkId(REPORT_FILTER_ALL);
+                  if (value === REPORT_SOURCE.Link) setTableApiKey(REPORT_FILTER_ALL);
+                  resetPage();
+                }}
+              />
+              {tableSource === REPORT_SOURCE.ApiKey ? (
+                <Dropdown
+                  label="API Key"
+                  value={tableApiKey}
+                  onChange={(value) => {
+                    setTableApiKey(value);
+                    resetPage();
+                  }}
+                  options={apiKeyOptions}
+                  className="min-w-0 w-full"
+                  triggerClassName="w-full"
+                />
+              ) : (
+                <Dropdown
+                  label="Payment Link"
+                  value={tableLinkId}
+                  onChange={(value) => {
+                    setTableLinkId(value);
+                    resetPage();
+                  }}
+                  options={linkOptions}
+                  onReachEnd={loadMoreLinks}
+                  loadingMore={linksQuery.isFetchingNextPage}
+                  className="min-w-0 w-full"
+                  triggerClassName="w-full"
+                  panelClassName="max-h-60 overflow-y-auto"
+                />
+              )}
               <Dropdown
                 label="Source Network"
                 value={sourceNetwork}

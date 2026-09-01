@@ -2,6 +2,18 @@ import { PAYOUT_SYMBOLS } from "@/stores/intents-tokens";
 
 export const REPORT_FILTER_ALL = "all";
 
+export const REPORT_SOURCE = {
+  ApiKey: "api_key",
+  Link: "link",
+} as const;
+
+export type ReportSource = (typeof REPORT_SOURCE)[keyof typeof REPORT_SOURCE];
+
+export const REPORT_SOURCE_OPTIONS = [
+  { value: REPORT_SOURCE.ApiKey, label: "Key" },
+  { value: REPORT_SOURCE.Link, label: "Link" },
+] as const;
+
 export const REPORT_TIME_PRESET = {
   Days30: 30,
   Days7: 7,

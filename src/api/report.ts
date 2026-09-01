@@ -69,6 +69,9 @@ function mapReportPaymentItem(raw: unknown): ReportPaymentItem {
 
 function paymentsQueryParams(params: ReportPaymentsQuery | ReportPaymentsExportQuery) {
   return {
+    type: params.type,
+    api_key_id: params.api_key_id,
+    link_id: params.link_id,
     network: params.network,
     symbol: params.symbol,
     destination_network: params.destination_network,

@@ -198,9 +198,9 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/apiKeys` | yes | `PayApiKeyBody` | `PayApiKey` | `createApiKey` | `useApiKeyMutations` |
 | POST | `/v1/pay/apiKeys/{id}` | yes | `PayApiKeyBody` | `string` | `updateApiKey` | `useApiKeyMutations` |
 | DELETE | `/v1/pay/apiKeys/{id}` | yes | — | `void` | `deleteApiKey` | `useApiKeyMutations` |
-| GET | `/v1/pay/report/analytics` | yes | `start_time`, `end_time`, `api_key_id`, `link_id`, `network` | `ReportAnalyticsResp` | `getReportAnalytics` | `useReportAnalyticsQuery` |
-| GET | `/v1/pay/report/payments` | yes | `page`, `pageSize`, `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | `ReportPaymentsResp` | `getReportPayments` | `useReportPaymentsQuery` |
-| GET | `/v1/pay/report/payments/export` | yes | `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | CSV blob | `exportReportPayments` | `useExportReportPaymentsMutation` |
+| GET | `/v1/pay/report/analytics` | yes | `start_time`, `end_time`, `api_key_id`, `link_id`, `network`, `type` | `ReportAnalyticsResp` | `getReportAnalytics` | `useReportAnalyticsQuery` |
+| GET | `/v1/pay/report/payments` | yes | `page`, `pageSize`, `type`, `api_key_id`, `link_id`, `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | `ReportPaymentsResp` | `getReportPayments` | `useReportPaymentsQuery` |
+| GET | `/v1/pay/report/payments/export` | yes | `type`, `api_key_id`, `link_id`, `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | CSV blob | `exportReportPayments` | `useExportReportPaymentsMutation` |
 | POST | `/v1/pay/request` | yes | `PayCreateRequestParam` | `PayCreateRequestResp` | `createPayRequest` | `useCreatePayRequestMutation` |
 | GET | `/v1/pay/request/{id}` | if session | — | `PayRequestItem` | `getPayRequest` | `usePayRequestDetailQuery` |
 | GET | `/v1/pay/request/list` | yes | — | `PayRequestItem[]` | `getRequestPayments` | `useRequestPaymentsQuery` |
