@@ -212,8 +212,8 @@ export function PayView() {
   const fiatDisplay = swap?.amountInUsd
     ? formatAmount(swap.amountInUsd, { maxDecimals: 2 })
     : "";
-  const feeUsd = swap?.amountInUsd && amountForQuote
-    ? usdFee(swap.amountInUsd, amountForQuote)
+  const feeUsd = swap?.amountInUsd && swap?.amountOutUsd
+    ? usdFee(swap.amountInUsd, swap?.amountOutUsd)
     : null;
   const feeDisplay = feeUsd ? formatAmount(feeUsd, { maxDecimals: 2, showDust: true }) : "—";
   const durationDisplay = swap?.timeEstimate != null ? `~${swap.timeEstimate}s` : "—";
@@ -259,7 +259,7 @@ export function PayView() {
       });
       const quoteQuery = {
         feesUsd: feeUsd ?? "",
-        payoutUsd: swap.amountOutUsd.trim() || amountForQuote,
+        payoutUsd: swap.amountOutUsd.trim() || "0",
       };
       enqueueQuickPayCommit({
         swapId: swap.swapId,
