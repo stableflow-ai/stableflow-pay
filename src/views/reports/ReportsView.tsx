@@ -50,6 +50,7 @@ import {
   reportPaymentsListQuery,
   reportsError,
 } from "./utils";
+import { cn } from "@/lib/utils";
 
 const NETWORK_OPTIONS = [
   { value: REPORT_FILTER_ALL, label: "All" },
@@ -59,6 +60,11 @@ const NETWORK_OPTIONS = [
 const TOKEN_OPTIONS = [
   { value: REPORT_FILTER_ALL, label: "All" },
   ...REPORT_TOKENS.map((symbol) => ({ value: symbol, label: symbol })),
+];
+
+const REPORT_SOURCE_OPTIONS: { value: "api_key" | "link"; label: string }[] = [
+  { value: "api_key", label: "Key" },
+  { value: "link", label: "Link" },
 ];
 
 function chartNumber(value: string): number {
@@ -80,6 +86,7 @@ export function ReportsView() {
   const [destToken, setDestToken] = useState(REPORT_FILTER_ALL);
   const [amountFilter, setAmountFilter] = useState<string>(REPORT_AMOUNT_FILTER.All);
   const [page, setPage] = useState(1);
+  const [reportSource, setReportSource] = useState(REPORT_SOURCE_OPTIONS[0]);
 
   const apiKeyOptions = useMemo(() => {
     return [
@@ -111,6 +118,7 @@ export function ReportsView() {
     api_key_id: reportOptionalApiKeyId(apiKey),
     link_id: reportOptionalLinkId(linkId),
     network: reportOptionalFilter(network),
+    type: reportSource.value,
   });
 
   const paymentFilters = useMemo(
@@ -177,30 +185,57 @@ export function ReportsView() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-1 flex-wrap items-center gap-3">
-        <DateRangePicker
-          value={range}
-          onChange={setRange}
-          className="w-full min-w-0 sm:w-auto sm:min-w-[179px]"
-        />
-        <Dropdown
-          label="API Key"
-          value={apiKey}
-          onChange={setApiKey}
-          options={apiKeyOptions}
-          className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
-          triggerClassName="w-full"
-        />
-        <Dropdown
-          label="Payment Link"
-          value={linkId}
-          onChange={setLinkId}
-          options={linkOptions}
-          onReachEnd={loadMoreLinks}
-          loadingMore={linksQuery.isFetchingNextPage}
-          className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
-          triggerClassName="w-full"
-          panelClassName="max-h-60 overflow-y-auto"
-        />
+        <div className="flex items-center justify-center text-[#606060] text-sm px-1 py-1 h-9 rounded-[6px] bg-white border border-[#E3E3E3]">
+          {
+            REPORT_SOURCE_OPTIONS.map((option) => (
+              <button
+                type="button"
+                className={cn(
+                  "flex justify-center items-center px-4 h-full flex-1 rounded-[6px]",
+                  reportSource.value === option.value ? "bg-[#eee] text-black cursor-default" : "cursor-pointer",
+                )}
+                onClick={() => {
+                  setReportSource(option);
+                  if (option.value === "api_key") {
+                    setLinkId(REPORT_FILTER_ALL);
+                  }
+                  if (option.value === "link") {
+                    setApiKey(REPORT_FILTER_ALL);
+                  }
+                }}
+              >
+                {option.label}
+              </button>
+            ))
+          }
+        </div>
+        {
+          reportSource.value === "api_key" && (
+            <Dropdown
+              label="API Key"
+              value={apiKey}
+              onChange={setApiKey}
+              options={apiKeyOptions}
+              className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
+              triggerClassName="w-full"
+            />
+          )
+        }
+        {
+          reportSource.value === "link" && (
+            <Dropdown
+              label="Payment Link"
+              value={linkId}
+              onChange={setLinkId}
+              options={linkOptions}
+              onReachEnd={loadMoreLinks}
+              loadingMore={linksQuery.isFetchingNextPage}
+              className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
+              triggerClassName="w-full"
+              panelClassName="max-h-60 overflow-y-auto"
+            />
+          )
+        }
         <Dropdown
           label="Networks"
           value={network}
@@ -208,6 +243,11 @@ export function ReportsView() {
           options={NETWORK_OPTIONS}
           className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
           triggerClassName="w-full"
+        />
+        <DateRangePicker
+          value={range}
+          onChange={setRange}
+          className="w-full min-w-0 sm:w-auto sm:min-w-[179px]"
         />
       </div>
 

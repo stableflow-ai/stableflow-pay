@@ -29,6 +29,7 @@ export async function getReportAnalytics(params: ReportAnalyticsQuery): Promise<
           network: params.network,
           start_time: params.start_time,
           end_time: params.end_time,
+          type: params.type,
         },
       }),
     ) ?? {};

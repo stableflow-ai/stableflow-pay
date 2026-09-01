@@ -4,6 +4,7 @@ export interface ReportAnalyticsQuery {
   api_key_id?: number;
   link_id?: string;
   network?: string;
+  type?: "api_key" | "link";
 }
 
 export interface ReportAnalyticsDailyItem {
