@@ -30,6 +30,7 @@ export async function getReportAnalytics(params: ReportAnalyticsQuery): Promise<
           start_time: params.start_time,
           end_time: params.end_time,
           type: params.type,
+          timezone: params.timezone,
         },
       }),
     ) ?? {};

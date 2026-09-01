@@ -7,6 +7,7 @@ export interface ReportAnalyticsQuery {
   link_id?: string;
   network?: string;
   type?: ReportPaymentType;
+  timezone?: string;
 }
 
 export interface ReportAnalyticsDailyItem {

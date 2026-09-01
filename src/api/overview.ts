@@ -50,7 +50,7 @@ export async function getOverviewPaymentsAnalytics(
 ): Promise<OverviewPaymentsAnalytics> {
   return mapOverviewPaymentsAnalytics(
     await http<unknown>(`${PAY_API_PREFIX}/payments/analytics`, {
-      query: { period, type },
+      query: { period, type, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
     }),
     period,
   );

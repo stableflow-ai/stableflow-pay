@@ -119,6 +119,7 @@ export function ReportsView() {
     link_id: reportOptionalLinkId(linkId),
     network: reportOptionalFilter(network),
     type: reportSource,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
   const paymentFilters = useMemo(

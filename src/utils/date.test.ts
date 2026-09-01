@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DATE_FORMAT, formatDate, formatTimeAgo } from "./date";
+import { DATE_FORMAT, formatDate, formatDateUTC, formatTimeAgo } from "./date";
 
 describe("formatDate", () => {
   const iso = "2026-08-01T03:56:00.000Z";
@@ -18,6 +18,26 @@ describe("formatDate", () => {
 
   it("returns an empty string for invalid input", () => {
     expect(formatDate("not-a-date")).toBe("");
+  });
+});
+
+describe("formatDateUTC", () => {
+  const iso = "2026-09-01T00:10:00.000Z";
+
+  it("formats date and time in UTC with a suffix", () => {
+    expect(formatDateUTC(iso)).toBe("Sep 1, 2026 00:10 (UTC)");
+  });
+
+  it("formats month, day, and year in UTC", () => {
+    expect(formatDateUTC(iso, DATE_FORMAT.MonthDayYear)).toBe("Sep 1, 2026 (UTC)");
+  });
+
+  it("formats month and day in UTC", () => {
+    expect(formatDateUTC(iso, DATE_FORMAT.MonthDay)).toBe("Sep 1 (UTC)");
+  });
+
+  it("returns an empty string for invalid input", () => {
+    expect(formatDateUTC("not-a-date")).toBe("");
   });
 });
 

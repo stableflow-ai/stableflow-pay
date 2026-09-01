@@ -5,7 +5,7 @@ Import from `@/utils`. Search this module (and `src/lib/`) before writing a new 
 After adding or changing a public util, update this file.
 
 ```ts
-import { formatAddress, formatAmount, formatDate, isHttpUrl } from "@/utils";
+import { formatAddress, formatAmount, formatDate, formatDateUTC, isHttpUrl } from "@/utils";
 ```
 
 ## Address
@@ -28,15 +28,17 @@ Moved from `src/lib/address-validation.ts` and `src/lib/address.ts`.
 
 Path: `src/utils/date.ts`
 
-Uses `date-fns`. ISO strings such as `2026-08-20T08:51:55.754Z` are parsed as `Date` and formatted in the **local** timezone. Invalid input returns `""`.
+Uses `date-fns`. ISO strings such as `2026-08-20T08:51:55.754Z` are parsed as `Date`. Invalid input returns `""`.
 
-`formatDate(value, variant?)` — `DATE_FORMAT`:
+`formatDate(value, variant?)` — local timezone, `DATE_FORMAT`:
 
 | Variant | Pattern | Example |
 | --- | --- | --- |
 | `monthDay` | `MMM d` | `Aug 1` |
 | `monthDayYear` | `MMM d, yyyy` | `Aug 1, 2026` |
 | `dateTime` (default) | `MMM d, yyyy HH:mm` | `Aug 1, 2026 11:56` (24h) |
+
+`formatDateUTC(value, variant?)` — same variants as `formatDate`, formatted in UTC with a trailing ` (UTC)`: `Sep 1, 2026 00:10 (UTC)`.
 
 `formatTimeAgo(value, now?)` — absolute interval to `now` (default `new Date()`), largest unit only, no `ago` suffix: `45 s`, `1 min` / `10 mins`, `1 hour` / `2 hours`, then `day(s)`, `week(s)`, `month(s)`, `year(s)`.
 

@@ -41,6 +41,23 @@ export function formatDate(
   return format(date, DATE_FORMAT_PATTERN[variant]);
 }
 
+export function formatDateUTC(
+  value: Date | string | number,
+  variant: DateFormatVariant = DATE_FORMAT.DateTime,
+): string {
+  const date = toDate(value);
+  if (!date) return "";
+  const utcDate = new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+  );
+  return `${format(utcDate, DATE_FORMAT_PATTERN[variant])} (UTC)`;
+}
+
 export function formatTimeAgo(value: Date | string | number, now: Date = new Date()): string {
   const date = toDate(value);
   if (!date) return "";
