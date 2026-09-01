@@ -149,3 +149,7 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+svg.recharts-surface {
+  outline: none;
+}
