@@ -20,6 +20,12 @@ export function reportOptionalApiKeyId(value: string): number | undefined {
   return Number.isInteger(id) && id > 0 ? id : undefined;
 }
 
+export function reportOptionalLinkId(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === REPORT_FILTER_ALL) return undefined;
+  return trimmed;
+}
+
 export function reportAmountQuery(filter: string): { min_amount?: number; max_amount?: number } {
   if (filter === REPORT_AMOUNT_FILTER.Under1k) return { min_amount: 0, max_amount: 1000 };
   if (filter === REPORT_AMOUNT_FILTER.From1kTo10k) return { min_amount: 1000, max_amount: 10000 };

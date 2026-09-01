@@ -12,7 +12,7 @@ The trigger uses `IconArrowDown`; the icon rotates `180deg` while open. The pane
 - `box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.06)`
 - Montserrat Medium 16px / `#000`
 
-Closes on outside click, Escape, and scroll.
+Closes on outside click, Escape, and scroll outside the panel. Scrolling inside the panel does not close it.
 
 The panel is `position: fixed`. `useFloatingPosition` measures it off-flow (hidden, origin `0,0`) before clamping, and keeps CSS width classes such as `w-[285px]` / `w-max` so the first open is not pinned to the left edge of the viewport.
 
@@ -36,7 +36,9 @@ The panel is `position: fixed`. `useFloatingPosition` measures it off-flow (hidd
 | `disabled` | `boolean` | `false` | |
 | `className` | `string` | — | Outer wrapper |
 | `triggerClassName` | `string` | — | Trigger button |
-| `panelClassName` | `string` | — | Portaled panel |
+| `panelClassName` | `string` | — | Portaled panel. Use `max-h-* overflow-y-auto` with `onReachEnd` |
+| `onReachEnd` | `() => void` | — | Fired when the panel sentinel enters view (infinite load). Caller should guard with `hasNextPage` / `isFetchingNextPage` |
+| `loadingMore` | `boolean` | `false` | Shows a spinner at the bottom of the panel |
 
 ## Example
 

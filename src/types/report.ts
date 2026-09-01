@@ -2,6 +2,7 @@ export interface ReportAnalyticsQuery {
   start_time?: number;
   end_time?: number;
   api_key_id?: number;
+  link_id?: string;
   network?: string;
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DateRangePicker } from "@/components/date-range-picker/DateRangePicker";
 import { lastNDaysRange, rangeToUnixSeconds } from "@/components/date-range-picker/utils";
 import { IconExportLink } from "@/components/icons/link";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table/Table";
 import { FIXED_CHAINS, txExplorerUrl } from "@/config/chains";
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
+import { usePaymentLinksInfiniteQuery } from "@/hooks/use-payment-links-api";
 import {
   useExportReportPaymentsMutation,
   useReportAnalyticsQuery,
@@ -32,6 +33,7 @@ import {
   REPORT_AMOUNT_FILTER,
   REPORT_AMOUNT_OPTIONS,
   REPORT_FILTER_ALL,
+  REPORT_LINKS_PAGE_SIZE,
   REPORT_TABLE_COLUMNS,
   REPORT_TIME_PRESET,
   REPORT_TOKENS,
@@ -43,6 +45,7 @@ import {
   reportDailyDateKey,
   reportOptionalApiKeyId,
   reportOptionalFilter,
+  reportOptionalLinkId,
   reportPaymentsFilters,
   reportPaymentsListQuery,
   reportsError,
@@ -66,8 +69,10 @@ function chartNumber(value: string): number {
 export function ReportsView() {
   const toast = useToast();
   const keysQuery = useApiKeysQuery();
+  const linksQuery = usePaymentLinksInfiniteQuery({ pageSize: REPORT_LINKS_PAGE_SIZE });
   const [range, setRange] = useState(() => lastNDaysRange(REPORT_TIME_PRESET.Days30));
   const [apiKey, setApiKey] = useState(REPORT_FILTER_ALL);
+  const [linkId, setLinkId] = useState(REPORT_FILTER_ALL);
   const [network, setNetwork] = useState(REPORT_FILTER_ALL);
   const [sourceNetwork, setSourceNetwork] = useState(REPORT_FILTER_ALL);
   const [sourceToken, setSourceToken] = useState(REPORT_FILTER_ALL);
@@ -83,11 +88,28 @@ export function ReportsView() {
     ];
   }, [keysQuery.data]);
 
+  const linkOptions = useMemo(() => {
+    const links = linksQuery.data?.pages.flatMap((chunk) => chunk.list) ?? [];
+    return [
+      { value: REPORT_FILTER_ALL, label: "All" },
+      ...links.map((link) => ({
+        value: link.linkId,
+        label: link.title.trim() || link.linkId,
+      })),
+    ];
+  }, [linksQuery.data]);
+
+  const loadMoreLinks = useCallback(() => {
+    if (!linksQuery.hasNextPage || linksQuery.isFetchingNextPage) return;
+    void linksQuery.fetchNextPage();
+  }, [linksQuery.fetchNextPage, linksQuery.hasNextPage, linksQuery.isFetchingNextPage]);
+
   const times = rangeToUnixSeconds(range);
   const analyticsQuery = useReportAnalyticsQuery({
     start_time: times.start_time,
     end_time: times.end_time,
     api_key_id: reportOptionalApiKeyId(apiKey),
+    link_id: reportOptionalLinkId(linkId),
     network: reportOptionalFilter(network),
   });
 
@@ -167,6 +189,17 @@ export function ReportsView() {
           options={apiKeyOptions}
           className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
           triggerClassName="w-full"
+        />
+        <Dropdown
+          label="Payment Link"
+          value={linkId}
+          onChange={setLinkId}
+          options={linkOptions}
+          onReachEnd={loadMoreLinks}
+          loadingMore={linksQuery.isFetchingNextPage}
+          className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
+          triggerClassName="w-full"
+          panelClassName="max-h-60 overflow-y-auto"
         />
         <Dropdown
           label="Networks"

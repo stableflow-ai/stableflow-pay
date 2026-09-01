@@ -135,7 +135,7 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
         <SummaryField label="Amount">
           {isPaymentLinkOpen(detail) ? "No limit" : formatAmount(detail.amount, { prefix: "", maxDecimals: 2, showDust: true })}
         </SummaryField>
-        <SummaryField label="Revenue">{detail.revenue || "0"}</SummaryField>
+        <SummaryField label="Revenue">{formatAmount(detail.revenue || "0", { maxDecimals: 6, showDust: true })}</SummaryField>
         <SummaryField label="Transactions">{detail.payments}</SummaryField>
       </div>
 

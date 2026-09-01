@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createPaymentLink,
   deletePaymentLink,
@@ -37,6 +37,20 @@ export function usePaymentLinksQuery(params: PayPaymentLinksQuery) {
   return useQuery({
     queryKey: queryKeys.paymentLinks.list(params),
     queryFn: () => listPaymentLinks(params),
+    enabled: Boolean(token),
+  });
+}
+
+export function usePaymentLinksInfiniteQuery(params: Omit<PayPaymentLinksQuery, "page">) {
+  const token = useAuthStore((state) => state.token);
+  return useInfiniteQuery({
+    queryKey: queryKeys.paymentLinks.infinite(params),
+    queryFn: ({ pageParam }) => listPaymentLinks({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      if (allPages.length >= lastPage.totalPage) return undefined;
+      return allPages.length + 1;
+    },
     enabled: Boolean(token),
   });
 }

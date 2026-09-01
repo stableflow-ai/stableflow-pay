@@ -26,6 +26,8 @@ export const REPORT_TOKENS = PAYOUT_SYMBOLS;
 
 export const REPORT_PAGE_SIZE = 12;
 
+export const REPORT_LINKS_PAGE_SIZE = 20;
+
 export const REPORT_VOLUME_CHART_COLOR = "#4DA0FF";
 export const REPORT_TX_CHART_COLOR = "#9BA84A";
 

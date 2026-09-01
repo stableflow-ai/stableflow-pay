@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { IconArrowDown } from "@/components/icons/arrow-down";
+import { IconLoading } from "@/components/icons/loading";
 import { cn } from "@/lib/utils";
 import {
   FLOATING_ALIGN,
@@ -26,6 +27,8 @@ export type DropdownProps = {
   className?: string;
   triggerClassName?: string;
   panelClassName?: string;
+  onReachEnd?: () => void;
+  loadingMore?: boolean;
 };
 
 export function Dropdown(props: DropdownProps) {
@@ -40,9 +43,14 @@ export function Dropdown(props: DropdownProps) {
     className,
     triggerClassName,
     panelClassName,
+    onReachEnd,
+    loadingMore = false,
   } = props;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const onReachEndRef = useRef(onReachEnd);
+  onReachEndRef.current = onReachEnd;
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [triggerWidth, setTriggerWidth] = useState<number>();
@@ -89,7 +97,11 @@ export function Dropdown(props: DropdownProps) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
     };
-    const onScroll = () => close();
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Node && panelRef.current?.contains(target)) return;
+      close();
+    };
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     window.addEventListener("scroll", onScroll, true);
@@ -99,6 +111,22 @@ export function Dropdown(props: DropdownProps) {
       window.removeEventListener("scroll", onScroll, true);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !onReachEnd) return;
+    const panel = panelRef.current;
+    const sentinel = sentinelRef.current;
+    if (!panel || !sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        onReachEndRef.current?.();
+      },
+      { root: panel, threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [open, onReachEnd, options.length, loadingMore]);
 
   return (
     <div className={cn("relative inline-block min-w-0", className)}>
@@ -162,6 +190,12 @@ export function Dropdown(props: DropdownProps) {
                   </button>
                 );
               })}
+              {onReachEnd ? <div ref={sentinelRef} className="h-px w-full" aria-hidden /> : null}
+              {loadingMore ? (
+                <div className="flex justify-center py-2">
+                  <IconLoading className="size-3.5 animate-spin text-[#909090]" />
+                </div>
+              ) : null}
             </div>,
             document.body,
           )

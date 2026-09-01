@@ -22,6 +22,7 @@ import {
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
 import { IconLoading } from "@/components/icons";
+import { formatAmount } from "@/utils";
 
 export function PaymentLinksTable({
   links,
@@ -142,7 +143,7 @@ function PaymentLinkRow({
       </TableCell>
       <TableCell className="py-0">{PAYMENT_LINK_TYPE_LABEL[paymentLinkType(link)]}</TableCell>
       <TableCell className="py-0">{formatLinkAmount(link)}</TableCell>
-      <TableCell className="py-0">{link.revenue || "0"}</TableCell>
+      <TableCell className="py-0">{formatAmount(link.revenue || "0", { maxDecimals: 6, showDust: true })}</TableCell>
       <TableCell className="gap-2 py-0">
         <span>{link.payments}</span>
         <button

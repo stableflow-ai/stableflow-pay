@@ -159,7 +159,7 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/webhooks/{webhookId}/disable` | yes | — | `string` | `disableWebhook` | `useWebhookMutations` |
 | POST | `/v1/pay/webhooks/{webhookId}/rotate-secret` | yes | — | `PayWebhookRotateSecretResp` | `rotateWebhookSecret` | `useWebhookMutations` |
 | POST | `/v1/pay/dev/simulateWebhook` | yes | `SimulateWebhookBody` | `SimulateWebhookResp` | `simulateWebhook` | `useWebhookMutations` |
-| GET | `/v1/pay/links` | yes | `page`, `pageSize`, `q` | `PayPaymentLinksResp` | `listPaymentLinks` | `usePaymentLinksQuery` |
+| GET | `/v1/pay/links` | yes | `page`, `pageSize`, `q` | `PayPaymentLinksResp` | `listPaymentLinks` | `usePaymentLinksQuery` / `usePaymentLinksInfiniteQuery` |
 | GET | `/v1/pay/links/overview` | yes | — | `PayPaymentLinksOverview` | `getPaymentLinksOverview` | `usePaymentLinksOverviewQuery` |
 | POST | `/v1/pay/links` | yes | `PayPaymentLinkBody` (`default_address`) | `PayPaymentLink` | `createPaymentLink` | `usePaymentLinkMutations` |
 | GET | `/v1/pay/links/default-addresses` | yes | — | `PayDefaultAddress[]` | `listDefaultAddresses` | `useDefaultAddressesQuery` |
@@ -198,7 +198,7 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/apiKeys` | yes | `PayApiKeyBody` | `PayApiKey` | `createApiKey` | `useApiKeyMutations` |
 | POST | `/v1/pay/apiKeys/{id}` | yes | `PayApiKeyBody` | `string` | `updateApiKey` | `useApiKeyMutations` |
 | DELETE | `/v1/pay/apiKeys/{id}` | yes | — | `void` | `deleteApiKey` | `useApiKeyMutations` |
-| GET | `/v1/pay/report/analytics` | yes | `start_time`, `end_time`, `api_key_id`, `network` | `ReportAnalyticsResp` | `getReportAnalytics` | `useReportAnalyticsQuery` |
+| GET | `/v1/pay/report/analytics` | yes | `start_time`, `end_time`, `api_key_id`, `link_id`, `network` | `ReportAnalyticsResp` | `getReportAnalytics` | `useReportAnalyticsQuery` |
 | GET | `/v1/pay/report/payments` | yes | `page`, `pageSize`, `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | `ReportPaymentsResp` | `getReportPayments` | `useReportPaymentsQuery` |
 | GET | `/v1/pay/report/payments/export` | yes | `network`, `symbol`, `destination_network`, `destination_symbol`, `min_amount`, `max_amount` | CSV blob | `exportReportPayments` | `useExportReportPaymentsMutation` |
 | POST | `/v1/pay/request` | yes | `PayCreateRequestParam` | `PayCreateRequestResp` | `createPayRequest` | `useCreatePayRequestMutation` |

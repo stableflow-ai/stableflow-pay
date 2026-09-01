@@ -2,6 +2,10 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-01
+
+- **Dropdown:** Panel scroll no longer closes the menu. Optional `onReachEnd` (sentinel IntersectionObserver) and `loadingMore` for infinite option lists.
+
 ## 2026-08-30
 
 - **Drawer:** `panelClassName` sizes the positioned shell. Right/left default width is on the shell (`w-[min(100%,420px)]`); the Card is `w-full`. Overlay `mask={false}` uses `pointer-events-none` on the root so the page behind stays clickable; the panel is `pointer-events-auto`.

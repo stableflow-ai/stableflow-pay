@@ -25,6 +25,7 @@ export async function getReportAnalytics(params: ReportAnalyticsQuery): Promise<
       await http<unknown>(`${PAY_API_PREFIX}/report/analytics`, {
         query: {
           api_key_id: params.api_key_id,
+          link_id: params.link_id,
           network: params.network,
           start_time: params.start_time,
           end_time: params.end_time,
