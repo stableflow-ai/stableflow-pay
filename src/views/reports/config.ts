@@ -40,8 +40,5 @@ export const REPORT_PAGE_SIZE = 12;
 
 export const REPORT_LINKS_PAGE_SIZE = 20;
 
-export const REPORT_VOLUME_CHART_COLOR = "#4DA0FF";
-export const REPORT_TX_CHART_COLOR = "#9BA84A";
-
 export const REPORT_TABLE_COLUMNS =
   "minmax(72px,0.6fr) minmax(140px,1.1fr) 28px minmax(88px,0.7fr) minmax(150px,1.2fr) minmax(130px,1fr) minmax(130px,1fr) minmax(140px,1fr)";

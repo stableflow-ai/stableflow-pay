@@ -1,14 +1,5 @@
 import type { OverviewAnalyticsPeriod, OverviewStats } from "@/types/overview";
 
-export const OVERVIEW_ANALYTICS_TYPE = "paylink";
-
-export const OVERVIEW_METRIC = {
-  Volume: "volume",
-  Transaction: "transaction",
-} as const;
-
-export type OverviewMetric = (typeof OVERVIEW_METRIC)[keyof typeof OVERVIEW_METRIC];
-
 export const OVERVIEW_RANGE = {
   Daily: "day",
   Weekly: "week",
@@ -24,17 +15,11 @@ export const EMPTY_OVERVIEW_STATS: OverviewStats = {
   apiKeys: 0,
 };
 
-export const OVERVIEW_CHART_COLOR = "#3F8AFB";
 export const OVERVIEW_LINK_CLASS =
   "font-montserrat text-base font-medium capitalize text-[#3f8afb] hover:text-[#3f8afb]/80";
 export const OVERVIEW_MUTED_LABEL_CLASS =
   "font-montserrat text-base font-medium capitalize text-[#aaa]";
 export const OVERVIEW_VALUE_CLASS = "font-montserrat text-[26px] font-medium capitalize text-black";
-
-export const OVERVIEW_METRIC_OPTIONS: { value: OverviewMetric; label: string }[] = [
-  { value: OVERVIEW_METRIC.Volume, label: "Volume" },
-  { value: OVERVIEW_METRIC.Transaction, label: "Transaction" },
-];
 
 export const OVERVIEW_RANGE_OPTIONS: { value: OverviewAnalyticsPeriod; label: string }[] = [
   { value: OVERVIEW_RANGE.Daily, label: "Daily" },

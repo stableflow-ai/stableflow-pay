@@ -46,7 +46,7 @@ export async function getOverview(): Promise<OverviewStats> {
 
 export async function getOverviewPaymentsAnalytics(
   period: OverviewAnalyticsPeriod,
-  type: string,
+  type?: string,
 ): Promise<OverviewPaymentsAnalytics> {
   return mapOverviewPaymentsAnalytics(
     await http<unknown>(`${PAY_API_PREFIX}/payments/analytics`, {

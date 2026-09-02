@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DateRangePicker } from "@/components/date-range-picker/DateRangePicker";
 import { lastNDaysRange, rangeToUnixSeconds } from "@/components/date-range-picker/utils";
+import { PaymentsAreaChart } from "@/components/payments-chart/PaymentsAreaChart";
+import { CHART_METRIC, type ChartMetric } from "@/components/payments-chart/config";
 import { IconExportLink } from "@/components/icons/link";
 import { Icon2Right } from "@/components/icons/to-right";
 import { Button } from "@/components/ui/button/Button";
@@ -28,7 +30,6 @@ import useToast from "@/hooks/use-toast";
 import { formatAmount, formatDate } from "@/utils";
 import { ReportsAddressCell } from "./components/ReportsAddressCell";
 import { ReportsAssetCell } from "./components/ReportsAssetCell";
-import { ReportsLineChart } from "./components/ReportsLineChart";
 import { ReportsSourceToggle } from "./components/ReportsSourceToggle";
 import {
   REPORT_AMOUNT_FILTER,
@@ -39,12 +40,11 @@ import {
   REPORT_TABLE_COLUMNS,
   REPORT_TIME_PRESET,
   REPORT_TOKENS,
-  REPORT_TX_CHART_COLOR,
-  REPORT_VOLUME_CHART_COLOR,
   type ReportSource,
 } from "./config";
 import {
   eachDateKey,
+  reportChartLabel,
   reportDailyDateKey,
   reportOptionalApiKeyId,
   reportOptionalFilter,
@@ -84,6 +84,7 @@ export function ReportsView() {
   const [amountFilter, setAmountFilter] = useState<string>(REPORT_AMOUNT_FILTER.All);
   const [page, setPage] = useState(1);
   const [reportSource, setReportSource] = useState<ReportSource>(REPORT_SOURCE.ApiKey);
+  const [chartMetric, setChartMetric] = useState<ChartMetric>(CHART_METRIC.Volume);
   const [tableSource, setTableSource] = useState<ReportSource>(REPORT_SOURCE.ApiKey);
   const [tableApiKey, setTableApiKey] = useState(REPORT_FILTER_ALL);
   const [tableLinkId, setTableLinkId] = useState(REPORT_FILTER_ALL);
@@ -150,19 +151,16 @@ export function ReportsView() {
     return map;
   }, [analyticsQuery.data?.dailyStats]);
 
-  const volumePoints = useMemo(() => {
-    return eachDateKey(range).map((key) => ({
-      label: key,
-      value: dailyByDate.get(key)?.volume ?? 0,
-    }));
-  }, [dailyByDate, range]);
-
-  const txPoints = useMemo(() => {
-    return eachDateKey(range).map((key) => ({
-      label: key,
-      value: dailyByDate.get(key)?.count ?? 0,
-    }));
-  }, [dailyByDate, range]);
+  const chartPoints = useMemo(() => {
+    const multiYear = range.from.getFullYear() !== range.to.getFullYear();
+    return eachDateKey(range).map((key) => {
+      const day = dailyByDate.get(key);
+      return {
+        label: reportChartLabel(key, multiYear),
+        value: chartMetric === CHART_METRIC.Transaction ? (day?.count ?? 0) : (day?.volume ?? 0),
+      };
+    });
+  }, [chartMetric, dailyByDate, range]);
 
   const totalPage = Math.max(1, paymentsQuery.data?.totalPage ?? 1);
   const safePage = Math.min(page, totalPage);
@@ -258,16 +256,12 @@ export function ReportsView() {
         <p className="font-montserrat text-sm text-danger">{analyticsError}</p>
       ) : null}
 
-      <ReportsLineChart
-        title="Volume by Days"
-        points={volumePoints}
-        color={REPORT_VOLUME_CHART_COLOR}
-        currency
-      />
-      <ReportsLineChart
-        title="Transactions by Days"
-        points={txPoints}
-        color={REPORT_TX_CHART_COLOR}
+      <PaymentsAreaChart
+        title={chartMetric === CHART_METRIC.Transaction ? "Transactions by Days" : "Volume by Days"}
+        points={chartPoints}
+        metric={chartMetric}
+        onMetricChange={setChartMetric}
+        loading={analyticsQuery.isPending}
       />
 
       <Table

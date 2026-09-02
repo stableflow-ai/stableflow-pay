@@ -8,7 +8,6 @@ import { getOverview, getOverviewPaymentsAnalytics } from "@/api/overview";
 import { queryKeys } from "@/api/query-keys";
 import { useAuthStore } from "@/stores/auth";
 import type { OverviewAnalyticsPeriod } from "@/types/overview";
-import { OVERVIEW_ANALYTICS_TYPE } from "@/views/overview/config";
 
 export function useOverviewQuery() {
   const token = useAuthStore((state) => state.token);
@@ -23,7 +22,7 @@ export function useOverviewPaymentsAnalyticsQuery(period: OverviewAnalyticsPerio
   const token = useAuthStore((state) => state.token);
   return useQuery({
     queryKey: queryKeys.overview.analytics(period),
-    queryFn: () => getOverviewPaymentsAnalytics(period, OVERVIEW_ANALYTICS_TYPE),
+    queryFn: () => getOverviewPaymentsAnalytics(period),
     enabled: Boolean(token),
   });
 }

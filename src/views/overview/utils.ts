@@ -1,7 +1,6 @@
-import { formatAmount } from "@/utils";
+import { CHART_METRIC, type ChartMetric } from "@/components/payments-chart/config";
 import type { OverviewAnalyticsPeriod } from "@/types/overview";
-import { OVERVIEW_METRIC, type OverviewMetric } from "./config";
-import Big from "big.js";
+import { formatAmount } from "@/utils";
 
 const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -12,43 +11,16 @@ export function splitUsdAmount(value: string | number): { whole: string; fractio
   return { whole: formatted.slice(0, dot), fraction: formatted.slice(dot) };
 }
 
-export function chartYTicks(maxValue: number, options?: { integer?: boolean }): number[] {
-  const niceMax = niceCeil(maxValue);
-  if (options?.integer) {
-    const step = Math.max(1, Math.ceil(niceMax / 5));
-    const top = step * 5;
-    return [0, step, 2 * step, 3 * step, 4 * step, top];
-  }
-  const step = niceMax / 5;
-  return [0, step, 2 * step, 3 * step, 4 * step, niceMax];
-}
-
-export function formatChartAxis(value: number, metric: OverviewMetric): string {
-  if (metric === OVERVIEW_METRIC.Transaction) return formatAmount(value, { prefix: "", maxDecimals: 0 });
-  if (value === 0) return "$0";
-  if (value >= 1000) return `$${value / 1000}K`;
-  if (value < 1) return formatAmount(value, { maxDecimals: 6 });
-  return formatAmount(value, { maxDecimals: 6 });
-}
-
 export function formatOverviewChartLabel(iso: string, period: OverviewAnalyticsPeriod): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  const month = MONTH_SHORT[date.getUTCMonth()];
-  if (period === "month") return `${month} ${date.getUTCFullYear()}`;
-  return `${month} ${date.getUTCDate()}`;
+  const month = MONTH_SHORT[date.getMonth()];
+  if (period === "month") return `${month} ${date.getFullYear()}`;
+  return `${month} ${date.getDate()}`;
 }
 
-export function overviewChartValue(volume: string, transactions: number, metric: OverviewMetric): number {
-  if (metric === OVERVIEW_METRIC.Transaction) return transactions;
+export function overviewChartValue(volume: string, transactions: number, metric: ChartMetric): number {
+  if (metric === CHART_METRIC.Transaction) return transactions;
   const parsed = Number(volume);
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function niceCeil(value: number): number {
-  if (value <= 0) return 1;
-  const magnitude = 10 ** Math.floor(Math.log10(value));
-  const normalized = value / magnitude;
-  const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-  return nice * magnitude;
 }

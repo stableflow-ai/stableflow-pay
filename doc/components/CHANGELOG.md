@@ -2,6 +2,10 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-02
+
+- **PaymentsAreaChart:** Shared payments area chart (`src/components/payments-chart/`) for Overview and Reports. Volume / Transaction toggle, even X-axis sampling from plot width (`evenCategoryTicks` + `interval={0}`), first/last ticks edge-aligned so labels are not clipped, optional `headerExtra`.
+
 ## 2026-09-01
 
 - **Dropdown:** Panel scroll no longer closes the menu. Optional `onReachEnd` (sentinel IntersectionObserver) and `loadingMore` for infinite option lists.

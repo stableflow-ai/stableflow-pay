@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, format, startOfDay, subDays } from "date-fns";
+import { differenceInCalendarDays, format, parseISO, startOfDay, subDays } from "date-fns";
 import type { DateRangeValue } from "@/components/date-range-picker/utils";
 import { ApiError } from "@/lib/api-error";
 import type { ReportPaymentType, ReportPaymentsExportQuery } from "@/types/report";
@@ -87,4 +87,10 @@ export function eachDateKey(range: DateRangeValue) {
     keys.push(format(subDays(startOfDay(range.to), days - i), "yyyy-MM-dd"));
   }
   return keys;
+}
+
+export function reportChartLabel(key: string, withYear: boolean): string {
+  const parsed = parseISO(key);
+  if (Number.isNaN(parsed.getTime())) return key;
+  return format(parsed, withYear ? "MMM d, yyyy" : "MMM d");
 }

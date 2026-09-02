@@ -18,6 +18,7 @@ Non-business primitives in `src/components/ui/`. Read the matching doc before us
 | Switch | `src/components/ui/switch/Switch.tsx` | [switch.md](switch.md) |
 | Checkbox | `src/components/ui/checkbox/Checkbox.tsx` | [checkbox.md](checkbox.md) |
 | DateRangePicker | `src/components/date-range-picker/DateRangePicker.tsx` | [date-range-picker.md](date-range-picker.md) |
+| PaymentsAreaChart | `src/components/payments-chart/PaymentsAreaChart.tsx` | [payments-chart.md](payments-chart.md) |
 
 `src/components/ui/overlay/` is **internal**. Dialog and Drawer own the public overlay API. Do not import Overlay from feature code unless you are extending those primitives.
 
