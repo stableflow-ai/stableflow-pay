@@ -12,8 +12,8 @@ import {
 import { Card } from "@/components/ui/card/Card";
 import { cn } from "@/lib/utils";
 import {
-  CHART_LINE_COLOR,
   CHART_METRIC,
+  CHART_METRIC_COLOR,
   CHART_METRIC_OPTIONS,
   CHART_PLOT_RIGHT_MARGIN,
   CHART_Y_AXIS_WIDTH,
@@ -50,6 +50,7 @@ export function PaymentsAreaChart(props: {
   className?: string;
 }) {
   const { title, points, metric, onMetricChange, loading, headerExtra, className } = props;
+  const color = CHART_METRIC_COLOR[metric];
   const gradientId = useId().replaceAll(":", "");
   const fillId = `paymentsAreaFill-${gradientId}`;
   const hostRef = useRef<HTMLDivElement>(null);
@@ -113,8 +114,8 @@ export function PaymentsAreaChart(props: {
             <AreaChart data={chartData} margin={{ top: 8, right: CHART_PLOT_RIGHT_MARGIN, left: 0, bottom: 4 }}>
               <defs>
                 <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={CHART_LINE_COLOR} stopOpacity={0.28} />
-                  <stop offset="100%" stopColor={CHART_LINE_COLOR} stopOpacity={0} />
+                  <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+                  <stop offset="100%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="#eee" />
@@ -142,6 +143,8 @@ export function PaymentsAreaChart(props: {
                   formatChartAxis(Number(value), metric),
                   metric === CHART_METRIC.Volume ? "Volume" : "Transaction",
                 ]}
+                itemStyle={{ color }}
+                cursor={{ stroke: color, strokeWidth: 1 }}
                 labelStyle={{ fontFamily: "Montserrat", fontSize: 12 }}
                 contentStyle={{
                   borderRadius: 12,
@@ -153,12 +156,12 @@ export function PaymentsAreaChart(props: {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke={CHART_LINE_COLOR}
+                stroke={color}
                 strokeWidth={2}
                 fill={`url(#${fillId})`}
                 fillOpacity={1}
                 dot={false}
-                activeDot={{ r: 5, stroke: CHART_LINE_COLOR, fill: "#fff" }}
+                activeDot={{ r: 5, stroke: color, fill: "#fff" }}
               />
               {lastPoint ? (
                 <ReferenceDot
@@ -166,7 +169,7 @@ export function PaymentsAreaChart(props: {
                   y={lastPoint.value}
                   r={5}
                   fill="#fff"
-                  stroke={CHART_LINE_COLOR}
+                  stroke={color}
                   strokeWidth={2}
                 />
               ) : null}

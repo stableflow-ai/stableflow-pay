@@ -18,7 +18,7 @@ This is a business widget (not a `src/components/ui/` primitive). It owns the Vo
 | `headerExtra` | `ReactNode?` | Extra header control (Overview period dropdown) |
 | `className` | `string?` | Card override |
 
-Constants live in `config.ts`: `CHART_METRIC`, `CHART_METRIC_OPTIONS`, `CHART_LINE_COLOR`.
+Constants live in `config.ts`: `CHART_METRIC`, `CHART_METRIC_OPTIONS`, `CHART_METRIC_COLOR` (Volume `#6284F5`, Transaction `#84A20F`).
 
 Helpers in `utils.ts`:
 
