@@ -16,7 +16,7 @@ Moved from `src/lib/address-validation.ts` and `src/lib/address.ts`.
 
 | Function | Notes |
 | --- | --- |
-| `validateAddress(address, chainKind)` | `{ isValid, error? }` for EVM / Near / Solana / Tron. Near accepts named accounts, 64-char hex implicit accounts, and `0x`+40hex Aurora-mapped accounts |
+| `validateAddress(address, chainKind)` | `{ isValid, error? }` for EVM / Near / Solana / Tron. Near uses near-sdk-js / Nomicon account ID rules: length 2–64, lowercase `a-z` / digits / `.` `-` `_` |
 | `isAddressValid(address, chainKind)` | Boolean wrapper |
 | `normalizeAddress(address, chainKind)` | Checksum EVM, lowercase Near, otherwise trimmed |
 | `sameAddress(a, b, chainKind?)` | Case-sensitive for Solana and Tron |
