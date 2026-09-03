@@ -63,7 +63,9 @@ export function ApiKeysTable({
         <TableBody>
           {apiKeys.map((row) => (
             <TableRow key={row.id}>
-              <TableCell>{row.name}</TableCell>
+              <TableCell>
+                <div className="truncate">{row.name}</div>
+              </TableCell>
               <TableCell>
                 <span className="inline-flex min-w-0 items-center gap-1.5">
                   <span className="truncate">{maskApiKey(row.apiKey)}</span>

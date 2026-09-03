@@ -2,6 +2,10 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-03
+
+- **Table:** Scroll children wrap in `min-w-full` (no `w-max`). `fr` columns size to the card so overflow can truncate; header and body stay on the same tracks. Horizontal scroll still applies when column mins exceed the card.
+
 ## 2026-09-02
 
 - **PaymentsAreaChart:** Shared payments area chart (`src/components/payments-chart/`) for Overview and Reports. Volume / Transaction toggle, even X-axis sampling from plot width (`evenCategoryTicks` + `interval={0}`), first/last ticks edge-aligned so labels are not clipped, optional `headerExtra`. Line, fill, end-dot, and tooltip colors follow `CHART_METRIC_COLOR` (Volume `#6284F5`, Transaction `#84A20F`).
