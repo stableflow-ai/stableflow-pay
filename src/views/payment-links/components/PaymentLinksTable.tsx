@@ -21,8 +21,9 @@ import {
   paymentLinkType,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
-import { IconLoading } from "@/components/icons";
-import { formatAmount } from "@/utils";
+import { IconCopy, IconLoading } from "@/components/icons";
+import { formatAddress, formatAmount } from "@/utils";
+import useToast from "@/hooks/use-toast";
 
 export function PaymentLinksTable({
   links,
@@ -78,6 +79,7 @@ export function PaymentLinksTable({
     >
       <TableHeader>
         <TableHead className="text-[#606060] first:pl-3">Name</TableHead>
+        <TableHead>Receive address</TableHead>
         <TableHead>Type</TableHead>
         <TableHead>Amount</TableHead>
         <TableHead>Revenue</TableHead>
@@ -132,6 +134,7 @@ function PaymentLinkRow({
 }) {
   const isActive = isPaymentLinkActive(link.status);
   const switchLabel = isActive ? "Disable payment link" : "Enable payment link";
+  const toast = useToast();
 
   return (
     <TableRow className="h-14 rounded-[12px] border-b-0 bg-[#f6f6f6]">
@@ -140,6 +143,24 @@ function PaymentLinkRow({
         <span className="w-full truncate font-montserrat text-xs font-medium text-[#aaa]">
           {link.description || "No description"}
         </span>
+      </TableCell>
+      <TableCell className="py-0 flex items-center gap-1">
+        <span>{formatAddress(link.recipient)}</span>
+        <button
+          type="button"
+          className="shrink-0 cursor-pointer text-[#909090] hover:text-black"
+          aria-label="Copy address"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(link.recipient);
+              toast.success({ title: "Copied" });
+            } catch {
+              toast.fail({ title: "Could not copy" });
+            }
+          }}
+        >
+          <IconCopy className="size-3" />
+        </button>
       </TableCell>
       <TableCell className="py-0">{PAYMENT_LINK_TYPE_LABEL[paymentLinkType(link)]}</TableCell>
       <TableCell className="py-0">{formatLinkAmount(link)}</TableCell>
