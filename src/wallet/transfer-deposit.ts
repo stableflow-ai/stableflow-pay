@@ -7,6 +7,7 @@ import { transferErc20, transferNativeEvm } from "./evm/transfer";
 import { transferFt, transferNativeNear, transferNearViaWrap } from "./near/transfer";
 import { transferNativeSol, transferSpl } from "./solana/transfer";
 import { transferNativeTrx, transferTrc20 } from "./tron/transfer";
+import { transferNativeZec } from "./zec/transfer";
 
 export async function transferToDepositAddress(input: {
   token: IntentsToken;
@@ -56,6 +57,11 @@ export async function transferToDepositAddress(input: {
     if (native) return transferNativeTrx({ to, amountIn });
     if (!token.contractAddress) throw new Error("Missing token contract");
     return transferTrc20({ contractAddress: token.contractAddress, to, amountIn });
+  }
+
+  if (kind === "zec") {
+    if (!native) throw new Error("Zcash only supports native ZEC");
+    return transferNativeZec({ to, amountIn, decimals: token.decimals });
   }
 
   throw new Error(`Unsupported origin chain: ${kind}`);

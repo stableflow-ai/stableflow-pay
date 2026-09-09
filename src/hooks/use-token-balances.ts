@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef } from "react";
-import type { ChainOwners } from "@/wallet";
+import { CHAIN_KINDS, type ChainOwners } from "@/wallet";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 
 function ownersKey(owners: ChainOwners): string {
-  return (["evm", "near", "solana", "tron"] as const)
+  return CHAIN_KINDS
     .map((kind) => {
       const address = owners[kind] || "";
-      return `${kind}:${kind === "solana" ? address : address.toLowerCase()}`;
+      return `${kind}:${kind === "solana" || kind === "zec" ? address : address.toLowerCase()}`;
     })
     .join("|");
 }
 
 function hasAnyOwner(owners: ChainOwners): boolean {
-  return Boolean(owners.evm || owners.near || owners.solana || owners.tron);
+  return CHAIN_KINDS.some((kind) => Boolean(owners[kind]));
 }
 
 export function useEnsureTokenBalances(opts: {

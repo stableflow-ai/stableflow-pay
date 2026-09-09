@@ -17,6 +17,7 @@ const eth = chain({ blockchain: "eth", chainName: "Ethereum", chainKind: "evm" }
 const base = chain({ blockchain: "base", chainName: "Base", chainKind: "evm" });
 const sol = chain({ blockchain: "sol", chainName: "Solana", chainKind: "solana" });
 const tron = chain({ blockchain: "tron", chainName: "Tron", chainKind: "tron" });
+const zec = chain({ blockchain: "zec", chainName: "Zcash", chainKind: "zec" });
 
 
 describe("tokenBalanceUsd", () => {
@@ -41,9 +42,9 @@ describe("tokenBalanceUsd", () => {
 });
 
 describe("sortTokenSelectChains", () => {
-  it("orders Near, then EVM, then Solana, then Tron", () => {
-    const sorted = sortTokenSelectChains([tron, sol, eth, near, base]);
-    expect(sorted.map((item) => item.blockchain)).toEqual(["near", "eth", "base", "sol", "tron"]);
+  it("orders Near, then EVM, then Solana, then Tron, then Zcash", () => {
+    const sorted = sortTokenSelectChains([zec, tron, sol, eth, near, base]);
+    expect(sorted.map((item) => item.blockchain)).toEqual(["near", "eth", "base", "sol", "tron", "zec"]);
   });
 });
 

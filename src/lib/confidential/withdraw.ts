@@ -53,6 +53,9 @@ async function assertPrivateBalance(input: WithdrawConfidentialInput, intentsAcc
 export async function withdrawConfidentialPayment(input: WithdrawConfidentialInput): Promise<{
   depositAddress: string;
 }> {
+  if (input.chainKind === "zec") {
+    throw new Error("Zcash is not supported for confidential withdraw");
+  }
   const intentsAccountId = toIntentsAccountId(input.address, input.chainKind);
   await assertPrivateBalance(input, intentsAccountId);
   const quoted = await nearintentsApi.nearintentsQuote({

@@ -16,12 +16,12 @@ Moved from `src/lib/address-validation.ts` and `src/lib/address.ts`.
 
 | Function | Notes |
 | --- | --- |
-| `validateAddress(address, chainKind)` | `{ isValid, error? }` for EVM / Near / Solana / Tron. Near uses near-sdk-js / Nomicon account ID rules: length 2–64, lowercase `a-z` / digits / `.` `-` `_` |
+| `validateAddress(address, chainKind)` | `{ isValid, error? }` for EVM / Near / Solana / Tron / Zcash. Near uses near-sdk-js / Nomicon account ID rules: length 2–64, lowercase `a-z` / digits / `.` `-` `_`. Zcash accepts transparent t1/t3 only (NEAR Intents; regex, no checksum). Unified `u1` and Sapling `zs1` are rejected |
 | `isAddressValid(address, chainKind)` | Boolean wrapper |
 | `normalizeAddress(address, chainKind)` | Checksum EVM, lowercase Near, otherwise trimmed |
-| `sameAddress(a, b, chainKind?)` | Case-sensitive for Solana and Tron |
-| `resolveChainKind(networkOrKind)` | Maps aliases such as `sol` / `trx` |
-| `getAddressPlaceholder(chainKind)` | Input placeholder |
+| `sameAddress(a, b, chainKind?)` | Case-sensitive for Solana, Tron, and Zcash |
+| `resolveChainKind(networkOrKind)` | Maps aliases such as `sol` / `trx` / `zcash` |
+| `getAddressPlaceholder(chainKind)` | Input placeholder (`t1…` for Zcash) |
 | `formatAddress(address, prefix?, suffix?)` | Truncates long `0x` addresses (`0x12...45678`) |
 
 ## Date

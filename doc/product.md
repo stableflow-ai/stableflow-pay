@@ -81,4 +81,4 @@ Authenticated `/reports`. Top Key / Link, API key or payment link, network, and 
 
 ## Wallet and payout capability
 
-EVM (RainbowKit + wagmi), NEAR, Solana, and Tron adapters are mounted in `WalletProvider`. `WalletConnectDialog` is the wallet connect UI for upcoming payment-link and payout screens — it is not the Settings dialog. Cross-chain transfer, quote/swap/submit, confidential receive, and commit queues stay in `src/wallet/`, `src/api/`, `src/lib/confidential/`, and related stores/hooks.
+EVM (RainbowKit + wagmi), NEAR, Solana, Tron, and Zcash (Noir Wallet) adapters are mounted in `WalletProvider`. Zcash is payer-enabled and not a batch origin. `WalletConnectDialog` is the wallet connect UI for upcoming payment-link and payout screens — it is not the Settings dialog. Cross-chain transfer, quote/swap/submit, confidential receive, and commit queues stay in `src/wallet/`, `src/api/`, `src/lib/confidential/`, and related stores/hooks.

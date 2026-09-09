@@ -7,7 +7,7 @@ export function tokenSelectChainTitle(chain: Pick<ChainConfig, "blockchain" | "c
   return TOKEN_SELECT_CHAIN_TITLES[chain.blockchain] ?? chain.chainName;
 }
 
-/** Near, then EVM (registry order), then Solana, then Tron. */
+/** Near, then EVM (registry order), then Solana, then Tron, then Zcash. */
 export function sortTokenSelectChains(chains: readonly ChainConfig[]): ChainConfig[] {
   const fixedIndex = new Map(FIXED_CHAINS.map((chain, index) => [chain.blockchain, index]));
   return chains.slice().sort((a, b) => {

@@ -5,9 +5,9 @@
  * Employees no longer connect a wallet.
  */
 
-export type ChainKind = "evm" | "near" | "solana" | "tron";
+export type ChainKind = "evm" | "near" | "solana" | "tron" | "zec";
 
-export const CHAIN_KINDS: ChainKind[] = ["evm", "near", "solana", "tron"];
+export const CHAIN_KINDS: ChainKind[] = ["evm", "near", "solana", "tron", "zec"];
 
 /** Connected address for each chain currently linked in this browser session. */
 export type ChainOwners = Partial<Record<ChainKind, string>>;

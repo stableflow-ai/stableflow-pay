@@ -119,9 +119,7 @@ export function YouPaySection(props: {
         onSelect={({ token }) => {
           onOriginTokenChange(token);
           const kind = token.chain.chainKind;
-          const owner = kind === "evm" || kind === "near" || kind === "solana" || kind === "tron"
-            ? balanceOwners[kind]
-            : undefined;
+          const owner = balanceOwners[kind];
           if (owner) void fetchOneBalance(owner, token);
         }}
       />

@@ -6,14 +6,15 @@ export const TOKEN_SELECT_TITLE = "Select Network & Token";
 
 export const TOKEN_SEARCH_PLACEHOLDER = "search name or paste address";
 
-/** Icon-rail kind order: Near, then EVM, then Solana, then Tron. */
-export const TOKEN_SELECT_KIND_ORDER: ChainKind[] = ["near", "evm", "solana", "tron"];
+/** Icon-rail kind order: Near, then EVM, then Solana, then Tron, then Zcash. */
+export const TOKEN_SELECT_KIND_ORDER: ChainKind[] = ["near", "evm", "solana", "tron", "zec"];
 
 export const TOKEN_SELECT_KIND_RANK: Record<ChainKind, number> = {
   near: 0,
   evm: 1,
   solana: 2,
   tron: 3,
+  zec: 4,
 };
 
 /** Display titles that differ from `ChainConfig.chainName`. */

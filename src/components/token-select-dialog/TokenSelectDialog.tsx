@@ -7,7 +7,7 @@ import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
 import { useEnsureTokenBalances } from "@/hooks/use-token-balances";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { FIXED_CHAINS } from "@/config/chains";
-import type { ChainOwners } from "@/wallet";
+import { CHAIN_KINDS, type ChainOwners } from "@/wallet";
 import { isNativeToken, useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import type { WalletChainKind } from "@/utils";
@@ -34,13 +34,11 @@ export interface TokenSelectDialogProps {
 }
 
 function ownerForToken(owners: ChainOwners | null | undefined, token: IntentsToken): string | null {
-  const kind = token.chain.chainKind;
-  if (kind !== "evm" && kind !== "near" && kind !== "solana" && kind !== "tron") return null;
-  return owners?.[kind] ?? null;
+  return owners?.[token.chain.chainKind] ?? null;
 }
 
 function hasAnyOwner(owners: ChainOwners | null | undefined): boolean {
-  return Boolean(owners?.evm || owners?.near || owners?.solana || owners?.tron);
+  return CHAIN_KINDS.some((kind) => Boolean(owners?.[kind]));
 }
 
 export function TokenSelectDialog({

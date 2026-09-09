@@ -40,7 +40,7 @@ export function TokenPane({
         <p className="min-w-0 truncate font-montserrat text-base font-semibold text-black">
           {selectedChain ? tokenSelectChainTitle(selectedChain) : ""}
         </p>
-        {walletKind === "evm" || walletKind === "near" || walletKind === "solana" || walletKind === "tron" ? (
+        {walletKind ? (
           <ChainWalletStatus kind={walletKind} />
         ) : null}
       </div>

@@ -30,12 +30,9 @@ const EMPTY_CHAIN: ChainWalletState = {
 };
 
 function emptyChains(): Record<ChainKind, ChainWalletState> {
-  return {
-    evm: { ...EMPTY_CHAIN },
-    near: { ...EMPTY_CHAIN },
-    solana: { ...EMPTY_CHAIN },
-    tron: { ...EMPTY_CHAIN },
-  };
+  return Object.fromEntries(
+    CHAIN_KINDS.map((kind) => [kind, { ...EMPTY_CHAIN }]),
+  ) as Record<ChainKind, ChainWalletState>;
 }
 
 function ownersFromChains(chains: Record<ChainKind, ChainWalletState>): ChainOwners {
