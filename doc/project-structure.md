@@ -1,6 +1,6 @@
 # Project Structure
 
-Stableflow Pay is a Vite 8 + React 19 frontend. Wallet providers for EVM, Near, Solana, Tron, and Zcash (Noir) are wired. The authenticated shell is the Figma Overview sidebar layout. Overview at `/` is mocked until the API contract exists.
+Stableflow Pay is a Vite 8 + React 19 frontend. Wallet providers for EVM, Near, Solana, Tron, and Zcash (`@rhea-finance/zcash-wallet-adapter` / Noir) are wired. The authenticated shell is the Figma Overview sidebar layout. Overview at `/` is mocked until the API contract exists.
 
 Product areas, routes, and constraints: [product.md](product.md).
 
