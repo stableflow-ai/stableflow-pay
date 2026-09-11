@@ -18,6 +18,7 @@ import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
 import type { ChainKind } from "@/wallet";
 import { isPaymentLinkActive, isPaymentLinkOpen } from "@/views/payment-links/utils";
 import { PayerLayout } from "./components/PayerLayout";
@@ -87,7 +88,12 @@ export function PayView() {
   const paymentWallet = usePaymentWallet(originKind);
   const wallet = paymentWallet.wallet;
   const connectedAddress = paymentWallet.connectedAddress;
+  const quotePayer = paymentWallet.quotePayer;
+  const quoteRefundTo = paymentWallet.quoteRefundTo;
   const walletReady = Boolean(connectedAddress);
+  const zecQuoteBlocked = originKind === "zec"
+    && Boolean(connectedAddress)
+    && (!quotePayer || !quoteRefundTo);
   const [openAmount, setOpenAmount] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending">("idle");
 
@@ -148,6 +154,8 @@ export function PayView() {
       || !destinationAddress
       || !walletReady
       || !connectedAddress
+      || !quotePayer
+      || !quoteRefundTo
       || !payable
     ) {
       return null;
@@ -161,11 +169,11 @@ export function PayView() {
       destinationSymbol: dest.token,
       network: origin.network,
       recipient: destinationAddress,
-      refundTo: connectedAddress,
+      refundTo: quoteRefundTo,
       slippageTolerance: QUICK_PAY_SLIPPAGE_TOLERANCE,
       swapType: PAY_SWAP_TYPE.ExactOutput,
       symbol: origin.token,
-      payer: connectedAddress,
+      payer: quotePayer,
     };
   }, [
     originToken,
@@ -174,6 +182,8 @@ export function PayView() {
     destinationAddress,
     walletReady,
     connectedAddress,
+    quotePayer,
+    quoteRefundTo,
     payable,
   ]);
 
@@ -205,7 +215,11 @@ export function PayView() {
     isPending: swapQuery.isPending,
     isFetching: swapQuery.isFetching,
   });
-  const quoteError = swapQuery.isError ? formatQuoteErrorMessage(swapQuery.error, 2) : null;
+  const quoteError = zecQuoteBlocked
+    ? ZCASH_TRANSPARENT_REFUND_MESSAGE
+    : swapQuery.isError
+      ? formatQuoteErrorMessage(swapQuery.error, 2)
+      : null;
   const amountInDisplay = swap?.amountInFormatted
     ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
     : "—";
@@ -292,6 +306,7 @@ export function PayView() {
   const sending = settleMutation.isPending || phase === "sending";
   const swapFetching = Boolean(swapBody) && swapQuery.isFetching;
   const quoteLoading = Boolean(amountForQuote && destinationAddress && destToken && originToken && walletReady)
+    && !zecQuoteBlocked
     && (swapStale || swapQuery.isFetching);
   const canPay = Boolean(
     destinationAddress
