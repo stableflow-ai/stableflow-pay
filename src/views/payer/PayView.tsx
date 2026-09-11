@@ -18,6 +18,7 @@ import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
 import type { ChainKind } from "@/wallet";
 import { isPaymentLinkActive, isPaymentLinkOpen } from "@/views/payment-links/utils";
@@ -252,14 +253,26 @@ export function PayView() {
         throw new Error(SPENT_QUOTE_MESSAGE);
       }
 
-      const balance = await fetchOneBalance(paymentWalletAddress, originToken);
-      if (!balance || balance.status !== "success" || balance.raw == null) {
-        toast.fail({ title: "Could not read wallet balance" });
-        throw new BalanceGateError("Could not read wallet balance");
-      }
-      if (balance.raw < amountIn && import.meta.env.VITE_VIRIFY_BALANCE !== "false") {
-        toast.fail({ title: "Insufficient balance" });
-        throw new BalanceGateError("Insufficient balance");
+      if (import.meta.env.VITE_VIRIFY_BALANCE !== "false") {
+        if (originKind === "zec") {
+          try {
+            await assertNativeZecSpendable(amountIn);
+          } catch (error) {
+            const title = zecSpendableGateMessage(error);
+            toast.fail({ title });
+            throw new BalanceGateError(title);
+          }
+        } else {
+          const balance = await fetchOneBalance(paymentWalletAddress, originToken);
+          if (!balance || balance.status !== "success" || balance.raw == null) {
+            toast.fail({ title: "Could not read wallet balance" });
+            throw new BalanceGateError("Could not read wallet balance");
+          }
+          if (balance.raw < amountIn) {
+            toast.fail({ title: "Insufficient balance" });
+            throw new BalanceGateError("Insufficient balance");
+          }
+        }
       }
       setPhase("sending");
       // Claimed before broadcasting: a failing `sendRawTransaction` may still
