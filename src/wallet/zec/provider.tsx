@@ -7,13 +7,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import useToast from "@/hooks/use-toast";
 import {
   zcashWalletAdapter,
   zecConnectedAddress,
   zecShieldedAddress,
   zecTransparentAddress,
 } from "./sdk";
-import { isNoirWalletUnavailable, openNoirInstallPage } from "./utils";
+import { isNoirWalletRejected, isNoirWalletUnavailable, openNoirInstallPage } from "./utils";
 
 export interface ZecWalletContextValue {
   account: string | null;
@@ -37,6 +38,7 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
   const [shieldedAddress, setShieldedAddress] = useState<string | null>(null);
   const [transparentAddress, setTransparentAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const toast = useToast();
 
   const clearAddresses = useCallback(() => {
     setAccount(EMPTY_ZEC_ADDRESSES.account);
@@ -66,12 +68,16 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
           openNoirInstallPage();
           return;
         }
+        if (isNoirWalletRejected(error)) {
+          toast.fail({ title: "Wallet connection rejected" });
+          return;
+        }
         console.error("[wallet:zec]", error);
       } finally {
         setConnecting(false);
       }
     })();
-  }, [syncAccount]);
+  }, [syncAccount, toast]);
 
   const disconnect = useCallback(() => {
     void zcashWalletAdapter.disconnect().finally(() => {
