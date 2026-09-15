@@ -2,18 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
+import { paySwapSubmit } from "@/api/pay";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
-import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
 import { isSwapConsumed, markSwapConsumed, useConsumedSwapsStore } from "@/stores/consumed-swaps";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
-import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
@@ -82,7 +81,6 @@ export function PayView() {
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
   const queryClient = useQueryClient();
-  useQuickPayCommitQueue();
   const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
@@ -291,30 +289,30 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
+      let paymentsId = "";
+      try {
+        const submitted = await paySwapSubmit(
+          { swapId: swap.swapId, txHash },
+          { auth: false },
+        );
+        paymentsId = submitted.paymentsId.trim();
+      } catch {
+        // Submit is one-shot; waiting still proceeds without payments_id.
+      }
       const quoteQuery = {
         feesUsd: feeUsd ?? "",
         payoutUsd: swap.amountOutUsd.trim() || "0",
+        ...(paymentsId ? { paymentId: paymentsId } : {}),
       };
-      enqueueQuickPayCommit({
-        swapId: swap.swapId,
-        txHash,
-        onSuccess: (paymentsId) => {
-          if (payment.kind === PAYER_KIND.Checkout) {
-            navigate(checkoutWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
-            return;
-          }
-          navigate(
-            payerWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }),
-            { replace: true, state: PAYER_WAITING_STATE },
-          );
-        },
-      });
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id, quoteQuery));
+        navigate(checkoutWaitingPath(payment.id, quoteQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(payment.id, quoteQuery), { state: PAYER_WAITING_STATE });
+      navigate(payerWaitingPath(payment.id, quoteQuery), {
+        replace: true,
+        state: PAYER_WAITING_STATE,
+      });
     },
     onError: (err) => {
       setPhase("idle");
