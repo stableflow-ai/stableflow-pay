@@ -32,6 +32,7 @@ import {
   PAYER_KIND,
   PAYER_WAITING_STATE,
   QUOTE_DEBOUNCE_MS,
+  QUOTE_EXPIRED_MESSAGE,
   SPENT_QUOTE_MESSAGE,
   checkoutWaitingPath,
   payerWaitingPath,
@@ -41,6 +42,7 @@ import {
   isCheckoutOpenAmount,
   isCheckoutPayable,
   isDryQuoteStale,
+  isPayQuoteExpired,
   parsePositiveDecimal,
   paymentLinkCardIconUrl,
   payoutNetworkToken,
@@ -247,6 +249,11 @@ export function PayView() {
       const depositAddress = swap.depositAddress?.trim();
       if (!depositAddress) {
         throw new Error("Missing deposit address");
+      }
+      if (isPayQuoteExpired(swap.deadline)) {
+        toast.fail({ title: QUOTE_EXPIRED_MESSAGE });
+        void refetchSwap();
+        throw new BalanceGateError(QUOTE_EXPIRED_MESSAGE);
       }
       const amountIn = BigInt(swap.amountIn || "0");
       if (isSwapConsumed(swap.swapId)) {

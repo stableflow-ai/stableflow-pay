@@ -74,6 +74,12 @@ export function isDryQuoteStale(input: {
   );
 }
 
+export function isPayQuoteExpired(deadline: string, now = Date.now()): boolean {
+  const ms = Date.parse(deadline);
+  if (!Number.isFinite(ms)) return false;
+  return ms <= now;
+}
+
 function extractEmbeddedMessage(text: string): string | null {
   const start = text.indexOf("{");
   if (start >= 0) {

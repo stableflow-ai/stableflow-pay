@@ -13,6 +13,7 @@ export const QUOTE_DEBOUNCE_MS = 900;
 export const ORIGIN_BALANCE_POLL_MS = 20_000;
 export const STATUS_POLL_MS = 4_000;
 export const SPENT_QUOTE_MESSAGE = "This quote was already used. Refreshing the quote.";
+export const QUOTE_EXPIRED_MESSAGE = "Quote expired. Refreshing.";
 
 export const PAYER_KIND = {
   Paylink: "paylink",
