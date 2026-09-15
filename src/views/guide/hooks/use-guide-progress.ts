@@ -44,9 +44,11 @@ export function useGuideProgress() {
     storedApiKey ??
     (firstKey ? { id: firstKey.id, label: firstKey.name, key: firstKey.apiKey } : null);
 
-  const webhook =
-    storedWebhook ??
-    (firstWebhook ? { url: firstWebhook.url, events: firstWebhook.events } : null);
+  const webhook = storedWebhook
+    ? { ...storedWebhook, secret: storedWebhook.secret ?? "" }
+    : firstWebhook
+      ? { url: firstWebhook.url, events: firstWebhook.events, secret: "" }
+      : null;
 
   return {
     paymentLink,

@@ -1,6 +1,9 @@
+import { IconCopy } from "@/components/icons/copy";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
+import useToast from "@/hooks/use-toast";
 import { formatWebhookEvents } from "@/views/settings/utils";
+import { WEBHOOK_SIGNING_SECRET_SUBTITLE } from "@/views/settings/config";
 import { GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";
 import { GuideSuccessMark } from "../components/GuideSuccessMark";
@@ -9,10 +12,23 @@ import { useGuideProgress } from "../hooks/use-guide-progress";
 
 export function GuideWebhookPreviewView() {
   const { go } = useGuideFlow();
+  const toast = useToast();
   const { webhook } = useGuideProgress();
 
   if (!webhook) {
     return <GuideRedirect to={GUIDE_STEP_PATH.webhook} />;
+  }
+
+  const secret = webhook.secret.trim();
+
+  async function copySecret() {
+    if (!secret) return;
+    try {
+      await navigator.clipboard.writeText(secret);
+      toast.success({ title: "Copied" });
+    } catch {
+      toast.fail({ title: "Could not copy" });
+    }
   }
 
   return (
@@ -22,6 +38,27 @@ export function GuideWebhookPreviewView() {
         <p className="mt-6 text-center font-montserrat text-base font-semibold text-black">
           Webhook has been created
         </p>
+        {secret ? (
+          <div className="mt-6 w-full">
+            <p className="font-montserrat text-sm font-medium text-[#606060]">Signing Secret</p>
+            <div className="mt-3 flex w-full items-center gap-3 rounded-[20px] border border-white bg-[#fdfdfd] px-4 py-4 shadow-[0_0_20px_0_rgba(0,0,0,0.06)]">
+              <p className="min-w-0 flex-1 break-all font-montserrat text-base font-medium text-black">
+                {secret}
+              </p>
+              <Button
+                size={BUTTON_SIZE.Sm}
+                className="h-[30px] shrink-0 rounded-[8px] px-3"
+                onClick={() => void copySecret()}
+              >
+                <IconCopy className="size-3 shrink-0 text-white" />
+                Copy
+              </Button>
+            </div>
+            <p className="mt-4 font-montserrat text-sm font-medium text-[#606060]">
+              {WEBHOOK_SIGNING_SECRET_SUBTITLE}
+            </p>
+          </div>
+        ) : null}
         <div className="mt-8 w-full">
           <p className="font-montserrat text-sm font-medium text-[#606060]">Webhook</p>
           <div className="mt-3 flex items-start gap-3">

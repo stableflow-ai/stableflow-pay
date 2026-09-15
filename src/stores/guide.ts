@@ -20,6 +20,7 @@ export type GuideApiKey = {
 export type GuideWebhook = {
   url: string;
   events: string[];
+  secret: string;
 };
 
 export type GuideArtifacts = {
