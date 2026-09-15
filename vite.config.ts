@@ -113,6 +113,10 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       host: "127.0.0.1",
       proxy: checkoutProxy,
+      // Safe{Wallet} fetches /manifest.json cross-origin before it will load this
+      // app as a Safe App. Hosting must also leave `X-Frame-Options` unset and
+      // allow `frame-ancestors https://app.safe.global` so the iframe is not blocked.
+      cors: true,
     },
     preview: {
       proxy: checkoutProxy,

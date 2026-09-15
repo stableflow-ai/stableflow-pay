@@ -2,11 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
+import { SafePendingSwapCard } from "@/components/safe/SafePendingSwapCard";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
 import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
+import { useSafePendingSwaps } from "@/hooks/use-safe-pending-swaps";
 import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
@@ -14,10 +16,15 @@ import { useAuthStore } from "@/stores/auth";
 import { isSwapConsumed, markSwapConsumed, useConsumedSwapsStore } from "@/stores/consumed-swaps";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
 import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
+import { enqueueSafePendingSwap } from "@/stores/safe-pending-swap";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import {
+  SAFE_AWAITING_SIGNATURES_TITLE,
+  safeAwaitingSignaturesMessage,
+} from "@/wallet/evm/safe";
 import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
 import type { ChainKind } from "@/wallet";
@@ -279,7 +286,7 @@ export function PayView() {
       // have reached the network, and 1Click keeps a second transfer to the
       // same deposit address.
       markSwapConsumed(swap.swapId);
-      const txHash = await transferToDepositAddress({
+      const result = await transferToDepositAddress({
         token: originToken,
         depositAddress,
         amountIn,
@@ -288,9 +295,34 @@ export function PayView() {
         feesUsd: feeUsd ?? "",
         payoutUsd: swap.amountOutUsd.trim() || "0",
       };
+      // A Safe proposal has no transaction hash until the owners execute it, so it
+      // waits in `safe-pending-swap` and the payer stays on this page. The consumed
+      // marker stays either way: this deposit address must never be paid twice.
+      if (result.kind === "pending-multisig") {
+        enqueueSafePendingSwap({
+          swapId: swap.swapId,
+          safeTxHash: result.safeTxHash,
+          safeAddress: result.safeAddress,
+          chainId: result.chainId,
+          threshold: result.threshold,
+          safeNonce: result.safeNonce,
+          fromBlock: result.fromBlock,
+          deadline: swap.deadline,
+          paymentKind: payment.kind,
+          paymentId: payment.id,
+          feesUsd: quoteQuery.feesUsd,
+          payoutUsd: quoteQuery.payoutUsd,
+        });
+        setPhase("idle");
+        toast.info({
+          title: SAFE_AWAITING_SIGNATURES_TITLE,
+          text: safeAwaitingSignaturesMessage(result.threshold),
+        });
+        return;
+      }
       enqueueQuickPayCommit({
         swapId: swap.swapId,
-        txHash,
+        txHash: result.txHash,
         onSuccess: (paymentsId) => {
           if (payment.kind === PAYER_KIND.Checkout) {
             navigate(checkoutWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
@@ -334,6 +366,38 @@ export function PayView() {
     && payable,
   );
   const canRefreshSwap = Boolean(swapBody) && !swapFetching && !sending;
+
+  // Finishing a proposal means navigating to this payment's waiting page, which only
+  // this component can build, so the poller is scoped to the payment on screen.
+  useSafePendingSwaps({
+    paymentId: payment?.id ?? "",
+    onCommitted: (item, txHash) => {
+      const quoteQuery = { feesUsd: item.feesUsd, payoutUsd: item.payoutUsd };
+      const isCheckoutItem = item.paymentKind === PAYER_KIND.Checkout;
+      enqueueQuickPayCommit({
+        swapId: item.swapId,
+        txHash,
+        onSuccess: (paymentsId) => {
+          if (isCheckoutItem) {
+            navigate(checkoutWaitingPath(item.paymentId, { ...quoteQuery, paymentId: paymentsId }), {
+              replace: true,
+            });
+            return;
+          }
+          navigate(payerWaitingPath(item.paymentId, { ...quoteQuery, paymentId: paymentsId }), {
+            replace: true,
+            state: PAYER_WAITING_STATE,
+          });
+        },
+      });
+      if (isCheckoutItem) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(item.paymentId) });
+        navigate(checkoutWaitingPath(item.paymentId, quoteQuery));
+        return;
+      }
+      navigate(payerWaitingPath(item.paymentId, quoteQuery), { state: PAYER_WAITING_STATE });
+    },
+  });
 
   const detailPending = isCheckout ? checkoutQuery.isPending : linkQuery.isPending;
   const missingId = isCheckout ? !sessionId : !linkId;
@@ -380,6 +444,7 @@ export function PayView() {
 
   return (
     <PayerLayout iconUrl={isCheckout ? checkout?.organization.logo : paymentLinkCardIconUrl(link)}>
+      <SafePendingSwapCard paymentId={payment?.id ?? ""} />
       <PayCard
         state={cardState}
         paymentTitle={payment?.title ?? ""}

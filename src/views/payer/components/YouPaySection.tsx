@@ -7,7 +7,9 @@ import { useConnectedWallets } from "@/hooks/use-wallet";
 import { chainLogoUrl } from "@/lib/logo";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
+import { SafeMultisigBadge } from "@/components/safe/SafeMultisigBadge";
 import { formatAddress, formatAmount } from "@/utils";
+import { useSafeMode } from "@/wallet/evm/safe";
 import { TokenSelectButton } from "@/views/payment-links/components/create/TokenSelectButton";
 import { ORIGIN_BALANCE_POLL_MS } from "../config";
 
@@ -39,6 +41,8 @@ export function YouPaySection(props: {
   const balanceOwners = useConnectedWallets();
   const fetchOneBalance = useTokenBalancesStore((s) => s.fetchOne);
   const originBalance = useTokenBalance(walletAddress, originToken?.assetId);
+  const isEvmOrigin = originToken?.chain.chainKind === "evm";
+  const safeApp = useSafeMode().mode === "app";
   const chainIcon = originToken ? chainLogoUrl(originToken.blockchain) : "";
   const connectedIcon = walletIcon?.trim() || chainIcon;
 
@@ -64,14 +68,19 @@ export function YouPaySection(props: {
               <p className="truncate font-montserrat text-xs text-[#606060]">
                 {formatAddress(walletAddress)}
               </p>
-              <button
-                type="button"
-                aria-label="Disconnect wallet"
-                onClick={onDisconnectWallet}
-                className="inline-flex shrink-0 text-danger"
-              >
-                <IconLogout className="size-3.5" />
-              </button>
+              {isEvmOrigin ? <SafeMultisigBadge /> : null}
+              {/* Inside the Safe App the connection is the host iframe, so there is
+                  nothing this page can disconnect from. */}
+              {isEvmOrigin && safeApp ? null : (
+                <button
+                  type="button"
+                  aria-label="Disconnect wallet"
+                  onClick={onDisconnectWallet}
+                  className="inline-flex shrink-0 text-danger"
+                >
+                  <IconLogout className="size-3.5" />
+                </button>
+              )}
             </>
           ) : (
             <button
