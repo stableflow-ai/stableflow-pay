@@ -23,8 +23,8 @@ export function GuideWebhookFormView() {
       <WebhookForm
         submitLabel="Set up"
         onSubmit={async (url, events) => {
-          await createMutation.mutateAsync({ url, events });
-          setWebhook({ url, events });
+          const created = await createMutation.mutateAsync({ url, events });
+          setWebhook({ url, events, secret: created.secret });
           go(GUIDE_STEP_PATH.webhookPreview);
         }}
       />

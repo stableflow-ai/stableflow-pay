@@ -123,6 +123,22 @@
   z-index: 10000 !important;
 }
 
+w3m-modal,
+wcm-modal,
+w3m-overlay {
+  z-index: 10000 !important;
+}
+
+w3m-modal[open],
+wcm-modal[open] {
+  pointer-events: auto !important;
+}
+
+w3m-modal:not([open]),
+wcm-modal:not([open]) {
+  pointer-events: none !important;
+}
+
 .Toastify__toast-container--top-right .decash-toast-top-right.Toastify__toast {
   padding: 0 0 0 22px;
   margin-bottom: 10px;
