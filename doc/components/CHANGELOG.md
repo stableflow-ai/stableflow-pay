@@ -4,7 +4,7 @@ Record every create/update of components under `src/components/ui/` so other age
 
 ## 2026-09-16
 
-- **Toast:** `title` / `text` accept `ReactNode`. `useToast()` methods return a `ToastHandle` (`id`, `update`, `dismiss`) so a persistent toast can close itself from an in-body link.
+- **Toast:** `title` / `text` accept `ReactNode`. `useToast()` methods return a `ToastHandle` (`id`, `update`, `dismiss`) so a persistent toast can close itself from an in-body link. Container `z-index` is `100000001` so a toast stays above the near-connect wallet popup.
 
 ## 2026-09-03
 

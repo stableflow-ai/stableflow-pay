@@ -2,7 +2,7 @@
 
 Path: `src/components/ui/toast/Toast.tsx`
 
-Call from feature code through `src/hooks/use-toast.tsx` (`useToast()`). Do not import `react-toastify` in views. `ToastContainer` is mounted once in `App`.
+Call from feature code through `src/hooks/use-toast.tsx` (`useToast()`). Do not import `react-toastify` in views. `ToastContainer` is mounted once in `App`. Container `z-index` is `100000001` so a toast stays above the near-connect wallet popup (`100000000`).
 
 Card: 288px wide (`w-72`), `calc(100vw - 32px)` below `md`, white, 12px radius, shadow `0 0 6px 0 rgba(0,0,0,0.10)`. Title is Space Grotesk 14px `#444C59`; optional `text` is 12px light. Type glyphs and the close mark live inside this file — do not extract them into `src/components/icons/`.
 
