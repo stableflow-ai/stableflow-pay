@@ -6,6 +6,7 @@ import { IconOverview } from "@/components/icons/overview";
 import { IconRecords2 } from "@/components/icons/records";
 import { IconSettings } from "@/components/icons/settings";
 import type { IconProps } from "@/components/icons/types";
+import { PRIVACY_TRANSFER_PATH, PRIVACY_TRANSFER_TITLE } from "@/views/privacy-transfer/config";
 
 export const SIDEBAR_WIDTH_PX = 220;
 export const SIDEBAR_NAV_ACTIVE_COLOR = "#3F8AFB";
@@ -35,6 +36,9 @@ export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
 export const PLACEHOLDER_ROUTES = ["/terms"] as const;
 
 export function pageTitleForPath(pathname: string): string {
+  if (pathname === PRIVACY_TRANSFER_PATH || pathname.startsWith(`${PRIVACY_TRANSFER_PATH}/`)) {
+    return PRIVACY_TRANSFER_TITLE;
+  }
   const item = [...SIDEBAR_NAV_ITEMS, ...SIDEBAR_FOOTER_ITEMS].find((entry) => {
     if (entry.end || entry.to === "/") return pathname === entry.to;
     return pathname === entry.to || pathname.startsWith(`${entry.to}/`);

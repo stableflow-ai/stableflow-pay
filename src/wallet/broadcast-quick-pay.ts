@@ -1,5 +1,5 @@
 import type { Address, Hash, Hex } from "viem";
-import { getWalletClient, switchChain, waitForTransactionReceipt } from "wagmi/actions";
+import { waitForTransactionReceipt } from "wagmi/actions";
 import { readErc20Allowance } from "./evm/balance";
 import { wagmiConfig } from "./evm/config";
 import {
@@ -9,6 +9,7 @@ import {
   buildSafeBundle,
   sendViaSafe,
 } from "./evm/safe";
+import { getMatchedEvmWalletClient } from "./evm/switch-chain";
 import { pendingMultisigBroadcast, type BroadcastResult } from "./types";
 import { verifyPostApproveAllowance } from "./verify-post-approve-allowance";
 
@@ -27,9 +28,7 @@ export async function broadcastQuickPayCallData(input: {
   callData: string;
   value?: bigint;
 }): Promise<Hash> {
-  await switchChain(wagmiConfig, { chainId: input.chainId as SupportedEvmChainId });
-  const client = await getWalletClient(wagmiConfig);
-  if (!client) throw new Error("Connect an EVM wallet to broadcast this payout");
+  const client = await getMatchedEvmWalletClient(input.chainId);
   return client.sendTransaction({
     to: input.contract as Address,
     data: toHexData(input.callData),

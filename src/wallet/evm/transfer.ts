@@ -3,12 +3,9 @@
  */
 
 import { encodeFunctionData, erc20Abi, type Address, type Hex } from "viem";
-import { getWalletClient, switchChain } from "wagmi/actions";
 import { executedBroadcast, pendingMultisigBroadcast, type BroadcastResult } from "../types";
-import { wagmiConfig } from "./config";
 import { activeSafeMode, sendViaSafe } from "./safe";
-
-type SupportedEvmChainId = (typeof wagmiConfig)["chains"][number]["id"];
+import { getMatchedEvmWalletClient } from "./switch-chain";
 
 async function sendEvm(input: {
   chainId: number;
@@ -25,9 +22,7 @@ async function sendEvm(input: {
     }));
   }
 
-  await switchChain(wagmiConfig, { chainId: input.chainId as SupportedEvmChainId });
-  const client = await getWalletClient(wagmiConfig);
-  if (!client) throw new Error("Connect an EVM wallet to send this payout");
+  const client = await getMatchedEvmWalletClient(input.chainId);
   return executedBroadcast(await client.sendTransaction({
     to: input.to,
     data: input.data,

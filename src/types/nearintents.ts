@@ -10,10 +10,12 @@ export const NEARINTENTS_INTENT_STANDARD: Record<IntentsChainKind, "erc191" | "n
 };
 
 export const NEARINTENTS_DEPOSIT_TYPE = {
+  OriginChain: "ORIGIN_CHAIN",
   ConfidentialIntents: "CONFIDENTIAL_INTENTS",
 } as const;
 
 export const NEARINTENTS_RECIPIENT_TYPE = {
+  ConfidentialIntents: "CONFIDENTIAL_INTENTS",
   DestinationChain: "DESTINATION_CHAIN",
 } as const;
 
@@ -31,15 +33,15 @@ export const NEARINTENTS_INTENT_TYPE = {
 
 export interface NearintentsQuoteParam {
   dry: boolean;
-  swapType: "EXACT_INPUT" | "EXACT_OUTPUT";
+  swapType: "EXACT_INPUT" | "EXACT_OUTPUT" | "FLEX_INPUT";
   originAsset: string;
-  depositType: "CONFIDENTIAL_INTENTS";
+  depositType: "ORIGIN_CHAIN" | "CONFIDENTIAL_INTENTS";
   destinationAsset: string;
   amount: string;
   recipient: string;
-  recipientType: "DESTINATION_CHAIN";
+  recipientType: "CONFIDENTIAL_INTENTS" | "DESTINATION_CHAIN";
   refundTo: string;
-  refundType: "CONFIDENTIAL_INTENTS";
+  refundType: "ORIGIN_CHAIN" | "CONFIDENTIAL_INTENTS";
   confidentiality: "advanced";
   deadline: string;
   slippageTolerance: number;
@@ -103,7 +105,41 @@ export interface NearintentsStatusResp {
   swapDetails?: {
     amountInUsd?: string;
     amountOutUsd?: string;
+    amountOut?: string;
+    depositedAmount?: string;
     originChainTxHashes?: NearintentsStatusTxHash[];
     destinationChainTxHashes?: NearintentsStatusTxHash[];
   };
+}
+
+export interface PrivateWithdrawRow {
+  amount: string;
+  deposit_address: string;
+  destination_address: string;
+  destination_chain: string;
+  execution_type: "CONFIDENTIAL_1CLICK";
+  sequence: number;
+  signed_payload: IntentSignedPayload;
+  token: string;
+}
+
+export interface PrivateWithdrawRequest {
+  from_amount: string;
+  from_chain: string;
+  from_token: string;
+  mode: "TRANSFER" | "SWAP";
+  signer_id: string;
+  withdraws: PrivateWithdrawRow[];
+}
+
+export interface PrivateOrder {
+  order_id: string;
+  signer_id?: string;
+  status?: string;
+  transactions?: Array<{ deposit_address?: string; status?: string; transaction_type?: string }>;
+}
+
+export interface PrivateOrderPage {
+  list: PrivateOrder[];
+  hasNextPage: boolean;
 }

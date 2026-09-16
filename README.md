@@ -29,6 +29,7 @@ Fill `.env.local`:
 | `VITE_RPC_PROXY_HOST` / `VITE_RPC_SECRET_KEY` | optional | HMAC-signed RPC proxy |
 | `VITE_AMOUNT_MAX_DECIMALS` | optional | Amount input precision (default `6`) |
 | `VITE_GOOGLE_CLIENT_ID` / `VITE_GOOGLE_API_KEY` / `VITE_GOOGLE_APP_ID` | optional | Google Sheets import |
+| `VITE_PRIVATE_INDEXER_URL` | Privacy Transfer | Confidential indexer origin. Default `https://privateindexer.refburrow.top`. Dev Vite proxies `/v3/private`. |
 
 ## Scripts
 
@@ -56,6 +57,7 @@ pnpm preview
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
 | `/docs` | merchant | Checkout API documentation |
+| `/privacy-transfer` | merchant | Confidential TRANSFER/SWAP; not in the sidebar |
 | `/terms` | merchant | Placeholder |
 
 Overview still uses fixtures in `src/mocks/` until that backend contract exists. Payment Links, API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.

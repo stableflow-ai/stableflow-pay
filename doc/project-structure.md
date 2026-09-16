@@ -46,6 +46,7 @@ src/
     api-keys/             # Merchant API-key list at /api-keys
     reports/              # Merchant reports at /reports
     docs/                 # Checkout API documentation at /docs
+    privacy-transfer/     # Authenticated /privacy-transfer (not in the sidebar)
     placeholder/          # Sidebar routes without product UI yet (Terms)
   layouts/                # AppLayout (sidebar + title + outlet)
   components/

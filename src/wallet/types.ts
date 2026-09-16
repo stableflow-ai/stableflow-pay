@@ -26,6 +26,8 @@ export interface IntentSignInput {
   nonce: Uint8Array;
   deadlineMs: number;
   recipient?: string;
+  /** EVM only: switch the wallet onto this chain before signing. */
+  chainId?: number;
 }
 
 export interface GeneratedIntent {

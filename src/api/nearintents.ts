@@ -13,13 +13,17 @@ import type {
 
 const PASSTHROUGH = { envelope: false as const };
 
-export async function nearintentsQuote(body: NearintentsQuoteParam) {
+export async function nearintentsQuote(
+  body: NearintentsQuoteParam,
+  options?: { requireDeposit?: boolean },
+) {
+  const requireDeposit = options?.requireDeposit ?? true;
   const data = await http<NearintentsQuoteResp>(`${NEARINTENTS_API_PREFIX}/quote`, {
     method: "POST",
     body,
     ...PASSTHROUGH,
   });
-  if (data?.quote?.depositAddress?.trim()) return data;
+  if (!requireDeposit || data?.quote?.depositAddress?.trim()) return data;
   const message = data?.message?.trim();
   throw new ApiError(
     message || "Withdraw quote did not return a deposit address",
