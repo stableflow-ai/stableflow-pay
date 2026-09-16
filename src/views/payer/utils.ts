@@ -4,6 +4,7 @@ import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
 import { SOLANA_EXPIRED_MESSAGE } from "@/wallet/solana/config";
+import { solanaWalletErrorMessage } from "@/wallet/solana/utils";
 import {
   CHECKOUT_SUCCESS_STATUS,
   PAY_CHECKOUT_SESSION_STATUS,
@@ -121,6 +122,8 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
       : String(error ?? "");
   const text = raw || "Quote failed";
   const message = extractEmbeddedMessage(text) || text;
+  const ledgerLocked = solanaWalletErrorMessage(message);
+  if (ledgerLocked) return ledgerLocked;
   if (isUserRejectedError(message)) {
     return "User rejected transaction";
   }
