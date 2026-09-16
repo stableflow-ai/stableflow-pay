@@ -19,6 +19,7 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_API_KEY?: string;
   readonly VITE_GOOGLE_APP_ID?: string;
   readonly VITE_VIRIFY_BALANCE?: string;
+  readonly VITE_PRIVATE_INDEXER_URL?: string;
 }
 
 interface ImportMeta {

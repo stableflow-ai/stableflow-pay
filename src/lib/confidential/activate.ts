@@ -16,6 +16,10 @@ export interface ActivateConfidentialInput {
   address: string;
   chainKind: ChainKind;
   signMessage: (input: IntentSignInput) => Promise<IntentSignedPayload>;
+  /** Skip a cached session and always prompt the linking wallet. */
+  force?: boolean;
+  /** EVM linking: switch the wallet onto this chain before signing. */
+  chainId?: number;
 }
 
 export interface ActivateConfidentialResult {
@@ -52,7 +56,7 @@ export async function activateConfidentialAccount(
   const intentsAccountId = toIntentsAccountId(input.address, input.chainKind);
   const store = useNearintentsUserSessionStore.getState();
 
-  if (hasUsableNearintentsUserSession(intentsAccountId)) {
+  if (!input.force && hasUsableNearintentsUserSession(intentsAccountId)) {
     const existing = readNearintentsUserSession(intentsAccountId);
     if (existing) {
       if (sessionNeedsRefresh(existing)) {
@@ -78,6 +82,7 @@ export async function activateConfidentialAccount(
     nonce: createAuthNonce(salt, deadlineMs),
     deadlineMs,
     recipient: INTENTS_RECIPIENT,
+    chainId: input.chainId,
   });
 
   try {
@@ -89,20 +94,12 @@ export async function activateConfidentialAccount(
     }
     return { session, corsFallback: false };
   } catch (error) {
-    // Authenticate can be blocked by CORS in the browser. The switch still
-    // requires a successful wallet signature; do not treat CORS as success
-    // without signing. Add a same-origin proxy or CORS allowlist later.
     if (error instanceof OneClickAuthError && error.corsLikely) {
-      const session: NearintentsUserSession = {
-        intentsAccountId,
-        accessToken: null,
-        refreshToken: null,
-        accessExpiresAt: 0,
-        refreshExpiresAt: 0,
-        signedLocally: true,
-      };
-      store.upsert(session);
-      return { session, corsFallback: true };
+      throw new OneClickAuthError(
+        "Confidential auth could not reach 1Click. Restart pnpm dev so /v0/auth is proxied.",
+        error.status,
+        true,
+      );
     }
     throw error;
   }

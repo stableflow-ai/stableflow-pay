@@ -1,29 +1,29 @@
 /**
  * EVM wallet adapter backed by wagmi + RainbowKit.
  *
- * Message signing uses ERC-191 (`personal_sign`) via wagmi `signMessageAsync`.
+ * Message signing uses ERC-191 (`personal_sign`) after switching onto the
+ * target chain so the connector and wagmi connection agree.
  */
 
 import { useCallback, useMemo } from "react";
 import { isAddress } from "viem";
-import { useAccount, useDisconnect, useSignMessage } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import { useEvmWalletInfo } from "@/hooks/use-evm-wallet-info";
 import type { GeneratedIntent, IntentSignInput, IntentSignedPayload, UseWalletResult, WalletAccount } from "../types";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { getMatchedEvmWalletClient, readEvmConnectorChainId } from "./switch-chain";
 import {
   buildEvmFamilyPayload,
   encodeSecp256k1Signature,
   isoDeadline,
   nonceToBase64,
   payloadAsText,
-  walletDoesNotSupportSigning,
 } from "../intents-sign";
 
 export function useEvmWallet(): UseWalletResult {
   const { address, chainId, isConnected, isConnecting, isReconnecting } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
-  const { signMessageAsync } = useSignMessage();
   const walletInfo = useEvmWalletInfo();
 
   const account = useMemo<WalletAccount | null>(() => {
@@ -41,22 +41,24 @@ export function useEvmWallet(): UseWalletResult {
       if (!address) {
         throw new Error("[wallet:evm] No connected account to sign with.");
       }
-      if (typeof signMessageAsync !== "function") {
-        throw walletDoesNotSupportSigning("EVM");
+      const targetChainId = input.chainId ?? chainId;
+      if (targetChainId == null) {
+        throw new Error("[wallet:evm] Connect an EVM wallet on a supported network.");
       }
       const payload = buildEvmFamilyPayload(
         input.signerId,
         nonceToBase64(input.nonce),
         isoDeadline(input.deadlineMs),
       );
-      const signature = await signMessageAsync({ message: payload });
+      const client = await getMatchedEvmWalletClient(targetChainId);
+      const signature = await client.signMessage({ message: payload });
       return {
         standard: "erc191",
         payload,
         signature: encodeSecp256k1Signature(signature),
       };
     },
-    [address, signMessageAsync],
+    [address, chainId],
   );
 
   const signGeneratedIntent = useCallback(
@@ -64,18 +66,20 @@ export function useEvmWallet(): UseWalletResult {
       if (!address) {
         throw new Error("[wallet:evm] No connected account to sign with.");
       }
-      if (typeof signMessageAsync !== "function") {
-        throw walletDoesNotSupportSigning("EVM");
+      const targetChainId = (await readEvmConnectorChainId()) ?? chainId;
+      if (targetChainId == null) {
+        throw new Error("[wallet:evm] Connect an EVM wallet on a supported network.");
       }
       const payload = payloadAsText(intent.payload);
-      const signature = await signMessageAsync({ message: payload });
+      const client = await getMatchedEvmWalletClient(targetChainId);
+      const signature = await client.signMessage({ message: payload });
       return {
         standard: "erc191",
         payload,
         signature: encodeSecp256k1Signature(signature),
       };
     },
-    [address, signMessageAsync],
+    [address, chainId],
   );
 
   return useMemo<UseWalletResult>(() => ({

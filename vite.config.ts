@@ -57,6 +57,18 @@ export default defineConfig(({ mode }) => {
       target: apiTarget,
       changeOrigin: true,
     },
+    "/v3/private": {
+      target: (env.VITE_PRIVATE_INDEXER_URL || "https://privateindexer.refburrow.top").replace(/\/+$/, ""),
+      changeOrigin: true,
+    },
+    "/v0/auth": {
+      target: "https://1click.chaindefuser.com",
+      changeOrigin: true,
+    },
+    "/v0/account/balances": {
+      target: "https://1click.chaindefuser.com",
+      changeOrigin: true,
+    },
   };
 
   return {

@@ -25,6 +25,28 @@ interface NearintentsUserSessionState {
   clear: (intentsAccountId: string) => void;
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const parsed: unknown = JSON.parse(atob(padded));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+/** Partner distribution-channel JWTs cannot read private balances. */
+export function isConfidentialUserAccessToken(token: string | null | undefined): token is string {
+  if (!token?.trim()) return false;
+  const payload = decodeJwtPayload(token);
+  if (!payload) return false;
+  return payload.key_type !== "distribution_channel";
+}
+
 function getSessionStorage(): Storage | null {
   try {
     return globalThis.sessionStorage;
@@ -105,17 +127,17 @@ export function readNearintentsUserSession(intentsAccountId: string): Nearintent
 }
 
 export function sessionNeedsRefresh(session: NearintentsUserSession, now = Date.now()): boolean {
-  if (session.signedLocally || !session.accessToken) return false;
+  if (session.signedLocally || !isConfidentialUserAccessToken(session.accessToken)) return false;
   return session.accessExpiresAt <= now + ACCESS_REFRESH_SKEW_MS;
 }
 
 export function hasUsableNearintentsUserSession(intentsAccountId: string, now = Date.now()): boolean {
   const session = readNearintentsUserSession(intentsAccountId);
   if (!session) return false;
-  if (session.signedLocally) return true;
+  if (session.signedLocally) return false;
+  if (!isConfidentialUserAccessToken(session.accessToken) || !session.refreshToken) return false;
   if (session.accessExpiresAt > now + ACCESS_REFRESH_SKEW_MS) return true;
-  if (session.refreshToken && session.refreshExpiresAt > now) return true;
-  return false;
+  return session.refreshExpiresAt > now;
 }
 
 export async function getNearintentsAccessToken(intentsAccountId: string): Promise<string | null> {
@@ -123,6 +145,10 @@ export async function getNearintentsAccessToken(intentsAccountId: string): Promi
   const session = store.sessions[intentsAccountId];
   if (!session) return null;
   if (session.signedLocally) return null;
+  if (!isConfidentialUserAccessToken(session.accessToken) || !session.refreshToken) {
+    store.clear(intentsAccountId);
+    return null;
+  }
   if (!sessionNeedsRefresh(session)) return session.accessToken;
   if (!session.refreshToken) {
     store.clear(intentsAccountId);

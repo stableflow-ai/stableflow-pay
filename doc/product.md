@@ -19,9 +19,10 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Reports | `/reports` | shipped | Report analytics charts (`GET /v1/pay/report/analytics`) plus a paginated usage table (`GET /v1/pay/report/payments`) and CSV export (`GET /v1/pay/report/payments/export`). Top and table filters include Key / Link source (`type`), API key, payment link, network, and time. |
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
 | Developer Docs | `/docs` | shipped | Authenticated merchant Checkout API guide with setup, Session creation, redirects, confirmation, webhooks, supported assets, API reference, and production checklist. |
+| Privacy Transfer | `/privacy-transfer` | shipped | Authenticated. Not in the sidebar. Confidential TRANSFER or SWAP to 1–10 unique addresses. History is local to this browser. |
 | Terms | `/terms` | placeholder | Sidebar footer link. AppLayout also shows Terms of Service at the bottom right of authenticated pages (not login, register, or public payer). |
 
-Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and confidential helpers** live in `src/` for upcoming screens. Do not add the v2 Home / Pay / Partner page chrome.
+Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and confidential helpers** live in `src/`. Privacy Transfer is at `/privacy-transfer`. Do not add the v2 Home / Pay / Partner page chrome.
 
 ## Auth
 
@@ -41,7 +42,7 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Dashboard chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. All routes inside this layout, including `/docs`, are authenticated. Login, register, `/howitworks`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Dashboard chrome is `AppLayout`: left sidebar (220px) + page title + **Create Payment Link** on Overview `/` only (goes to `/payment-links/create`; hidden below 768px). The content column has a bottom-right `Terms of Service` link. All routes inside this layout, including `/docs` and `/privacy-transfer`, are authenticated. `/privacy-transfer` is not in the sidebar. Login, register, `/howitworks`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
 
 `/guide` is authenticated but does **not** use `AppLayout`. It has its own logo column and a step drawer.
 
@@ -50,6 +51,20 @@ The sidebar user chip shows `user.name` and a three-dot control. That control op
 Sidebar footer (muted): Settings, Developer Docs, Terms of Service. There is no Support item and no Webhooks item in the main nav.
 
 Developer Docs at `/docs` uses the authenticated AppLayout and documents the Checkout API. It is static product documentation and does not call the backend.
+
+`/privacy-transfer` uses AppLayout but is **not** a sidebar item. Open it by URL. The page title is Privacy Transfer.
+
+## Privacy Transfer
+
+Authenticated `/privacy-transfer`. A merchant sends one amount to 1–10 unique destination addresses through a confidential Intents account.
+
+- Mode is derived after the funding route: same `assetId` → `TRANSFER`, otherwise `SWAP`. There is no mode switch.
+- Funding is the connected source-chain wallet **or** an existing confidential balance. Linking (the Intents account) is a connected NEAR / EVM / Solana / Tron wallet. Zcash cannot link; it may be the origin or the destination.
+- Recipients are typed in. They must be unique. Preview hides per-recipient shares (±20% split is applied at execute time). Preview shows total, expected total out, minimum total out, mode, route (`DIRECT` / `SAME_CHAIN_SWAP` / `CROSS_CHAIN_SWAP`), expiry, and fee (product fee is 0 bps).
+- This release only quotes a **DIRECT** registered source deposit. Unregistered SAME_CHAIN / CROSS_CHAIN funding swaps throw.
+- Wallet deposits go through 1Click quote + `transferToDepositAddress`, then indexer `POST /v3/private/withdraws`. Balance funding signs and `POST /v1/nearintents/submit-intent`.
+- Execution snapshots persist in Zustand (`stableflow-pay:privacy-transfer-execution:v1`). Failed transfers are not resumed; Retry from balance opens a new order whose recipients must be a subset of the original addresses.
+- Quote activates a 1Click User-Session through `activateConfidentialAccount` (`POST /v0/auth/authenticate`, Vite-proxied in `pnpm dev`). Empty-intents wallet signing happens once per linking account; later quotes reuse the access/refresh tokens until they expire. Access-token refresh does not prompt the wallet. Switching linking wallet, closing the tab, or a failed refresh signs again. When a signature is needed, EVM linking switches onto the source (or destination) token chain first. The private indexer is `VITE_PRIVATE_INDEXER_URL` (dev Vite proxies `/v3/private`). Production CORS still needs a backend proxy. How it works is unchanged.
 
 ## Overview
 

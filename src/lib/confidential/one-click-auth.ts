@@ -1,5 +1,5 @@
 import type { IntentSignedPayload } from "@/wallet";
-import { ONE_CLICK_API_URL } from "./config";
+import { oneClickBrowserUrl } from "./config";
 
 export interface UserAuthResponse {
   accessToken: string;
@@ -58,7 +58,7 @@ function readErrorMessage(payload: unknown, fallback: string): string {
 async function postJson<T>(path: string, body: unknown): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${ONE_CLICK_API_URL}${path}`, {
+    res = await fetch(oneClickBrowserUrl(path), {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -79,7 +79,11 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function authenticateUser(signedData: IntentSignedPayload): Promise<UserAuthResponse> {
-  return postJson<UserAuthResponse>("/v0/auth/authenticate", { signedData });
+  const auth = await postJson<UserAuthResponse>("/v0/auth/authenticate", { signedData });
+  if (!auth?.accessToken) {
+    throw new OneClickAuthError("Authenticate did not return an access token.");
+  }
+  return auth;
 }
 
 export async function refreshUserSession(refreshToken: string): Promise<UserRefreshResponse> {
@@ -130,9 +134,10 @@ export async function getPrivateBalances(
   tokenIds?: string[],
 ): Promise<PrivateBalance[]> {
   const query = tokenIds?.length ? `?tokenIds=${encodeURIComponent(tokenIds.join(","))}` : "";
+  const url = oneClickBrowserUrl(`/v0/account/balances${query}`);
   let res: Response;
   try {
-    res = await fetch(`${ONE_CLICK_API_URL}/v0/account/balances${query}`, {
+    res = await fetch(url, {
       headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` },
     });
   } catch (error) {
