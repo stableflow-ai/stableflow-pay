@@ -6,12 +6,14 @@
  * refuse outright rather than handing NEAR Intents a signature it will reject.
  */
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { isAddress } from "viem";
-import { useAccount, useDisconnect, useSignMessage } from "wagmi";
+import { useAccount, useConnectors, useDisconnect, useSignMessage, type Connector } from "wagmi";
 import { useEvmWalletInfo } from "@/hooks/use-evm-wallet-info";
 import type { GeneratedIntent, IntentSignInput, IntentSignedPayload, UseWalletResult, WalletAccount } from "../types";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import useToast from "@/hooks/use-toast";
+import { withWalletConnectError } from "../connect-feedback";
 import {
   buildEvmFamilyPayload,
   encodeSecp256k1Signature,
@@ -26,9 +28,29 @@ export function useEvmWallet(): UseWalletResult {
   const { address, chainId, isConnected, isConnecting, isReconnecting } = useAccount();
   const { disconnect } = useDisconnect();
   const { openConnectModal } = useConnectModal();
+  const connectors = useConnectors();
   const { signMessageAsync } = useSignMessage();
   const { isSafe } = useSafeMode();
   const walletInfo = useEvmWalletInfo();
+  const toast = useToast();
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
+
+  useEffect(() => {
+    const originals = new Map<Connector, Connector["connect"]>();
+    for (const connector of connectors) {
+      originals.set(connector, connector.connect);
+      const original = connector.connect.bind(connector) as (...args: never[]) => ReturnType<Connector["connect"]>;
+      connector.connect = ((...args: never[]) =>
+        withWalletConnectError(toastRef.current, () => original(...args))
+      ) as Connector["connect"];
+    }
+    return () => {
+      for (const [connector, original] of originals) {
+        connector.connect = original;
+      }
+    };
+  }, [connectors]);
 
   const account = useMemo<WalletAccount | null>(() => {
     if (!address) return null;
@@ -39,6 +61,10 @@ export function useEvmWallet(): UseWalletResult {
       icon: walletInfo.icon || null,
     };
   }, [address, chainId, walletInfo.icon]);
+
+  const connect = useCallback(() => {
+    openConnectModal?.();
+  }, [openConnectModal]);
 
   const signMessage = useCallback(
     async (input: IntentSignInput): Promise<IntentSignedPayload> => {
@@ -87,7 +113,7 @@ export function useEvmWallet(): UseWalletResult {
     account,
     isConnected: Boolean(isConnected && address),
     isConnecting: isConnecting || isReconnecting,
-    connect: () => openConnectModal?.(),
+    connect,
     disconnect,
     signMessage,
     signGeneratedIntent,
@@ -95,11 +121,11 @@ export function useEvmWallet(): UseWalletResult {
   }), [
     account,
     address,
+    connect,
     disconnect,
     isConnected,
     isConnecting,
     isReconnecting,
-    openConnectModal,
     signMessage,
     signGeneratedIntent,
   ]);

@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
+import { paySwapSubmit } from "@/api/pay";
 import { SafePendingSwapCard } from "@/components/safe/SafePendingSwapCard";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
-import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { useSafePendingSwaps } from "@/hooks/use-safe-pending-swaps";
 import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
@@ -39,6 +39,7 @@ import {
   PAYER_KIND,
   PAYER_WAITING_STATE,
   QUOTE_DEBOUNCE_MS,
+  QUOTE_EXPIRED_MESSAGE,
   SPENT_QUOTE_MESSAGE,
   checkoutWaitingPath,
   payerWaitingPath,
@@ -48,6 +49,7 @@ import {
   isCheckoutOpenAmount,
   isCheckoutPayable,
   isDryQuoteStale,
+  isPayQuoteExpired,
   parsePositiveDecimal,
   paymentLinkCardIconUrl,
   payoutNetworkToken,
@@ -87,7 +89,6 @@ export function PayView() {
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
   const queryClient = useQueryClient();
-  useQuickPayCommitQueue();
   const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
@@ -255,6 +256,11 @@ export function PayView() {
       if (!depositAddress) {
         throw new Error("Missing deposit address");
       }
+      if (isPayQuoteExpired(swap.deadline)) {
+        toast.fail({ title: QUOTE_EXPIRED_MESSAGE });
+        void refetchSwap();
+        throw new BalanceGateError(QUOTE_EXPIRED_MESSAGE);
+      }
       const amountIn = BigInt(swap.amountIn || "0");
       if (isSwapConsumed(swap.swapId)) {
         throw new Error(SPENT_QUOTE_MESSAGE);
@@ -291,10 +297,6 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      const quoteQuery = {
-        feesUsd: feeUsd ?? "",
-        payoutUsd: swap.amountOutUsd.trim() || "0",
-      };
       // A Safe proposal has no transaction hash until the owners execute it, so it
       // waits in `safe-pending-swap` and the payer stays on this page. The consumed
       // marker stays either way: this deposit address must never be paid twice.
@@ -310,8 +312,8 @@ export function PayView() {
           deadline: swap.deadline,
           paymentKind: payment.kind,
           paymentId: payment.id,
-          feesUsd: quoteQuery.feesUsd,
-          payoutUsd: quoteQuery.payoutUsd,
+          feesUsd: feeUsd ?? "",
+          payoutUsd: swap.amountOutUsd.trim() || "0",
         });
         setPhase("idle");
         toast.info({
@@ -320,26 +322,31 @@ export function PayView() {
         });
         return;
       }
-      enqueueQuickPayCommit({
-        swapId: swap.swapId,
-        txHash: result.txHash,
-        onSuccess: (paymentsId) => {
-          if (payment.kind === PAYER_KIND.Checkout) {
-            navigate(checkoutWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
-            return;
-          }
-          navigate(
-            payerWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }),
-            { replace: true, state: PAYER_WAITING_STATE },
-          );
-        },
-      });
+      const txHash = result.txHash;
+      let paymentsId = "";
+      try {
+        const submitted = await paySwapSubmit(
+          { swapId: swap.swapId, txHash },
+          { auth: false },
+        );
+        paymentsId = submitted.paymentsId.trim();
+      } catch {
+        // Submit is one-shot; waiting still proceeds without payments_id.
+      }
+      const quoteQuery = {
+        feesUsd: feeUsd ?? "",
+        payoutUsd: swap.amountOutUsd.trim() || "0",
+        ...(paymentsId ? { paymentId: paymentsId } : {}),
+      };
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id, quoteQuery));
+        navigate(checkoutWaitingPath(payment.id, quoteQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(payment.id, quoteQuery), { state: PAYER_WAITING_STATE });
+      navigate(payerWaitingPath(payment.id, quoteQuery), {
+        replace: true,
+        state: PAYER_WAITING_STATE,
+      });
     },
     onError: (err) => {
       setPhase("idle");
@@ -392,10 +399,13 @@ export function PayView() {
       });
       if (isCheckoutItem) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(item.paymentId) });
-        navigate(checkoutWaitingPath(item.paymentId, quoteQuery));
+        navigate(checkoutWaitingPath(item.paymentId, quoteQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(item.paymentId, quoteQuery), { state: PAYER_WAITING_STATE });
+      navigate(payerWaitingPath(item.paymentId, quoteQuery), {
+        replace: true,
+        state: PAYER_WAITING_STATE,
+      });
     },
   });
 
