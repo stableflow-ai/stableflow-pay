@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+/**
+ * Retry queue for payout submit. Currently unused. Keep this module so
+ * retries can be wired back through enqueueBatchPayoutCommit /
+ * processAllPendingBatchPayoutCommits.
+ */
+
 const STORAGE_KEY = "stableflow-pay:batch-payout-commit-queue:v1";
 const BASE_RETRY_MS = 5_000;
 
@@ -123,6 +129,7 @@ export const useBatchPayoutCommitQueueStore = create(
   ),
 );
 
+/** Currently unused. Re-enable retries by calling this after a successful broadcast. */
 export function enqueueBatchPayoutCommit(input: {
   orderId: string;
   txHash: string;
@@ -139,6 +146,7 @@ export function enqueueBatchPayoutCommit(input: {
   return id;
 }
 
+/** Currently unused. Re-enable retries by calling this from the layout hook. */
 export function processAllPendingBatchPayoutCommits() {
   const { queue } = useBatchPayoutCommitQueueStore.getState();
   for (const item of queue) {

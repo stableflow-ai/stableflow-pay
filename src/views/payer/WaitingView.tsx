@@ -3,9 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayPaymentQuery } from "@/hooks/use-pay-payment";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
-import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { txExplorerUrl } from "@/config/chains";
-import { onQuickPayCommitSuccess, peekLastQuickPayCommitSuccess } from "@/stores/quick-pay-commit-queue";
 import { PayerLayout } from "./components/PayerLayout";
 import { WaitingCard } from "./components/WaitingCard";
 import {
@@ -19,9 +17,7 @@ import {
   PAYER_WAIT_STATUS,
   PAYER_WAITING_STATE,
   checkoutPath,
-  checkoutWaitingPath,
   payerPath,
-  payerWaitingPath,
 } from "./config";
 import {
   buildCheckoutSuccessUrl,
@@ -47,7 +43,6 @@ export function WaitingView() {
     !isCheckout && (state as { awaitingSubmit?: boolean } | null)?.awaitingSubmit === PAYER_WAITING_STATE.awaitingSubmit,
   );
   const navigate = useNavigate();
-  useQuickPayCommitQueue();
 
   const checkoutQuery = useCheckoutSessionQuery(isCheckout ? sessionId : undefined, {
     poll: isCheckout && !queryPaymentId,
@@ -59,33 +54,6 @@ export function WaitingView() {
   const paymentId = queryPaymentId || (isCheckout ? checkoutPaymentsId : "");
   const paymentQuery = usePayPaymentQuery(paymentId);
   const payment = paymentQuery.data;
-
-  useEffect(() => {
-    const quoteQuery = { feesUsd, payoutUsd };
-    function applyPaymentsId(paymentsId: string) {
-      if (!paymentsId) return;
-      if (isCheckout) {
-        if (!sessionId) return;
-        navigate(checkoutWaitingPath(sessionId, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
-        return;
-      }
-      if (!linkId) return;
-      navigate(
-        payerWaitingPath(linkId, { ...quoteQuery, paymentId: paymentsId }),
-        { replace: true, state: PAYER_WAITING_STATE },
-      );
-    }
-
-    if (!queryPaymentId) {
-      const last = peekLastQuickPayCommitSuccess();
-      if (last?.paymentsId) applyPaymentsId(last.paymentsId);
-    }
-
-    if (queryPaymentId) return;
-    return onQuickPayCommitSuccess((result) => {
-      applyPaymentsId(result.paymentsId);
-    });
-  }, [feesUsd, isCheckout, linkId, navigate, payoutUsd, queryPaymentId, sessionId]);
 
   const waitStatus = (() => {
     if (paymentId) return waitStatusFromPayment(payment?.status);
