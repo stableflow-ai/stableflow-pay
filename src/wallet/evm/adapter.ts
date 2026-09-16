@@ -1,7 +1,9 @@
 /**
  * EVM wallet adapter backed by wagmi + RainbowKit.
  *
- * Message signing uses ERC-191 (`personal_sign`) via wagmi `useSignMessage`.
+ * Message signing uses ERC-191 (`personal_sign`) via wagmi `signMessageAsync`.
+ * A Safe cannot produce one — it signs through EIP-1271 — so both signing paths
+ * refuse outright rather than handing NEAR Intents a signature it will reject.
  */
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -20,6 +22,7 @@ import {
   payloadAsText,
   walletDoesNotSupportSigning,
 } from "../intents-sign";
+import { useSafeMode } from "./safe";
 
 export function useEvmWallet(): UseWalletResult {
   const { address, chainId, isConnected, isConnecting, isReconnecting } = useAccount();
@@ -27,6 +30,7 @@ export function useEvmWallet(): UseWalletResult {
   const { openConnectModal } = useConnectModal();
   const connectors = useConnectors();
   const { signMessageAsync } = useSignMessage();
+  const { isSafe } = useSafeMode();
   const walletInfo = useEvmWalletInfo();
   const toast = useToast();
   const toastRef = useRef(toast);
@@ -67,7 +71,7 @@ export function useEvmWallet(): UseWalletResult {
       if (!address) {
         throw new Error("[wallet:evm] No connected account to sign with.");
       }
-      if (typeof signMessageAsync !== "function") {
+      if (typeof signMessageAsync !== "function" || isSafe) {
         throw walletDoesNotSupportSigning("EVM");
       }
       const payload = buildEvmFamilyPayload(
@@ -82,7 +86,7 @@ export function useEvmWallet(): UseWalletResult {
         signature: encodeSecp256k1Signature(signature),
       };
     },
-    [address, signMessageAsync],
+    [address, isSafe, signMessageAsync],
   );
 
   const signGeneratedIntent = useCallback(
@@ -90,7 +94,7 @@ export function useEvmWallet(): UseWalletResult {
       if (!address) {
         throw new Error("[wallet:evm] No connected account to sign with.");
       }
-      if (typeof signMessageAsync !== "function") {
+      if (typeof signMessageAsync !== "function" || isSafe) {
         throw walletDoesNotSupportSigning("EVM");
       }
       const payload = payloadAsText(intent.payload);
@@ -101,7 +105,7 @@ export function useEvmWallet(): UseWalletResult {
         signature: encodeSecp256k1Signature(signature),
       };
     },
-    [address, signMessageAsync],
+    [address, isSafe, signMessageAsync],
   );
 
   return useMemo<UseWalletResult>(() => ({

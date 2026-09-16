@@ -1,0 +1,5 @@
+{
+  "name": "Stableflow Pay",
+  "description": "Pay a Stableflow payment link or checkout from your Safe",
+  "iconPath": "logo.svg"
+}

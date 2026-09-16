@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
 import { paySwapSubmit } from "@/api/pay";
+import { showSafeProposalToast } from "@/components/safe/safe-proposal-toast";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
@@ -17,6 +18,7 @@ import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { assertSafeOriginChain } from "@/wallet/evm/safe";
 import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
 import type { ChainKind } from "@/wallet";
@@ -253,6 +255,9 @@ export function PayView() {
         void refetchSwap();
         throw new BalanceGateError(QUOTE_EXPIRED_MESSAGE);
       }
+      if (originToken.chain.chainId != null) {
+        await assertSafeOriginChain(originToken.chain.chainId);
+      }
       const amountIn = BigInt(swap.amountIn || "0");
       if (isSwapConsumed(swap.swapId)) {
         throw new Error(SPENT_QUOTE_MESSAGE);
@@ -284,11 +289,23 @@ export function PayView() {
       // have reached the network, and 1Click keeps a second transfer to the
       // same deposit address.
       markSwapConsumed(swap.swapId);
-      const txHash = await transferToDepositAddress({
+      const result = await transferToDepositAddress({
         token: originToken,
         depositAddress,
         amountIn,
       });
+      // A Safe proposal has no transaction hash until the owners execute it, so the
+      // payer stays on this page with a persistent toast. The consumed marker stays
+      // either way: this deposit address must never be paid twice.
+      if (result.kind === "pending-multisig") {
+        showSafeProposalToast(toast, {
+          chainId: result.chainId,
+          safeAddress: result.safeAddress,
+        });
+        setPhase("idle");
+        return;
+      }
+      const txHash = result.txHash;
       let paymentsId = "";
       try {
         const submitted = await paySwapSubmit(
