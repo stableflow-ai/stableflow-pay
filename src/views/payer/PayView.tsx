@@ -2,22 +2,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
+import { paySwapSubmit } from "@/api/pay";
+import { showSafeProposalToast } from "@/components/safe/safe-proposal-toast";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { usePaymentWallet } from "@/hooks/use-payment-wallet";
-import { useQuickPayCommitQueue } from "@/hooks/use-quick-pay-commit-queue";
 import { usePaySwapQuery } from "@/hooks/use-pay-quote-api";
 import useToast from "@/hooks/use-toast";
 import { QUICK_PAY_SLIPPAGE_TOLERANCE } from "@/config/payout";
 import { useAuthStore } from "@/stores/auth";
 import { isSwapConsumed, markSwapConsumed, useConsumedSwapsStore } from "@/stores/consumed-swaps";
 import { useIntentsTokensStore, normalizeSymbol } from "@/stores/intents-tokens";
-import { enqueueQuickPayCommit } from "@/stores/quick-pay-commit-queue";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { assertSafeOriginChain } from "@/wallet/evm/safe";
 import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
 import type { ChainKind } from "@/wallet";
@@ -82,7 +83,6 @@ export function PayView() {
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
   const queryClient = useQueryClient();
-  useQuickPayCommitQueue();
   const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
@@ -255,6 +255,9 @@ export function PayView() {
         void refetchSwap();
         throw new BalanceGateError(QUOTE_EXPIRED_MESSAGE);
       }
+      if (originToken.chain.chainId != null) {
+        await assertSafeOriginChain(originToken.chain.chainId);
+      }
       const amountIn = BigInt(swap.amountIn || "0");
       if (isSwapConsumed(swap.swapId)) {
         throw new Error(SPENT_QUOTE_MESSAGE);
@@ -286,35 +289,47 @@ export function PayView() {
       // have reached the network, and 1Click keeps a second transfer to the
       // same deposit address.
       markSwapConsumed(swap.swapId);
-      const txHash = await transferToDepositAddress({
+      const result = await transferToDepositAddress({
         token: originToken,
         depositAddress,
         amountIn,
       });
+      // A Safe proposal has no transaction hash until the owners execute it, so the
+      // payer stays on this page with a persistent toast. The consumed marker stays
+      // either way: this deposit address must never be paid twice.
+      if (result.kind === "pending-multisig") {
+        showSafeProposalToast(toast, {
+          chainId: result.chainId,
+          safeAddress: result.safeAddress,
+        });
+        setPhase("idle");
+        return;
+      }
+      const txHash = result.txHash;
+      let paymentsId = "";
+      try {
+        const submitted = await paySwapSubmit(
+          { swapId: swap.swapId, txHash },
+          { auth: false },
+        );
+        paymentsId = submitted.paymentsId.trim();
+      } catch {
+        // Submit is one-shot; waiting still proceeds without payments_id.
+      }
       const quoteQuery = {
         feesUsd: feeUsd ?? "",
         payoutUsd: swap.amountOutUsd.trim() || "0",
+        ...(paymentsId ? { paymentId: paymentsId } : {}),
       };
-      enqueueQuickPayCommit({
-        swapId: swap.swapId,
-        txHash,
-        onSuccess: (paymentsId) => {
-          if (payment.kind === PAYER_KIND.Checkout) {
-            navigate(checkoutWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }), { replace: true });
-            return;
-          }
-          navigate(
-            payerWaitingPath(payment.id, { ...quoteQuery, paymentId: paymentsId }),
-            { replace: true, state: PAYER_WAITING_STATE },
-          );
-        },
-      });
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id, quoteQuery));
+        navigate(checkoutWaitingPath(payment.id, quoteQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(payment.id, quoteQuery), { state: PAYER_WAITING_STATE });
+      navigate(payerWaitingPath(payment.id, quoteQuery), {
+        replace: true,
+        state: PAYER_WAITING_STATE,
+      });
     },
     onError: (err) => {
       setPhase("idle");

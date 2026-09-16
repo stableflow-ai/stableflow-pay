@@ -1,9 +1,13 @@
 /**
  * Send origin tokens to the 1Click deposit address returned by single swap.
+ *
+ * Only the EVM branch can return `pending-multisig`: the other chains have no
+ * multisig support here, so they always resolve to an executed transaction hash.
  */
 
 import { isNativeToken, isNearWrappedGasToken, type IntentsToken } from "@/stores/intents-tokens";
 import { transferErc20, transferNativeEvm } from "./evm/transfer";
+import { executedBroadcast, type BroadcastResult } from "./types";
 import { transferFt, transferNativeNear, transferNearViaWrap } from "./near/transfer";
 import { transferNativeSol, transferSpl } from "./solana/transfer";
 import { transferNativeTrx, transferTrc20 } from "./tron/transfer";
@@ -13,7 +17,7 @@ export async function transferToDepositAddress(input: {
   token: IntentsToken;
   depositAddress: string;
   amountIn: bigint;
-}): Promise<string> {
+}): Promise<BroadcastResult> {
   const { token, depositAddress, amountIn } = input;
   const to = depositAddress.trim();
   if (!to) throw new Error("Missing deposit address");
@@ -38,30 +42,30 @@ export async function transferToDepositAddress(input: {
   }
 
   if (kind === "solana") {
-    if (native) return transferNativeSol({ to, amountIn });
+    if (native) return executedBroadcast(await transferNativeSol({ to, amountIn }));
     if (!token.contractAddress) throw new Error("Missing token mint");
-    return transferSpl({ mint: token.contractAddress, to, amountIn });
+    return executedBroadcast(await transferSpl({ mint: token.contractAddress, to, amountIn }));
   }
 
   if (kind === "near") {
     if (isNearWrappedGasToken(token)) {
       if (!token.contractAddress) throw new Error("Missing token contract");
-      return transferNearViaWrap({ tokenContract: token.contractAddress, to, amountIn });
+      return executedBroadcast(await transferNearViaWrap({ tokenContract: token.contractAddress, to, amountIn }));
     }
-    if (native) return transferNativeNear({ to, amountIn });
+    if (native) return executedBroadcast(await transferNativeNear({ to, amountIn }));
     if (!token.contractAddress) throw new Error("Missing token contract");
-    return transferFt({ tokenContract: token.contractAddress, to, amountIn });
+    return executedBroadcast(await transferFt({ tokenContract: token.contractAddress, to, amountIn }));
   }
 
   if (kind === "tron") {
-    if (native) return transferNativeTrx({ to, amountIn });
+    if (native) return executedBroadcast(await transferNativeTrx({ to, amountIn }));
     if (!token.contractAddress) throw new Error("Missing token contract");
-    return transferTrc20({ contractAddress: token.contractAddress, to, amountIn });
+    return executedBroadcast(await transferTrc20({ contractAddress: token.contractAddress, to, amountIn }));
   }
 
   if (kind === "zec") {
     if (!native) throw new Error("Zcash only supports native ZEC");
-    return transferNativeZec({ to, amountIn, decimals: token.decimals });
+    return executedBroadcast(await transferNativeZec({ to, amountIn, decimals: token.decimals }));
   }
 
   throw new Error(`Unsupported origin chain: ${kind}`);

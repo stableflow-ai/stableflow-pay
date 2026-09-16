@@ -172,7 +172,7 @@ export function useOrderQuery(id: string) {
 | POST | `/v1/pay/links/{linkId}/disable` | yes | — | `string` | `disablePaymentLink` | `usePaymentLinkMutations` |
 | POST | `/v1/pay/swap/link/{linkId}` | if session | `PaySwapParam` | `PaySwapResp` | `paySwapLink` | `usePaySwapQuery` |
 | POST | `/v1/pay/swap/checkout/{sessionId}` | if session | `PaySwapParam` | `PaySwapResp` | `paySwapCheckout` | `usePaySwapQuery` |
-| POST | `/v1/pay/swap/submit` | if session | `PaySwapSubmitParam` | `PaySwapSubmitResp` | `paySwapSubmit` | commit queue |
+| POST | `/v1/pay/swap/submit` | if session | `PaySwapSubmitParam` | `PaySwapSubmitResp` | `paySwapSubmit` | `PayView` (one-shot) |
 | POST | `/v1/pay/checkout/sessions` | x-api-key | `PayCheckoutSessionBody` | `unknown` | `createCheckoutSession` | `useCreateCheckoutSessionMutation` |
 | GET | `/v1/pay/checkout/sessions/{sessionId}` | if session | — | `PayCheckoutSession` (`organization.logo`) | `getCheckoutSession` | `useCheckoutSessionQuery` |
 | GET | `/v1/pay/payments/{paymentId}` | if session | — | `PayPaymentDetail` | `getPayPayment` | `usePayPaymentQuery` |

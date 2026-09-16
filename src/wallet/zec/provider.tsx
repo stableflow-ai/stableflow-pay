@@ -8,12 +8,14 @@ import {
   type ReactNode,
 } from "react";
 import useToast from "@/hooks/use-toast";
+import { isWalletConnectionRejected, withWalletConnectError } from "../connect-feedback";
 import {
   zcashWalletAdapter,
   zecConnectedAddress,
   zecShieldedAddress,
   zecTransparentAddress,
 } from "./sdk";
+import { ZecWalletSelectModal } from "./select-modal";
 import { isNoirWalletRejected, isNoirWalletUnavailable, openNoirInstallPage } from "./utils";
 
 export interface ZecWalletContextValue {
@@ -38,6 +40,7 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
   const [shieldedAddress, setShieldedAddress] = useState<string | null>(null);
   const [transparentAddress, setTransparentAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const toast = useToast();
 
   const clearAddresses = useCallback(() => {
@@ -52,7 +55,7 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
     setTransparentAddress(zecTransparentAddress());
   }, []);
 
-  const connect = useCallback(() => {
+  const connectNoir = useCallback(() => {
     setConnecting(true);
     void (async () => {
       try {
@@ -61,23 +64,24 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
           openNoirInstallPage();
           return;
         }
-        await zcashWalletAdapter.connect();
+        await withWalletConnectError(toast, () => zcashWalletAdapter.connect());
         syncAccount();
       } catch (error: unknown) {
         if (isNoirWalletUnavailable(error)) {
           openNoirInstallPage();
           return;
         }
-        if (isNoirWalletRejected(error)) {
-          toast.fail({ title: "Wallet connection rejected" });
-          return;
-        }
+        if (isNoirWalletRejected(error) || isWalletConnectionRejected(error)) return;
         console.error("[wallet:zec]", error);
       } finally {
         setConnecting(false);
       }
     })();
   }, [syncAccount, toast]);
+
+  const connect = useCallback(() => {
+    setPickerOpen(true);
+  }, []);
 
   const disconnect = useCallback(() => {
     void zcashWalletAdapter.disconnect().finally(() => {
@@ -133,6 +137,11 @@ export function ZecWalletProvider({ children }: { children: ReactNode }) {
   return (
     <ZecWalletContext.Provider value={value}>
       {children}
+      <ZecWalletSelectModal
+        visible={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelectNoir={connectNoir}
+      />
     </ZecWalletContext.Provider>
   );
 }
