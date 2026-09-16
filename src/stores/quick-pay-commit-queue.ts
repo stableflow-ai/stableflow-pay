@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+/**
+ * Retry queue for POST /pay/swap/submit. Currently unused: PayView
+ * submits once and does not enqueue. Keep this module so retries can be
+ * wired back through enqueueQuickPayCommit / processAllPendingQuickPayCommits.
+ */
+
 const STORAGE_KEY = "stableflow-pay:quick-pay-commit-queue:v2";
 const BASE_RETRY_MS = 5_000;
 
@@ -141,6 +147,7 @@ export const useQuickPayCommitQueueStore = create(
   ),
 );
 
+/** Currently unused. Re-enable retries by calling this after a successful broadcast. */
 export function enqueueQuickPayCommit(input: {
   swapId: string;
   txHash: string;
@@ -159,6 +166,7 @@ export function enqueueQuickPayCommit(input: {
   return id;
 }
 
+/** Currently unused. Re-enable retries by calling this from the waiting-page hook. */
 export function processAllPendingQuickPayCommits() {
   const { queue } = useQuickPayCommitQueueStore.getState();
   for (const item of queue) {
