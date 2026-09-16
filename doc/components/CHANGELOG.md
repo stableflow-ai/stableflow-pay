@@ -2,6 +2,10 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-16
+
+- **Toast:** `title` / `text` accept `ReactNode`. `useToast()` methods return a `ToastHandle` (`id`, `update`, `dismiss`) so a persistent toast can close itself from an in-body link.
+
 ## 2026-09-03
 
 - **Table:** Scroll children wrap in `min-w-full` (no `w-max`). `fr` columns size to the card so overflow can truncate; header and body stay on the same tracks. Horizontal scroll still applies when column mins exceed the card.

@@ -21,7 +21,7 @@ Default position `top-right`. `autoClose` is `3000` ms unless `duration` is pass
 | `notice` | `notice` | Yellow speaker |
 | `dismiss` | — | `toast.dismiss` from react-toastify |
 
-Each show method takes `{ title, text?, duration? }` and returns the toast id.
+Each show method takes `{ title, text?, duration?, onClose? }` and returns a `ToastHandle` (`id`, `update`, `dismiss`). `title` and `text` are `ReactNode`.
 
 ## Toast props
 
@@ -30,8 +30,8 @@ Used by the hook. Feature code should not render `<Toast>` directly.
 | Prop | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `type` | `ToastType` | required | Visual glyph |
-| `title` | `string` | required | |
-| `text` | `string` | — | Secondary line |
+| `title` | `ReactNode` | required | |
+| `text` | `ReactNode` | — | Secondary line |
 | `className` | `string` | — | Root card |
 | `closeToast` | `() => void` | — | Injected by react-toastify |
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { IconProcessing } from "@/components/icons/processing";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +13,8 @@ export type ToastType = (typeof ToastType)[keyof typeof ToastType];
 
 interface ToastProps {
   type: ToastType;
-  title: string;
-  text?: string;
+  title: ReactNode;
+  text?: ReactNode;
   className?: string;
   closeToast?: () => void;
 }
