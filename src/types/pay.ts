@@ -39,6 +39,7 @@ export interface PaySwapResp extends PayQuoteResp {
 
 export interface PaySwapSubmitParam {
   swapId: string;
+  /** On-chain hash, or `""` when a watched multisig has none yet. */
   txHash: string;
 }
 

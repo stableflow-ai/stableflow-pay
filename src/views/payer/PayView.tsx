@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
 import { paySwapSubmit } from "@/api/pay";
-import { showMultisigProposalToast } from "@/components/multisig/multisig-proposal-toast";
+import { showMultisigConfirmToast } from "@/components/multisig/multisig-proposal-toast";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
@@ -18,6 +18,8 @@ import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { resolveMultisigConfirmToast } from "@/wallet/multisig";
+import type { BroadcastResult } from "@/wallet/types";
 import { assertSafeOriginChain } from "@/wallet/evm/safe";
 import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
@@ -289,18 +291,31 @@ export function PayView() {
       // have reached the network, and 1Click keeps a second transfer to the
       // same deposit address.
       markSwapConsumed(swap.swapId);
-      const result = await transferToDepositAddress({
-        token: originToken,
-        depositAddress,
-        amountIn,
-      });
-      // A Safe / Trezu / Squads proposal has no transaction hash until owners
-      // execute it, so the payer stays on this page with a persistent toast.
+      const confirmCopy = await resolveMultisigConfirmToast(originKind);
+      const confirmToast = confirmCopy ? showMultisigConfirmToast(toast, confirmCopy) : undefined;
+      let result: BroadcastResult;
+      try {
+        result = await transferToDepositAddress({
+          token: originToken,
+          depositAddress,
+          amountIn,
+        });
+      } catch (error) {
+        confirmToast?.dismiss();
+        throw error;
+      }
+      confirmToast?.dismiss();
+      // A Safe / Trezu / Squads proposal is watched on waiting via URL params.
       // The consumed marker stays either way: this deposit address must never
       // be paid twice.
       if (result.kind === "pending-multisig") {
-        showMultisigProposalToast(toast, result);
-        setPhase("idle");
+        const waitingQuery = { swapId: swap.swapId, proposal: result };
+        if (payment.kind === PAYER_KIND.Checkout) {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
+          navigate(checkoutWaitingPath(payment.id, waitingQuery), { replace: true });
+          return;
+        }
+        navigate(payerWaitingPath(payment.id, waitingQuery), { replace: true });
         return;
       }
       const txHash = result.txHash;
