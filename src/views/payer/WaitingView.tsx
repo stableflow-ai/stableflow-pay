@@ -10,10 +10,8 @@ import {
   CHECKOUT_PATH,
   CHECKOUT_REDIRECT_SECONDS,
   CHECKOUT_SESSION_QUERY,
-  PAYER_FEES_QUERY,
   PAYER_PATH_PREFIX,
   PAYER_PAYMENT_QUERY,
-  PAYER_PAYOUT_QUERY,
   PAYER_WAIT_STATUS,
   PAYER_WAITING_STATE,
   checkoutPath,
@@ -37,8 +35,6 @@ export function WaitingView() {
   const linkId = isCheckout ? "" : (idParam?.trim() || "");
   const sessionId = isCheckout ? (searchParams.get(CHECKOUT_SESSION_QUERY)?.trim() || "") : "";
   const queryPaymentId = searchParams.get(PAYER_PAYMENT_QUERY)?.trim() || "";
-  const feesUsd = searchParams.get(PAYER_FEES_QUERY)?.trim() || "";
-  const payoutUsd = searchParams.get(PAYER_PAYOUT_QUERY)?.trim() || "";
   const awaitingSubmit = Boolean(
     !isCheckout && (state as { awaitingSubmit?: boolean } | null)?.awaitingSubmit === PAYER_WAITING_STATE.awaitingSubmit,
   );
@@ -97,9 +93,7 @@ export function WaitingView() {
     fallbackAmount: checkout?.amount,
     fallbackSymbol: checkout?.symbol,
     fallbackNetwork: checkout?.network,
-    feesUsd,
-    payoutUsd,
-  }), [checkout, feesUsd, payment, payoutUsd]);
+  }), [checkout, payment]);
 
   const explorerUrl = useMemo(() => {
     const destHash = payment?.destinationTxHash.trim();

@@ -161,6 +161,10 @@ export function mapPaymentDetail(raw: unknown): PayPaymentDetail {
   const row = asRecord(raw) ?? {};
   return {
     amount: apiText(row.amount),
+    amountInUsd: apiText(row.volume ?? row.amount_in_usd ?? row.amountInUsd),
+    amountOutUsd: apiText(
+      row.destination_volume ?? row.destinationVolume ?? row.amount_out_usd ?? row.amountOutUsd,
+    ),
     destinationAmount: apiText(row.destination_amount ?? row.destinationAmount),
     destinationNetwork: apiText(row.destination_network ?? row.destinationNetwork),
     destinationSymbol: apiText(row.destination_symbol ?? row.destinationSymbol ?? row.destination_token),

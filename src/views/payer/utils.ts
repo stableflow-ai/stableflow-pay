@@ -114,6 +114,7 @@ function extractEmbeddedMessage(text: string): string | null {
   return null;
 }
 
+/** `decimals` is the destination token decimals (1Click EXACT_OUTPUT min amounts). */
 export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
   const raw = error instanceof ApiError
     ? error.message
@@ -209,11 +210,11 @@ export function payerWaitDetailsFromSources(input: {
   fallbackAmount?: string;
   fallbackSymbol?: string;
   fallbackNetwork?: string;
-  feesUsd?: string;
-  payoutUsd?: string;
 }): PayerWaitDetails {
   const checkout = input.checkout;
   const payment = input.payment;
+  const amountInUsd = payment?.amountInUsd.trim() || "";
+  const amountOutUsd = payment?.amountOutUsd.trim() || "";
   return {
     recipientAddress: payment?.recipient.trim() || checkout?.recipient.trim() || input.fallbackRecipient?.trim() || "",
     requestAmount: payment?.destinationAmount.trim()
@@ -227,8 +228,8 @@ export function payerWaitDetailsFromSources(input: {
     originNetwork: payment?.network.trim() || "",
     payerAddress: payment?.payer.trim() || "",
     paidAt: payment?.paidAt.trim() || "",
-    feesUsd: input.feesUsd?.trim() || "",
-    payoutUsd: input.payoutUsd?.trim() || "",
+    feesUsd: amountInUsd && amountOutUsd ? usdFee(amountInUsd, amountOutUsd) ?? "" : "",
+    payoutUsd: amountOutUsd,
   };
 }
 

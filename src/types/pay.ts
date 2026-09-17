@@ -73,6 +73,8 @@ export interface PayCheckoutSession {
 
 export interface PayPaymentDetail {
   amount: string;
+  amountInUsd: string;
+  amountOutUsd: string;
   destinationAmount: string;
   destinationNetwork: string;
   destinationSymbol: string;
