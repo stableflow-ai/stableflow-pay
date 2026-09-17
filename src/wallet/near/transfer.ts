@@ -1,10 +1,26 @@
 /**
  * Near native and FT transfers to a deposit address.
+ *
+ * Consecutive txs to the same receiver are merged so Trezu opens one proposal.
+ * Multisig does not await the connector hash: it discovers the Sputnik proposal
+ * and returns `pending-multisig`.
  */
 
-import type { ConnectorAction } from "@hot-labs/near-connect";
+import type { ConnectorAction, NearWalletBase } from "@hot-labs/near-connect";
 import { nearViewFunction } from "@/lib/rpc/near";
 import type { PayBatchNearAction } from "@/types/payout";
+import {
+  executedBroadcast,
+  pendingNearMultisigBroadcast,
+  type BroadcastResult,
+} from "../types";
+import { TREZU_NOT_CONNECTED_MESSAGE } from "./multisig/config";
+import { activeNearMultisigMode } from "./multisig/detect";
+import {
+  discoverProposal,
+  matchSpecFromTransaction,
+  snapshotLastProposalId,
+} from "./multisig/proposal";
 import { getNearConnector } from "./session";
 
 const FT_GAS = BigInt("30000000000000");
@@ -13,7 +29,7 @@ const STORAGE_DEPOSIT = BigInt("1250000000000000000000");
 
 function requireConnector() {
   const connector = getNearConnector();
-  if (!connector) throw new Error("Connect a Near wallet to send this payout");
+  if (!connector) throw new Error(TREZU_NOT_CONNECTED_MESSAGE);
   return connector;
 }
 
@@ -64,33 +80,101 @@ function toConnectorAction(action: PayBatchNearAction): ConnectorAction {
   };
 }
 
-type NearTx = {
+export type NearTx = {
   receiverId: string;
   actions: ConnectorAction[];
 };
 
+export function mergeSameReceiverTxs(txs: readonly NearTx[]): NearTx[] {
+  const merged: NearTx[] = [];
+  for (const tx of txs) {
+    const last = merged[merged.length - 1];
+    if (last && last.receiverId === tx.receiverId) {
+      last.actions.push(...tx.actions);
+    } else {
+      merged.push({ receiverId: tx.receiverId, actions: [...tx.actions] });
+    }
+  }
+  return merged;
+}
+
+async function broadcastNearViaMultisig(
+  wallet: NearWalletBase,
+  tx: NearTx,
+): Promise<BroadcastResult> {
+  const daoId = (await wallet.getAccounts())[0]?.accountId?.trim();
+  if (!daoId) throw new Error(TREZU_NOT_CONNECTED_MESSAGE);
+
+  const fromIndex = await snapshotLastProposalId(daoId);
+  const expected = matchSpecFromTransaction(tx);
+
+  let discovered = false;
+  const submitted = wallet.signAndSendTransaction({
+    receiverId: tx.receiverId,
+    actions: tx.actions,
+  });
+  const earlyFail = new Promise<never>((_, reject) => {
+    void submitted.then(
+      () => undefined,
+      (error) => {
+        if (!discovered) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      },
+    );
+  });
+
+  try {
+    const proposalId = await Promise.race([
+      discoverProposal({ daoId, fromIndex, expected }),
+      earlyFail,
+    ]);
+    discovered = true;
+    return pendingNearMultisigBroadcast({ proposalId, daoId });
+  } catch (error) {
+    discovered = true;
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+}
+
+async function sendNearTransaction(tx: NearTx): Promise<BroadcastResult> {
+  const wallet = await requireConnector().wallet();
+  if (await activeNearMultisigMode()) {
+    return broadcastNearViaMultisig(wallet, tx);
+  }
+  const result = await wallet.signAndSendTransaction({
+    receiverId: tx.receiverId,
+    actions: tx.actions,
+  });
+  return executedBroadcast(await hashFromOutcomes(result));
+}
+
+async function sendMergedNearTransactions(txs: NearTx[]): Promise<BroadcastResult> {
+  const merged = mergeSameReceiverTxs(txs);
+  if (merged.length !== 1) {
+    throw new Error("NEAR transfer must collapse to one receiver");
+  }
+  return sendNearTransaction(merged[0]);
+}
+
 export async function broadcastNearActions(input: {
   receiverId: string;
   actions: PayBatchNearAction[];
-}): Promise<string> {
-  const wallet = await requireConnector().wallet();
-  const result = await wallet.signAndSendTransaction({
+}): Promise<BroadcastResult> {
+  return sendNearTransaction({
     receiverId: input.receiverId,
     actions: input.actions.map(toConnectorAction),
   });
-  return hashFromOutcomes(result);
 }
 
 export async function transferNativeNear(input: {
   to: string;
   amountIn: bigint;
-}): Promise<string> {
-  const wallet = await requireConnector().wallet();
-  const result = await wallet.signAndSendTransaction({
+}): Promise<BroadcastResult> {
+  return sendNearTransaction({
     receiverId: input.to,
     actions: [nativeTransfer(input.amountIn)],
   });
-  return hashFromOutcomes(result);
 }
 
 async function needsStorageDeposit(tokenContract: string, accountId: string): Promise<boolean> {
@@ -120,8 +204,7 @@ export async function transferFt(input: {
   tokenContract: string;
   to: string;
   amountIn: bigint;
-}): Promise<string> {
-  const wallet = await requireConnector().wallet();
+}): Promise<BroadcastResult> {
   const transactions: NearTx[] = [];
 
   if (await needsStorageDeposit(input.tokenContract, input.to)) {
@@ -144,18 +227,17 @@ export async function transferFt(input: {
     ],
   });
 
-  const result = await wallet.signAndSendTransactions({ transactions });
-  return hashFromOutcomes(result);
+  return sendMergedNearTransactions(transactions);
 }
 
 export async function transferNearViaWrap(input: {
   tokenContract: string;
   to: string;
   amountIn: bigint;
-}): Promise<string> {
+}): Promise<BroadcastResult> {
   const wallet = await requireConnector().wallet();
   const payer = (await wallet.getAccounts())[0]?.accountId;
-  if (!payer) throw new Error("Connect a Near wallet to send this payout");
+  if (!payer) throw new Error(TREZU_NOT_CONNECTED_MESSAGE);
 
   const transactions: NearTx[] = [];
   if (await needsStorageDeposit(input.tokenContract, payer)) {
@@ -184,6 +266,5 @@ export async function transferNearViaWrap(input: {
     ],
   });
 
-  const result = await wallet.signAndSendTransactions({ transactions });
-  return hashFromOutcomes(result);
+  return sendMergedNearTransactions(transactions);
 }

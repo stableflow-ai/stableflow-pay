@@ -22,7 +22,7 @@ export function WalletConnectDialog({
   const address = wallet.account?.address || null;
 
   const kindHint = useMemo(() => {
-    if (selectedKind === "near") return "Connect HOT, Meteor, Intear, OKX, Ledger, NEAR Mobile, Nightly, or WalletConnect.";
+    if (selectedKind === "near") return "Connect HOT, Meteor, Intear, OKX, Ledger, NEAR Mobile, Nightly, WalletConnect, or Trezu.";
     if (selectedKind === "solana") return "Connect Phantom or Solflare.";
     if (selectedKind === "tron") return "Connect TronLink, OKX, or WalletConnect.";
     if (selectedKind === "zec") return "Connect Noir Wallet.";

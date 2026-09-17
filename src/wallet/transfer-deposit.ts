@@ -1,8 +1,8 @@
 /**
  * Send origin tokens to the 1Click deposit address returned by single swap.
  *
- * Only the EVM branch can return `pending-multisig`: the other chains have no
- * multisig support here, so they always resolve to an executed transaction hash.
+ * EVM Safe and NEAR Trezu / SputnikDAO can return `pending-multisig`. Other
+ * chains always resolve to an executed transaction hash.
  */
 
 import { isNativeToken, isNearWrappedGasToken, type IntentsToken } from "@/stores/intents-tokens";
@@ -50,11 +50,11 @@ export async function transferToDepositAddress(input: {
   if (kind === "near") {
     if (isNearWrappedGasToken(token)) {
       if (!token.contractAddress) throw new Error("Missing token contract");
-      return executedBroadcast(await transferNearViaWrap({ tokenContract: token.contractAddress, to, amountIn }));
+      return transferNearViaWrap({ tokenContract: token.contractAddress, to, amountIn });
     }
-    if (native) return executedBroadcast(await transferNativeNear({ to, amountIn }));
+    if (native) return transferNativeNear({ to, amountIn });
     if (!token.contractAddress) throw new Error("Missing token contract");
-    return executedBroadcast(await transferFt({ tokenContract: token.contractAddress, to, amountIn }));
+    return transferFt({ tokenContract: token.contractAddress, to, amountIn });
   }
 
   if (kind === "tron") {

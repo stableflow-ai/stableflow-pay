@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
 import { paySwapSubmit } from "@/api/pay";
-import { showSafeProposalToast } from "@/components/safe/safe-proposal-toast";
+import { showMultisigProposalToast } from "@/components/multisig/multisig-proposal-toast";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
@@ -294,14 +294,11 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      // A Safe proposal has no transaction hash until the owners execute it, so the
-      // payer stays on this page with a persistent toast. The consumed marker stays
-      // either way: this deposit address must never be paid twice.
+      // A Safe / Trezu proposal has no transaction hash until owners execute it,
+      // so the payer stays on this page with a persistent toast. The consumed
+      // marker stays either way: this deposit address must never be paid twice.
       if (result.kind === "pending-multisig") {
-        showSafeProposalToast(toast, {
-          chainId: result.chainId,
-          safeAddress: result.safeAddress,
-        });
+        showMultisigProposalToast(toast, result);
         setPhase("idle");
         return;
       }

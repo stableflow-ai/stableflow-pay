@@ -7,7 +7,7 @@ import { useConnectedWallets } from "@/hooks/use-wallet";
 import { chainLogoUrl } from "@/lib/logo";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
-import { SafeMultisigBadge } from "@/components/safe/SafeMultisigBadge";
+import { MultisigBadge } from "@/components/multisig/MultisigBadge";
 import { formatAddress, formatAmount } from "@/utils";
 import { useSafeMode } from "@/wallet/evm/safe";
 import { TokenSelectButton } from "@/views/payment-links/components/create/TokenSelectButton";
@@ -42,6 +42,7 @@ export function YouPaySection(props: {
   const fetchOneBalance = useTokenBalancesStore((s) => s.fetchOne);
   const originBalance = useTokenBalance(walletAddress, originToken?.assetId);
   const isEvmOrigin = originToken?.chain.chainKind === "evm";
+  const isNearOrigin = originToken?.chain.chainKind === "near";
   const safeApp = useSafeMode().mode === "app";
   const chainIcon = originToken ? chainLogoUrl(originToken.blockchain) : "";
   const connectedIcon = walletIcon?.trim() || chainIcon;
@@ -68,7 +69,9 @@ export function YouPaySection(props: {
               <p className="truncate font-montserrat text-xs text-[#606060]">
                 {formatAddress(walletAddress)}
               </p>
-              {isEvmOrigin ? <SafeMultisigBadge /> : null}
+              {isEvmOrigin || isNearOrigin ? (
+                <MultisigBadge chainKind={isNearOrigin ? "near" : "evm"} />
+              ) : null}
               {/* Inside the Safe App the connection is the host iframe, so there is
                   nothing this page can disconnect from. */}
               {isEvmOrigin && safeApp ? null : (
