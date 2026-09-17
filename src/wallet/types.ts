@@ -100,6 +100,13 @@ export type BroadcastResult =
       chainKind: "near";
       proposalId: number;
       daoId: string;
+    }
+  | {
+      kind: "pending-multisig";
+      chainKind: "solana";
+      vaultAddress: string;
+      multisigPda?: string;
+      transactionIndex?: bigint;
     };
 
 export type PendingMultisigBroadcast = Extract<BroadcastResult, { kind: "pending-multisig" }>;
@@ -132,6 +139,20 @@ export function pendingNearMultisigBroadcast(result: {
     chainKind: "near",
     proposalId: result.proposalId,
     daoId: result.daoId,
+  };
+}
+
+export function pendingSquadsMultisigBroadcast(result: {
+  vaultAddress: string;
+  multisigPda?: string;
+  transactionIndex?: bigint;
+}): BroadcastResult {
+  return {
+    kind: "pending-multisig",
+    chainKind: "solana",
+    vaultAddress: result.vaultAddress,
+    ...(result.multisigPda ? { multisigPda: result.multisigPda } : {}),
+    ...(result.transactionIndex != null ? { transactionIndex: result.transactionIndex } : {}),
   };
 }
 

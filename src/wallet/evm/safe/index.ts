@@ -11,6 +11,7 @@ export {
 } from "./config";
 export { activeSafeMode, isSafeAccount, isSafeAppEnv } from "./detect";
 export { getSafeInfo } from "./info";
+export { isSafeTxStatusTerminal, watchSafeProposal } from "./watch";
 export {
   SafeApprovalProposedError,
   SafeAtomicUnsupportedError,

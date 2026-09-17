@@ -54,17 +54,24 @@ src/
     layout/               # AppSidebar, AccountMenu, sidebar config
     WalletConnect.tsx     # Wallet connect dialog (business)
     safe/                 # SafeMultisigBadge (wraps MultisigBadge), showSafeProposalToast
-    multisig/             # MultisigBadge, showMultisigProposalToast
+    multisig/             # MultisigBadge, showMultisigProposalToast, PayFromSquadSection
   hooks/                  # Shared hooks
   wallet/                 # Multi-chain wallet adapters and providers
-    evm/safe/             # Safe proposal helpers (no execution poller):
+    evm/safe/             # Safe proposal helpers:
                           # abi.ts, bundle.ts, config.ts, detect.ts, info.ts,
-                          # send.ts, types.ts, use-safe-info.ts, use-safe-mode.ts
-    near/multisig/        # SputnikDAO / Trezu helpers (no execution poller):
+                          # send.ts, types.ts, use-safe-info.ts, use-safe-mode.ts,
+                          # watch.ts (toast dismiss; does not submit after execution)
+    near/multisig/        # SputnikDAO / Trezu helpers:
                           # config.ts, detect.ts, policy.ts, info.ts,
                           # proposal.ts, types.ts, use-near-dao-info.ts,
-                          # use-near-multisig-mode.ts
-  stores/                 # Zustand stores (auth persist, wallet, intents, commit queues)
+                          # use-near-multisig-mode.ts,
+                          # watch.ts (toast dismiss; does not submit after execution)
+    solana/               # adapter, balance, transfer, session
+    solana/multisig/      # SquadsX wrap + Squads SDK proposal helpers:
+                          # access.ts, config.ts, detect.ts, info.ts, resolve.ts,
+                          # result.ts, send.ts, send-sdk.ts, types.ts, watch.ts,
+                          # use-squads-info.ts, use-squads-mode.ts
+  stores/                 # Zustand stores (auth persist, wallet, intents, squads-sdk, commit queues)
   api/                    # Backend wrappers by domain
   types/                  # Shared API / domain types
   mocks/                  # UI fixtures while an API contract is missing — see doc/mocks.md

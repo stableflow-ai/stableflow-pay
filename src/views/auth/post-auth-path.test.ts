@@ -15,8 +15,8 @@ describe("postAuthPath", () => {
     useGuideStore.setState({ skippedAllUserIds: [] });
   });
 
-  it("prefers returnTo", () => {
-    expect(postAuthPath(user(false), "/settings")).toBe("/settings");
+  it("prefers returnTo only after the guide is done", () => {
+    expect(postAuthPath(user(false), "/settings")).toBe("/guide/payment-link");
     expect(postAuthPath(user(true), "/docs")).toBe("/docs");
     expect(postAuthPath(user(false), "/")).toBe("/guide/payment-link");
   });

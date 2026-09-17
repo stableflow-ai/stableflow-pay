@@ -1,17 +1,29 @@
 /**
  * Send origin tokens to the 1Click deposit address returned by single swap.
  *
- * EVM Safe and NEAR Trezu / SputnikDAO can return `pending-multisig`. Other
- * chains always resolve to an executed transaction hash.
+ * EVM Safe, NEAR Trezu / SputnikDAO, and Solana Squads can return
+ * `pending-multisig`. Other chains always resolve to an executed transaction hash.
  */
 
 import { isNativeToken, isNearWrappedGasToken, type IntentsToken } from "@/stores/intents-tokens";
 import { transferErc20, transferNativeEvm } from "./evm/transfer";
 import { executedBroadcast, type BroadcastResult } from "./types";
 import { transferFt, transferNativeNear, transferNearViaWrap } from "./near/transfer";
-import { transferNativeSol, transferSpl } from "./solana/transfer";
+import { activeSquadsMode, sendViaSquads, sendViaSquadsSdk } from "./solana/multisig";
+import { getSolanaSigner, getSquadsSdkBinding } from "./solana/session";
+import { broadcastSolanaTransaction, buildSolanaDepositTransfer } from "./solana/transfer";
 import { transferNativeTrx, transferTrc20 } from "./tron/transfer";
 import { transferNativeZec } from "./zec/transfer";
+
+function solanaDepositFromAddress(): string {
+  const signer = getSolanaSigner();
+  if (!signer) throw new Error("Connect a Solana wallet to send this payout");
+  if (activeSquadsMode() === "sdk") {
+    const vault = getSquadsSdkBinding()?.vaultAddress?.trim();
+    if (vault) return vault;
+  }
+  return signer.publicKey.toBase58();
+}
 
 export async function transferToDepositAddress(input: {
   token: IntentsToken;
@@ -42,9 +54,18 @@ export async function transferToDepositAddress(input: {
   }
 
   if (kind === "solana") {
-    if (native) return executedBroadcast(await transferNativeSol({ to, amountIn }));
-    if (!token.contractAddress) throw new Error("Missing token mint");
-    return executedBroadcast(await transferSpl({ mint: token.contractAddress, to, amountIn }));
+    if (!native && !token.contractAddress) throw new Error("Missing token mint");
+    const inner = await buildSolanaDepositTransfer({
+      from: solanaDepositFromAddress(),
+      to,
+      amountIn,
+      mint: native ? null : token.contractAddress,
+    });
+    const mode = activeSquadsMode();
+    if (mode === "squadsx") return sendViaSquads(inner);
+    if (mode === "sdk") return sendViaSquadsSdk(inner);
+    const { signature } = await broadcastSolanaTransaction(inner);
+    return executedBroadcast(signature);
   }
 
   if (kind === "near") {

@@ -273,7 +273,7 @@ export function PayView() {
             throw new BalanceGateError(title);
           }
         } else {
-          const balance = await fetchOneBalance(paymentWalletAddress, originToken);
+          const balance = await fetchOneBalance(quotePayer || paymentWalletAddress, originToken);
           if (!balance || balance.status !== "success" || balance.raw == null) {
             toast.fail({ title: "Could not read wallet balance" });
             throw new BalanceGateError("Could not read wallet balance");
@@ -294,9 +294,10 @@ export function PayView() {
         depositAddress,
         amountIn,
       });
-      // A Safe / Trezu proposal has no transaction hash until owners execute it,
-      // so the payer stays on this page with a persistent toast. The consumed
-      // marker stays either way: this deposit address must never be paid twice.
+      // A Safe / Trezu / Squads proposal has no transaction hash until owners
+      // execute it, so the payer stays on this page with a persistent toast.
+      // The consumed marker stays either way: this deposit address must never
+      // be paid twice.
       if (result.kind === "pending-multisig") {
         showMultisigProposalToast(toast, result);
         setPhase("idle");
@@ -406,7 +407,8 @@ export function PayView() {
         fiatDisplay={fiatDisplay}
         originToken={originToken}
         onOriginTokenChange={setOriginToken}
-        walletAddress={connectedAddress}
+        walletAddress={quotePayer || connectedAddress}
+        signerAddress={connectedAddress}
         walletConnected={wallet.isConnected}
         walletIcon={originKind === "evm" ? paymentWallet.walletInfo.icon : null}
         connecting={wallet.isConnecting}
