@@ -54,12 +54,17 @@ src/
     icons/                # Shared icon components (inline SVG TSX, re-export from index.tsx)
     layout/               # AppSidebar, AccountMenu, sidebar config
     WalletConnect.tsx     # Wallet connect dialog (business)
-    safe/                 # SafeMultisigBadge, showSafeProposalToast
+    safe/                 # SafeMultisigBadge (wraps MultisigBadge), showSafeProposalToast
+    multisig/             # MultisigBadge, showMultisigProposalToast
   hooks/                  # Shared hooks
   wallet/                 # Multi-chain wallet adapters and providers
     evm/safe/             # Safe proposal helpers (no execution poller):
                           # abi.ts, bundle.ts, config.ts, detect.ts, info.ts,
                           # send.ts, types.ts, use-safe-info.ts, use-safe-mode.ts
+    near/multisig/        # SputnikDAO / Trezu helpers (no execution poller):
+                          # config.ts, detect.ts, policy.ts, info.ts,
+                          # proposal.ts, types.ts, use-near-dao-info.ts,
+                          # use-near-multisig-mode.ts
   stores/                 # Zustand stores (auth persist, wallet, intents, commit queues)
   api/                    # Backend wrappers by domain
   types/                  # Shared API / domain types
