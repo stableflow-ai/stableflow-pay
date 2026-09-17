@@ -221,7 +221,7 @@ export function PayView() {
   const quoteError = zecQuoteBlocked
     ? ZCASH_TRANSPARENT_REFUND_MESSAGE
     : swapQuery.isError
-      ? formatQuoteErrorMessage(swapQuery.error, 2)
+      ? formatQuoteErrorMessage(swapQuery.error, destToken?.decimals ?? 6)
       : null;
   const amountInDisplay = swap?.amountInFormatted
     ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
@@ -313,17 +313,13 @@ export function PayView() {
       } catch {
         // Submit is one-shot; waiting still proceeds without payments_id.
       }
-      const quoteQuery = {
-        feesUsd: feeUsd ?? "",
-        payoutUsd: swap.amountOutUsd.trim() || "0",
-        ...(paymentsId ? { paymentId: paymentsId } : {}),
-      };
+      const waitingQuery = paymentsId ? { paymentId: paymentsId } : undefined;
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id, quoteQuery), { replace: true });
+        navigate(checkoutWaitingPath(payment.id, waitingQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(payment.id, quoteQuery), {
+      navigate(payerWaitingPath(payment.id, waitingQuery), {
         replace: true,
         state: PAYER_WAITING_STATE,
       });
@@ -331,7 +327,7 @@ export function PayView() {
     onError: (err) => {
       setPhase("idle");
       if (err instanceof BalanceGateError) return;
-      toast.fail({ title: formatQuoteErrorMessage(err, 2) });
+      toast.fail({ title: formatQuoteErrorMessage(err, destToken?.decimals ?? 6) });
     },
   });
 
