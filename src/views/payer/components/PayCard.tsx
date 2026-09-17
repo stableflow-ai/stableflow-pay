@@ -24,6 +24,7 @@ export function PayCard(props: {
   originToken: IntentsToken | null;
   onOriginTokenChange: (token: IntentsToken) => void;
   walletAddress: string | null;
+  signerAddress?: string | null;
   walletConnected: boolean;
   walletIcon?: string | null;
   connecting: boolean;
@@ -128,6 +129,7 @@ export function PayCard(props: {
             originToken={props.originToken}
             onOriginTokenChange={props.onOriginTokenChange}
             walletAddress={props.walletAddress}
+            signerAddress={props.signerAddress}
             walletConnected={props.walletConnected}
             walletIcon={props.walletIcon}
             connecting={props.connecting}
