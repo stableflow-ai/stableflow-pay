@@ -1,6 +1,7 @@
 export const PHANTOM_SIGN_DISPLAY = "utf8";
 
 export const SOLANA_EXPIRED_MESSAGE = "Solana transaction expired. Confirm again to retry.";
+export const SOLANA_INSUFFICIENT_SOL_MESSAGE = "Insufficient SOL for fees. Add SOL and try again.";
 export const SOLANA_ATA_ALLOW_OWNER_OFF_CURVE = true;
 
 /** Rebroadcast attempts web3.js makes while the blockhash is still valid. */
