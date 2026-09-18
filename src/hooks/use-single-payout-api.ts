@@ -11,6 +11,7 @@ export function useSinglePayQuote(body: PaySingleQuoteParam | null, options?: { 
     enabled: Boolean(body),
     placeholderData: keepPreviousData,
     refetchInterval: 60_000,
+    retry: false,
   });
 }
 

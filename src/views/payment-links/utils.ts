@@ -1,4 +1,4 @@
-import { FIXED_CHAINS } from "@/config/chains";
+import { chainDisplayName } from "@/config/chains";
 import { Big, formatAmount, stampDownloadFilename } from "@/utils";
 import type { PayPaymentLink } from "@/types/payment-links";
 import {
@@ -48,13 +48,6 @@ export function formatLinkAmount(link: PayPaymentLink): string {
   const asset = formatTokenNetwork(link.symbol, link.network);
   if (isPaymentLinkOpen(link)) return asset;
   return `${link.amount} ${asset}`;
-}
-
-export function chainDisplayName(network: string): string {
-  const chain = FIXED_CHAINS.find(
-    (entry) => entry.blockchain === network || entry.chainName === network,
-  );
-  return chain?.chainName ?? network;
 }
 
 export function isPositiveAmount(value: string): boolean {

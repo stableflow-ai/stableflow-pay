@@ -74,7 +74,6 @@ function mapSwapSubmit(raw: unknown): PaySwapSubmitResp {
   const row = asRecord(raw) ?? {};
   return {
     paymentsId: apiText(row.payments_id ?? row.paymentsId),
-    status: apiText(row.status),
   };
 }
 

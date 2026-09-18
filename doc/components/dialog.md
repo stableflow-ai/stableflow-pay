@@ -6,6 +6,8 @@ Figma: DapDap V2 `41559:93`.
 
 Centered modal on desktop (`min-width: 768px`). Below that breakpoint it renders [Drawer](drawer.md) with `side="bottom"` and `width: 100%`. Nested dialogs stack (each open instance gets a higher z-index). Escape closes the topmost overlay.
 
+On desktop, open fades the mask and panel together (0.1s). Close fades the panel first, then the mask (`OVERLAY_DIALOG_PANEL_FADE_SECONDS` in `overlay/config.ts`). There is no panel slide. On a narrow viewport the bottom Drawer slides up on open and down on close.
+
 Masked dialogs move focus to the panel, keep Tab focus inside it, and restore focus to the previously focused control when they close. The visible title labels the dialog through `aria-labelledby`; pass `ariaLabel` when no visible title is rendered.
 
 The panel uses [Card](card.md) defaults. The title row is always rendered (styles reserved) even when `title` is empty. Body content is passed as `children` and scrolls when it exceeds `max-h-[90vh]`.

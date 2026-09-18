@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import {
+  OVERLAY_DIALOG_PANEL_FADE_SECONDS,
   OVERLAY_EXIT_SECONDS,
   OVERLAY_MASK_FADE_SECONDS,
   OVERLAY_PANEL_SLIDE_SECONDS,
@@ -88,7 +89,9 @@ export function Overlay(props: OverlayProps) {
               opacity: 0,
               transition: {
                 duration: OVERLAY_MASK_FADE_SECONDS,
-                delay: type === "drawer" ? OVERLAY_PANEL_SLIDE_SECONDS : 0,
+                delay: type === "drawer"
+                  ? OVERLAY_PANEL_SLIDE_SECONDS
+                  : OVERLAY_DIALOG_PANEL_FADE_SECONDS,
               },
             }}
             onClick={closeOnMaskClick ? onClose : undefined}

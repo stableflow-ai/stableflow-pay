@@ -85,7 +85,6 @@ export function PayView() {
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
   const queryClient = useQueryClient();
-  const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
   const { originToken, setOriginToken } = usePayOriginToken();
@@ -101,10 +100,6 @@ export function PayView() {
     && (!quotePayer || !quoteRefundTo);
   const [openAmount, setOpenAmount] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending">("idle");
-
-  useEffect(() => {
-    void ensureFresh();
-  }, [ensureFresh]);
 
   const payment = useMemo(() => {
     if (isCheckout) {

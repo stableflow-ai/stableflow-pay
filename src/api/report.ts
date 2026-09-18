@@ -1,6 +1,7 @@
 import { http, httpBlob } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { apiNumber, apiText, asRecord } from "@/api/map";
+import type { PayPaymentStatus } from "@/types/pay";
 import type {
   ReportAnalyticsQuery,
   ReportAnalyticsResp,
@@ -62,7 +63,7 @@ function mapReportPaymentItem(raw: unknown): ReportPaymentItem {
       row.destination_txHash ?? row.destination_tx_hash ?? row.destinationTxHash,
     ),
     txHash: apiText(row.tx_hash ?? row.txHash),
-    status: apiText(row.status).toLowerCase(),
+    status: apiText(row.status).toLowerCase() as PayPaymentStatus,
     submittedAt: apiText(row.submitted_at ?? row.submittedAt),
     paidAt: apiText(row.paid_at ?? row.paidAt),
   };

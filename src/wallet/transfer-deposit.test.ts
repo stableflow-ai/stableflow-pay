@@ -41,11 +41,11 @@ const solToken = {
     chainName: "Solana",
     chainKind: "solana",
     logo: "",
-    payerEnabled: true,
-    batchEnabled: true,
     txExplorer: "https://solscan.io/tx/",
   },
   logo: "",
+  supportPayment: true,
+  supportReceive: true,
 } as IntentsToken;
 
 describe("transferToDepositAddress Solana Squads", () => {

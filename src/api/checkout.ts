@@ -1,7 +1,11 @@
 import { http } from "@/lib/http";
 import { PAY_API_PREFIX } from "@/api/config";
 import { apiText, asRecord, mapOrganizationLogo } from "@/api/map";
-import type { PayCheckoutSession, PayCheckoutSessionBody } from "@/types/pay";
+import type {
+  PayCheckoutSession,
+  PayCheckoutSessionBody,
+  PayCheckoutSessionStatus,
+} from "@/types/pay";
 
 export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
   const row = asRecord(raw) ?? {};
@@ -14,7 +18,7 @@ export function mapCheckoutSession(raw: unknown): PayCheckoutSession {
     paymentsId: apiText(row.payments_id ?? row.paymentsId),
     recipient: apiText(row.recipient),
     sessionId: apiText(row.session_id ?? row.sessionId),
-    status: apiText(row.status),
+    status: apiText(row.status).toLowerCase() as PayCheckoutSessionStatus,
     successUrl: apiText(row.success_url ?? row.successUrl),
     symbol: apiText(row.symbol),
     organization: mapOrganizationLogo(row.organization),

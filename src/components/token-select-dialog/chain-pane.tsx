@@ -1,6 +1,6 @@
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
 import { FLOATING_SIDE } from "@/components/ui/overlay/use-floating-position";
-import { FIXED_CHAINS, chainLabel, type ChainConfig } from "@/config/chains";
+import { getRuntimeChains, chainLabel, type ChainConfig } from "@/config/chains";
 import { cn } from "@/lib/utils";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { useWalletStore } from "@/stores/wallet";
@@ -27,7 +27,7 @@ export function ChainPane({
   const owners = useWalletStore((state) => state.owners);
   const availableCodes = new Set(tokens.map((token) => token.blockchain));
   const chains = sortTokenSelectChains(
-    FIXED_CHAINS.filter((chain) => availableCodes.has(chain.blockchain)),
+    getRuntimeChains().filter((chain) => availableCodes.has(chain.blockchain)),
   );
 
   return (

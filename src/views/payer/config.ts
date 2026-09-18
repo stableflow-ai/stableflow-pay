@@ -1,4 +1,10 @@
+import {
+  PAY_CHECKOUT_SESSION_STATUS,
+  PAY_PAYMENT_STATUS,
+} from "@/types/pay";
 import type { PendingMultisigBroadcast } from "@/wallet/types";
+
+export { PAY_CHECKOUT_SESSION_STATUS, PAY_PAYMENT_STATUS };
 
 export const PAYER_PATH_PREFIX = "/paylink";
 export const CHECKOUT_PATH = "/checkout";
@@ -53,20 +59,6 @@ export const PAYER_WAIT_STATUS = {
 } as const;
 
 export type PayerWaitStatus = (typeof PAYER_WAIT_STATUS)[keyof typeof PAYER_WAIT_STATUS];
-
-export const PAY_CHECKOUT_SESSION_STATUS = {
-  Created: "created",
-  Processing: "processing",
-  Completed: "completed",
-  Failed: "failed",
-  Expired: "expired",
-} as const;
-
-export const PAY_PAYMENT_STATUS = {
-  Submitted: "submitted",
-  Completed: "completed",
-  Failed: "failed",
-} as const;
 
 export function payerPath(id: string): string {
   return `${PAYER_PATH_PREFIX}/${id}`;

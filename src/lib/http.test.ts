@@ -77,6 +77,7 @@ describe("http", () => {
     expect(url).toBe(`${API_BASE}/v1/pay/auth/login`);
     expect(init.method).toBe("POST");
     expect(init.body).toBe(JSON.stringify({ email: "a@b.com", password: "x" }));
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 
   it("throws ApiError when business code is not 200", async () => {
@@ -318,5 +319,48 @@ describe("httpBlob", () => {
       message: "Expired",
     });
     expect(useAuthStore.getState().token).toBeNull();
+  });
+});
+
+describe("http timeout", () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    vi.stubEnv("VITE_API_BASE_URL", API_BASE);
+    vi.stubGlobal("localStorage", createMemoryStorage());
+    vi.stubGlobal("sessionStorage", createMemoryStorage());
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockReset();
+    resetSession();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    resetSession();
+  });
+
+  it("maps AbortError to a TIMEOUT ApiError", async () => {
+    applySession();
+    const abort = new DOMException("The operation was aborted.", "AbortError");
+    fetchMock.mockRejectedValueOnce(abort);
+    await expect(http("/v1/pay/order/1")).rejects.toMatchObject({
+      name: "ApiError",
+      message: "Request timed out",
+      status: 0,
+      code: "TIMEOUT",
+    });
+  });
+
+  it("maps TimeoutError to a TIMEOUT ApiError", async () => {
+    applySession();
+    const timeout = new DOMException("The operation timed out.", "TimeoutError");
+    fetchMock.mockRejectedValueOnce(timeout);
+    await expect(httpBlob("/v1/pay/payments/export")).rejects.toMatchObject({
+      name: "ApiError",
+      message: "Request timed out",
+      status: 0,
+      code: "TIMEOUT",
+    });
   });
 });

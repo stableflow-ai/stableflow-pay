@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
 import { IconClose } from "@/components/icons/close";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
 import { Overlay } from "@/components/ui/overlay/Overlay";
-import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
+import {
+  DESKTOP_MEDIA_QUERY,
+  OVERLAY_DIALOG_PANEL_FADE_SECONDS,
+} from "@/components/ui/overlay/config";
 import { useEnsureTokenBalances } from "@/hooks/use-token-balances";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { FIXED_CHAINS } from "@/config/chains";
+import { getRuntimeChains } from "@/config/chains";
 import { CHAIN_KINDS, type ChainOwners } from "@/wallet";
 import { isNativeToken, useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
@@ -30,6 +34,7 @@ export interface TokenSelectDialogProps {
   allowedBlockchains?: string[] | null;
   lockChainKind?: WalletChainKind | null;
   excludeNative?: boolean;
+  requireSupport?: "payment" | "receive";
   onSelect: (selection: TokenSelectSelection) => void;
 }
 
@@ -51,11 +56,11 @@ export function TokenSelectDialog({
   allowedBlockchains = null,
   lockChainKind = null,
   excludeNative = false,
+  requireSupport,
   onSelect,
 }: TokenSelectDialogProps) {
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
   const owners = showBalances ? balanceOwners : {};
-  const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const loading = useIntentsTokensStore((s) => s.loading);
   const getBalance = useTokenBalancesStore((s) => s.getBalance);
@@ -77,21 +82,22 @@ export function TokenSelectDialog({
     return tokens.filter((token) => {
       if (allowed && !allowed.has(token.blockchain.toLowerCase())) return false;
       if (excludeNative && isNativeToken(token)) return false;
+      if (requireSupport === "payment" && !token.supportPayment) return false;
+      if (requireSupport === "receive" && !token.supportReceive) return false;
       return true;
     });
-  }, [tokens, allowed, excludeNative]);
+  }, [tokens, allowed, excludeNative, requireSupport]);
 
   const availableChains = useMemo(() => {
     const codes = new Set(scopedTokens.map((token) => token.blockchain));
-    return sortTokenSelectChains(FIXED_CHAINS.filter((chain) => codes.has(chain.blockchain)));
+    return sortTokenSelectChains(getRuntimeChains().filter((chain) => codes.has(chain.blockchain)));
   }, [scopedTokens]);
 
   useEffect(() => {
     if (!open) return;
-    void ensureFresh();
     setSearch("");
     setChainFilter("");
-  }, [open, ensureFresh]);
+  }, [open]);
 
   useEffect(() => {
     if (!open || availableChains.length === 0) return;
@@ -175,8 +181,6 @@ export function TokenSelectDialog({
     </div>
   );
 
-  if (!open) return null;
-
   if (!isDesktop) {
     return (
       <Drawer
@@ -195,25 +199,38 @@ export function TokenSelectDialog({
   return (
     <Overlay open={open} onClose={onClose}>
       <div className="pointer-events-none relative flex size-full items-center justify-center p-4">
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="pointer-events-auto relative flex h-[min(617px,90vh)] w-full max-w-[420px] flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_0_40px_0_rgba(0,0,0,0.1)]"
-          onClick={(event) => event.stopPropagation()}
+        <motion.div
+          className="pointer-events-auto"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            transition: { duration: OVERLAY_DIALOG_PANEL_FADE_SECONDS, delay: 0 },
+          }}
+          exit={{
+            opacity: 0,
+            transition: { duration: OVERLAY_DIALOG_PANEL_FADE_SECONDS, delay: 0 },
+          }}
         >
-          <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-[#E3E3E3] px-6">
-            <p className="font-montserrat text-lg font-semibold text-black">{title}</p>
-            <button
-              type="button"
-              aria-label="Close"
-              onClick={onClose}
-              className="shrink-0 cursor-pointer text-black"
-            >
-              <IconClose className="size-3.25" />
-            </button>
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative flex h-[min(617px,90vh)] w-full max-w-[420px] flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_0_40px_0_rgba(0,0,0,0.1)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-[#E3E3E3] px-6">
+              <p className="font-montserrat text-lg font-semibold text-black">{title}</p>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                className="shrink-0 cursor-pointer text-black"
+              >
+                <IconClose className="size-3.25" />
+              </button>
+            </div>
+            {body}
           </div>
-          {body}
-        </div>
+        </motion.div>
       </div>
     </Overlay>
   );

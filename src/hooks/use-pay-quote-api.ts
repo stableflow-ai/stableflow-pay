@@ -23,5 +23,6 @@ export function usePaySwapQuery(source: PaySwapSource, options?: { auth?: boolea
     },
     enabled,
     placeholderData: keepPreviousData,
+    retry: false,
   });
 }

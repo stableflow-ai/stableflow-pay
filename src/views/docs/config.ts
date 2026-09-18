@@ -128,7 +128,7 @@ export const PAYMENT_STATUSES_TABLE: DocTableDefinition = {
   columns: "minmax(105px,0.65fr) minmax(220px,1.8fr)",
   headers: ["Status", "Meaning"],
   rows: [
-    [code("submitted"), plain("The source transaction was submitted for processing.")],
+    [code("processing"), plain("The source transaction was submitted for processing.")],
     [code("completed"), plain("The destination payment completed.")],
     [code("failed"), plain("Payment processing failed.")],
   ],

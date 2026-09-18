@@ -21,7 +21,6 @@ import {
   sendResetPasswordCode,
 } from "@/api/auth";
 import { queryKeys } from "@/api/query-keys";
-import { ApiError } from "@/lib/api-error";
 import { useAuthStore } from "@/stores/auth";
 import type { AuthUser } from "@/types/auth";
 
@@ -81,10 +80,6 @@ export function useProfileQuery() {
     queryKey: queryKeys.auth.profile,
     queryFn: getProfile,
     enabled: Boolean(token),
-    retry: (failureCount, error) => {
-      if (error instanceof ApiError && error.status === 401) return false;
-      return failureCount < 1;
-    },
   });
 
   useEffect(() => {

@@ -69,6 +69,7 @@ export const queryKeys = {
   },
   pay: {
     all: ["pay"] as const,
+    config: ["pay", "config"] as const,
     swap: (body: unknown) => [...queryKeys.pay.all, "swap", body] as const,
   },
   checkout: {

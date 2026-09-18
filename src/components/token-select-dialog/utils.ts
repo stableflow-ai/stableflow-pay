@@ -1,4 +1,4 @@
-import { FIXED_CHAINS, type ChainConfig } from "@/config/chains";
+import { getRuntimeChains, type ChainConfig } from "@/config/chains";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import type { WalletChainKind } from "@/utils";
 import { TOKEN_SELECT_CHAIN_TITLES, TOKEN_SELECT_KIND_RANK } from "./config";
@@ -9,7 +9,8 @@ export function tokenSelectChainTitle(chain: Pick<ChainConfig, "blockchain" | "c
 
 /** Near, then EVM (registry order), then Solana, then Tron, then Zcash. */
 export function sortTokenSelectChains(chains: readonly ChainConfig[]): ChainConfig[] {
-  const fixedIndex = new Map(FIXED_CHAINS.map((chain, index) => [chain.blockchain, index]));
+  const order = getRuntimeChains();
+  const fixedIndex = new Map(order.map((chain, index) => [chain.blockchain, index]));
   return chains.slice().sort((a, b) => {
     const kindDiff = (TOKEN_SELECT_KIND_RANK[a.chainKind] ?? 99) - (TOKEN_SELECT_KIND_RANK[b.chainKind] ?? 99);
     if (kindDiff !== 0) return kindDiff;
@@ -33,7 +34,7 @@ export function defaultTokenSelectChain(
 }
 
 
-/** USD value of a token balance using `/v0/tokens` price. Unknown balance is -1 (sort last). */
+/** USD value of a token balance using config token price. Unknown balance is -1 (sort last). */
 export function tokenBalanceUsd(
   token: Pick<IntentsToken, "price">,
   formatted: string | null | undefined,
