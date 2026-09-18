@@ -4,6 +4,7 @@ import { isWalletConnectionRejected } from "../connect-feedback";
 import {
   LEDGER_DEVICE_LOCKED_CODE,
   LEDGER_DEVICE_LOCKED_MESSAGE,
+  LEDGER_LIVE_WC_DEEPLINK_IFRAME_MS,
   LEDGER_LIVE_WC_DEEPLINK_PREFIX,
 } from "./config";
 import { LedgerConnectCancelledError } from "./ledger-choice";
@@ -37,7 +38,16 @@ export function solanaWalletErrorMessage(error: unknown): string | null {
 }
 
 export function openLedgerLiveWalletConnect(uri: string) {
-  window.location.href = `${LEDGER_LIVE_WC_DEEPLINK_PREFIX}${encodeURIComponent(uri)}`;
+  const url = `${LEDGER_LIVE_WC_DEEPLINK_PREFIX}${encodeURIComponent(uri)}`;
+  const opened = window.open(url);
+  if (opened != null) return;
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = url;
+  document.body.appendChild(iframe);
+  window.setTimeout(() => {
+    iframe.remove();
+  }, LEDGER_LIVE_WC_DEEPLINK_IFRAME_MS);
 }
 
 export function reportSolanaWalletError(toast: ConnectToast, error: unknown): void {
