@@ -29,6 +29,7 @@ The panel uses [Card](card.md) defaults. The title row is always rendered (style
 | `headerAction` | `ReactNode` | — | Optional control next to the title (not inside `<h2>`), before the close button |
 | `closeClassName` | `string` | — | Close button |
 | `closeIcon` | `ReactNode` | `IconClose` | Replace the default close icon |
+| `elevated` | `boolean` | `false` | Visual `z-index` is `WALLET_PORTAL_Z_INDEX` plus the overlay stack offset, so wallet dialogs stay above TokenSelect / other app dialogs. Escape still uses the overlay stack. |
 
 ## Example
 
@@ -49,6 +50,7 @@ import { Button } from "@/components/ui/button/Button";
 ## Notes
 
 - Multiple dialogs can be open at once; only the top overlay handles Escape and receives the topmost mask.
+- Wallet SDK portals (RainbowKit, Near, Solana, Tron, including `.ledger-modal-*`) sit at `WALLET_PORTAL_Z_INDEX` (`10000`), above ordinary dialog layers. Pass `elevated` for in-app wallet dialogs (Ledger USB / Retry, Blind signing) so they sit in that same band.
 - Focus trapping applies to masked dialogs. A transparent `mask={false}` overlay remains non-modal and does not trap focus.
 - Do not import `src/components/ui/overlay/` from feature code.
 - Mobile stacking uses bottom drawers, also layered by z-index.

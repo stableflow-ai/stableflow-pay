@@ -8,14 +8,12 @@
 import type { PayBatchSwapTransaction } from "@/types/payout";
 import { isNativeToken, type IntentsToken } from "@/stores/intents-tokens";
 import { broadcastBatchPayCallData } from "./broadcast-quick-pay";
-import { INSUFFICIENT_APPROVAL_AMOUNT_MESSAGE } from "./config";
 import { executedBroadcast, type BroadcastResult } from "./types";
 import { broadcastNearActions } from "./near/transfer";
 import { broadcastSerializedSolanaTx } from "./solana/transfer";
 import { readTrc20Allowance } from "./tron/balance";
-import { TRON_CONFIRM_TIMEOUT_MESSAGE } from "./tron/config";
-import { broadcastTronCallData, isTronConfirmTimeout, waitForTronSuccess } from "./tron/transfer";
-import { verifyPostApproveAllowance } from "./verify-post-approve-allowance";
+import { ensureTronLedgerBlindSigning } from "./tron/ledger-blind-sign";
+import { broadcastTronCallData, waitForTronApproveReady, waitForTronSuccess } from "./tron/transfer";
 
 export async function broadcastBatchPayout(input: {
   token: IntentsToken;
@@ -70,7 +68,10 @@ async function broadcastTron(input: {
     throw new Error("Missing batch transaction");
   }
   const native = isNativeToken(input.token);
-  let confirmTimedOut = false;
+  await ensureTronLedgerBlindSigning({
+    callData: tx.callData,
+    callValue: native ? input.amountIn : 0n,
+  });
   for (const approval of tx.approvals ?? []) {
     if (!approval.trim()) continue;
     const tokenAddress = input.token.contractAddress?.trim();
@@ -80,36 +81,19 @@ async function broadcastTron(input: {
       callData: approval,
       callValue: 0n,
     });
-    try {
+    if (native) {
       await waitForTronSuccess(hash);
-    } catch (error) {
-      if (!isTronConfirmTimeout(error)) throw error;
-      confirmTimedOut = true;
+      continue;
     }
-  }
-  if (!native) {
-    const tokenAddress = input.token.contractAddress?.trim();
-    if (!tokenAddress) throw new Error("Missing origin token contract");
-    try {
-      await verifyPostApproveAllowance({
-        requiredAmount: input.amountIn,
-        readAllowance: () => readTrc20Allowance({
-          tokenContract: tokenAddress,
-          owner: input.payer,
-          spender: tx.batch_contract,
-        }),
-      });
-    } catch (error) {
-      if (
-        confirmTimedOut
-        && !(error instanceof Error && error.message === INSUFFICIENT_APPROVAL_AMOUNT_MESSAGE)
-      ) {
-        throw new Error(TRON_CONFIRM_TIMEOUT_MESSAGE);
-      }
-      throw error;
-    }
-  } else if (confirmTimedOut) {
-    throw new Error(TRON_CONFIRM_TIMEOUT_MESSAGE);
+    await waitForTronApproveReady({
+      txid: hash,
+      requiredAmount: input.amountIn,
+      readAllowance: () => readTrc20Allowance({
+        tokenContract: tokenAddress,
+        owner: input.payer,
+        spender: tx.batch_contract,
+      }),
+    });
   }
   return executedBroadcast(await broadcastTronCallData({
     contract: tx.batch_contract,
