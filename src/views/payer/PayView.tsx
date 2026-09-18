@@ -309,7 +309,11 @@ export function PayView() {
       // The consumed marker stays either way: this deposit address must never
       // be paid twice.
       if (result.kind === "pending-multisig") {
-        const waitingQuery = { swapId: swap.swapId, proposal: result };
+        const waitingQuery = {
+          swapId: swap.swapId,
+          proposal: result,
+          deadline: swap.deadline,
+        };
         if (payment.kind === PAYER_KIND.Checkout) {
           void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
           navigate(checkoutWaitingPath(payment.id, waitingQuery), { replace: true });

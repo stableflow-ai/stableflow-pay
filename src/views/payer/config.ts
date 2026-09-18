@@ -15,6 +15,7 @@ export const PAYER_MS_PROPOSAL_QUERY = "msProposal";
 export const PAYER_MS_VAULT_QUERY = "msVault";
 export const PAYER_MS_PDA_QUERY = "msPda";
 export const PAYER_MS_INDEX_QUERY = "msIndex";
+export const PAYER_DEADLINE_QUERY = "deadline";
 export const CHECKOUT_SUCCESS_STATUS = "success";
 export const CHECKOUT_REDIRECT_SECONDS = 10;
 
@@ -75,14 +76,17 @@ export interface PayerWaitingQuery {
   paymentId?: string;
   swapId?: string;
   proposal?: PendingMultisigBroadcast;
+  deadline?: string;
 }
 
 export function applyWaitingMultisig(
   params: URLSearchParams,
-  input: { swapId: string; proposal: PendingMultisigBroadcast },
+  input: { swapId: string; proposal: PendingMultisigBroadcast; deadline?: string },
 ) {
   params.set(PAYER_SWAP_QUERY, input.swapId);
   params.set(PAYER_MS_KIND_QUERY, input.proposal.chainKind);
+  const deadline = input.deadline?.trim() ?? "";
+  if (deadline) params.set(PAYER_DEADLINE_QUERY, deadline);
   if (input.proposal.chainKind === "evm") {
     params.set(PAYER_MS_SAFE_QUERY, input.proposal.safeAddress);
     params.set(PAYER_MS_TX_QUERY, input.proposal.safeTxHash);
@@ -106,7 +110,11 @@ function applyWaitingQuery(params: URLSearchParams, query?: PayerWaitingQuery) {
   if (paymentId) params.set(PAYER_PAYMENT_QUERY, paymentId);
   const swapId = query?.swapId?.trim() ?? "";
   if (swapId && query?.proposal) {
-    applyWaitingMultisig(params, { swapId, proposal: query.proposal });
+    applyWaitingMultisig(params, {
+      swapId,
+      proposal: query.proposal,
+      deadline: query.deadline,
+    });
   }
 }
 

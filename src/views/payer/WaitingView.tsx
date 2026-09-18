@@ -7,6 +7,7 @@ import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
 import { txExplorerUrl } from "@/config/chains";
 import {
   MULTISIG_WATCH_STATUS,
+  abortOnQuoteDeadline,
   isWatchablePendingMultisig,
   pendingMultisigSessionId,
   txHashForSubmit,
@@ -30,6 +31,7 @@ import {
   buildCheckoutSuccessUrl,
   isCheckoutFailedWithoutPayment,
   isCheckoutSuspended,
+  isPayQuoteExpired,
   payerWaitDetailsFromSources,
   paymentLinkCardIconUrl,
   shouldCheckoutShowForm,
@@ -127,49 +129,78 @@ export function WaitingView() {
     setMsRequired(null);
 
     async function run() {
-      const { swapId, proposal } = current;
-      const snap = isWatchablePendingMultisig(proposal)
-        ? await watchMultisigProposal(proposal, (next) => {
-          if (controller.signal.aborted) return;
-          setMsSigned(next.signed);
-          setMsRequired(next.required);
-        }, controller.signal)
-        : {
-          signed: null,
-          required: null,
-          status: MULTISIG_WATCH_STATUS.Success,
-          txHash: null,
-        };
-      if (controller.signal.aborted) return;
-      if (snap.status !== MULTISIG_WATCH_STATUS.Success) {
-        setMsFailed(true);
-        return;
-      }
-      if (submittedRef.current) return;
-      submittedRef.current = true;
-      const next = new URLSearchParams(waitingSearch);
-      dropWaitingMultisig(next);
+      const { swapId, proposal, deadline } = current;
+      let expired = false;
+      const stopExpire = abortOnQuoteDeadline(deadline, () => {
+        expired = true;
+        if (!controller.signal.aborted) controller.abort();
+      });
       try {
-        const submitted = await paySwapSubmit(
-          { swapId, txHash: txHashForSubmit(snap.txHash) },
-          { auth: false },
-        );
-        const paymentsId = submitted.paymentsId.trim();
-        if (paymentsId) next.set(PAYER_PAYMENT_QUERY, paymentsId);
-        navigate({ search: next.toString() }, {
-          replace: true,
-          state: paymentsId ? undefined : PAYER_WAITING_STATE,
-        });
-      } catch {
-        navigate({ search: next.toString() }, {
-          replace: true,
-          state: PAYER_WAITING_STATE,
-        });
+        if (expired) {
+          setMsFailed(true);
+          return;
+        }
+        const watchable = isWatchablePendingMultisig(proposal);
+        const snap = watchable
+          ? await watchMultisigProposal(proposal, (next) => {
+            if (controller.signal.aborted) return;
+            setMsSigned(next.signed);
+            setMsRequired(next.required);
+          }, controller.signal)
+          : {
+            signed: null,
+            required: null,
+            status: MULTISIG_WATCH_STATUS.Success,
+            txHash: null,
+          };
+        if (controller.signal.aborted) {
+          if (expired) setMsFailed(true);
+          return;
+        }
+        if (snap.status !== MULTISIG_WATCH_STATUS.Success) {
+          setMsFailed(true);
+          return;
+        }
+        if (!watchable && isPayQuoteExpired(deadline)) {
+          setMsFailed(true);
+          return;
+        }
+        if (submittedRef.current) return;
+        submittedRef.current = true;
+        const next = new URLSearchParams(waitingSearch);
+        dropWaitingMultisig(next);
+        try {
+          const submitted = await paySwapSubmit(
+            { swapId, txHash: txHashForSubmit(snap.txHash) },
+            { auth: false },
+          );
+          const paymentsId = submitted.paymentsId.trim();
+          if (paymentsId) next.set(PAYER_PAYMENT_QUERY, paymentsId);
+          navigate({ search: next.toString() }, {
+            replace: true,
+            state: paymentsId ? undefined : PAYER_WAITING_STATE,
+          });
+        } catch {
+          navigate({ search: next.toString() }, {
+            replace: true,
+            state: PAYER_WAITING_STATE,
+          });
+        }
+      } catch (error) {
+        if (expired) {
+          setMsFailed(true);
+          return;
+        }
+        throw error;
+      } finally {
+        stopExpire();
       }
     }
 
     void run().catch((error) => {
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted) {
+        return;
+      }
       if (error instanceof DOMException && error.name === "AbortError") return;
       setMsFailed(true);
     });
