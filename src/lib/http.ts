@@ -3,6 +3,8 @@ import { useAuthStore } from "@/stores/auth";
 
 const SUCCESS_CODE = 200;
 const DEFAULT_BLOB_FILENAME = "download";
+const REQUEST_TIMEOUT_MS = 30_000;
+const TIMEOUT_CODE = "TIMEOUT";
 
 type HttpMethod = "GET" | "POST" | "DELETE";
 
@@ -135,11 +137,24 @@ async function send(path: string, options: HttpOptions, accept: string): Promise
     headers.Authorization = `Bearer ${token}`;
   }
 
-  return fetch(joinUrl(withQuery(path, query), options.sameOrigin), {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  try {
+    return await fetch(joinUrl(withQuery(path, query), options.sameOrigin), {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (error) {
+    if (isTimeoutError(error)) {
+      throw new ApiError("Request timed out", 0, TIMEOUT_CODE);
+    }
+    throw error;
+  }
+}
+
+function isTimeoutError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.name === "TimeoutError" || error.name === "AbortError";
 }
 
 function throwHttpError(

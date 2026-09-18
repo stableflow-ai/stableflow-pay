@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { IconLogout } from "@/components/icons/logout";
 import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
-import { PAYER_BLOCKCHAINS } from "@/config/chains";
 import { useTokenBalance } from "@/hooks/use-token-balances";
 import { useConnectedWallets } from "@/hooks/use-wallet";
 import { chainLogoUrl } from "@/lib/logo";
@@ -144,7 +143,7 @@ export function YouPaySection(props: {
         selectedAssetId={originToken?.assetId}
         showBalances
         balanceOwners={ownersForBalances}
-        allowedBlockchains={PAYER_BLOCKCHAINS}
+        requireSupport="payment"
         onSelect={({ token }) => {
           onOriginTokenChange(token);
           const owner = token.chain.chainKind === "solana" && fund

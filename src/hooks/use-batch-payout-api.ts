@@ -10,6 +10,7 @@ export function useBatchPayQuote(body: PayBatchQuoteParam | null) {
     enabled: Boolean(body),
     placeholderData: keepPreviousData,
     refetchInterval: 60_000,
+    retry: false,
   });
 }
 

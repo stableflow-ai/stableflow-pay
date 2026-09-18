@@ -79,7 +79,7 @@ export function ProfileSection(props: {
             type="submit"
             size={BUTTON_SIZE.Md}
             loading={saving}
-            className="h-10 w-full rounded-[8px] text-sm md:w-[150px]"
+            className="h-10 w-full rounded-[8px] text-sm md:w-[150px] whitespace-nowrap"
           >
             Save Change
           </Button>

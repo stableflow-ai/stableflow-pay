@@ -45,7 +45,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
 
     const previouslyFocused =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    panel.focus();
+    panel.focus({ preventScroll: true });
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
@@ -61,7 +61,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
 
       if (focusableElements.length === 0) {
         event.preventDefault();
-        panel.focus();
+        panel.focus({ preventScroll: true });
         return;
       }
 
@@ -74,17 +74,17 @@ export function OverlayPanel(props: OverlayPanelProps) {
         (activeElement === panel || activeElement === firstElement || !panel.contains(activeElement))
       ) {
         event.preventDefault();
-        lastElement.focus();
+        lastElement.focus({ preventScroll: true });
       } else if (!event.shiftKey && activeElement === lastElement) {
         event.preventDefault();
-        firstElement.focus();
+        firstElement.focus({ preventScroll: true });
       }
     };
 
     panel.addEventListener("keydown", handleKeyDown);
     return () => {
       panel.removeEventListener("keydown", handleKeyDown);
-      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+      if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true });
     };
   }, [panelId, trapFocus]);
 

@@ -4,6 +4,26 @@ export const PAY_SWAP_TYPE = {
 
 export type PaySwapType = (typeof PAY_SWAP_TYPE)[keyof typeof PAY_SWAP_TYPE];
 
+export const PAY_CHECKOUT_SESSION_STATUS = {
+  Created: "created",
+  Processing: "processing",
+  Completed: "completed",
+  Failed: "failed",
+  Expired: "expired",
+} as const;
+
+export type PayCheckoutSessionStatus =
+  (typeof PAY_CHECKOUT_SESSION_STATUS)[keyof typeof PAY_CHECKOUT_SESSION_STATUS];
+
+export const PAY_PAYMENT_STATUS = {
+  Processing: "processing",
+  Completed: "completed",
+  Failed: "failed",
+} as const;
+
+export type PayPaymentStatus =
+  (typeof PAY_PAYMENT_STATUS)[keyof typeof PAY_PAYMENT_STATUS];
+
 export interface PayQuoteParam {
   amount: string;
   destinationAmount: string;
@@ -45,7 +65,6 @@ export interface PaySwapSubmitParam {
 
 export interface PaySwapSubmitResp {
   paymentsId: string;
-  status: string;
 }
 
 export interface PayCheckoutSessionBody {
@@ -66,7 +85,7 @@ export interface PayCheckoutSession {
   paymentsId: string;
   recipient: string;
   sessionId: string;
-  status: string;
+  status: PayCheckoutSessionStatus;
   successUrl: string;
   symbol: string;
   organization: { logo: string };
@@ -86,7 +105,7 @@ export interface PayPaymentDetail {
   payer: string;
   paymentsId: string;
   recipient: string;
-  status: string;
+  status: PayPaymentStatus;
   submittedAt: string;
   symbol: string;
   txHash: string;

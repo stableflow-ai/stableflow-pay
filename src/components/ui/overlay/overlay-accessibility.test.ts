@@ -10,7 +10,7 @@ describe("overlay accessibility contract", () => {
     expect(panelSource).toContain('aria-labelledby={hasTitle ? titleId : undefined}');
     expect(panelSource).toContain('aria-label={hasTitle ? undefined : ariaLabel}');
     expect(panelSource).toContain('if (event.key !== "Tab") return');
-    expect(panelSource).toContain("panel.focus()");
+    expect(panelSource).toContain("panel.focus({ preventScroll: true })");
     expect(panelSource).toContain("activeElement === panel");
     expect(panelSource).toContain("previouslyFocused?.isConnected");
     expect(drawerSource).toContain("trapFocus={mask}");

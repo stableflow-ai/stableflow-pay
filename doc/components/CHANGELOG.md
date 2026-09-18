@@ -2,6 +2,11 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-18
+
+- **Dialog / Overlay:** Desktop close fades the panel first, then the mask (`OVERLAY_DIALOG_PANEL_FADE_SECONDS`). Open still fades mask and panel together. Narrow viewports keep the bottom Drawer slide.
+- **OverlayPanel:** Focus move/restore uses `{ preventScroll: true }` so opening a bottom Drawer does not `scrollIntoView` and interrupt the slide-in.
+
 ## 2026-09-16
 
 - **Toast:** `title` / `text` accept `ReactNode`. `useToast()` methods return a `ToastHandle` (`id`, `update`, `dismiss`) so a persistent toast can close itself from an in-body link. Container `z-index` is `100000001` so a toast stays above the near-connect wallet popup.
