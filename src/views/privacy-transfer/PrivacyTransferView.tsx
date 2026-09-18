@@ -64,7 +64,6 @@ function linkingOptionsFrom(owners: Partial<Record<ChainKind, string>>) {
 export function PrivacyTransferView() {
   const toast = useToast();
   const owners = useConnectedWallets();
-  const ensureFresh = useIntentsTokensStore((state) => state.ensureFresh);
   const tokens = useIntentsTokensStore((state) => state.tokens);
   const findByAssetId = useIntentsTokensStore((state) => state.findByAssetId);
   const snapshots = usePrivacyTransferExecutionStore((state) => state.snapshots);
@@ -92,10 +91,6 @@ export function PrivacyTransferView() {
     [snapshots],
   );
   const active = activeId ? snapshots[activeId] : undefined;
-
-  useEffect(() => {
-    void ensureFresh();
-  }, [ensureFresh]);
 
   useEffect(() => {
     if (linkingKind && linkingOptions.some((option) => option.kind === linkingKind)) return;
