@@ -1,5 +1,6 @@
 import type { PendingMultisigBroadcast } from "@/wallet/types";
 import {
+  PAYER_DEADLINE_QUERY,
   PAYER_MS_CHAIN_QUERY,
   PAYER_MS_DAO_QUERY,
   PAYER_MS_INDEX_QUERY,
@@ -15,9 +16,11 @@ import {
 export function parseWaitingMultisig(search: URLSearchParams): {
   swapId: string;
   proposal: PendingMultisigBroadcast;
+  deadline: string;
 } | null {
   const swapId = search.get(PAYER_SWAP_QUERY)?.trim() ?? "";
   const kind = search.get(PAYER_MS_KIND_QUERY)?.trim() ?? "";
+  const deadline = search.get(PAYER_DEADLINE_QUERY)?.trim() ?? "";
   if (!swapId || !kind) return null;
   if (kind === "evm") {
     const safeAddress = search.get(PAYER_MS_SAFE_QUERY)?.trim() ?? "";
@@ -26,6 +29,7 @@ export function parseWaitingMultisig(search: URLSearchParams): {
     if (!safeAddress || !safeTxHash || !Number.isFinite(chainId)) return null;
     return {
       swapId,
+      deadline,
       proposal: {
         kind: "pending-multisig",
         chainKind: "evm",
@@ -41,6 +45,7 @@ export function parseWaitingMultisig(search: URLSearchParams): {
     if (!daoId || !Number.isFinite(proposalId) || proposalId < 0) return null;
     return {
       swapId,
+      deadline,
       proposal: {
         kind: "pending-multisig",
         chainKind: "near",
@@ -57,6 +62,7 @@ export function parseWaitingMultisig(search: URLSearchParams): {
     const transactionIndex = indexRaw ? BigInt(indexRaw) : undefined;
     return {
       swapId,
+      deadline,
       proposal: {
         kind: "pending-multisig",
         chainKind: "solana",
@@ -71,6 +77,7 @@ export function parseWaitingMultisig(search: URLSearchParams): {
 
 export function dropWaitingMultisig(search: URLSearchParams) {
   search.delete(PAYER_SWAP_QUERY);
+  search.delete(PAYER_DEADLINE_QUERY);
   search.delete(PAYER_MS_KIND_QUERY);
   search.delete(PAYER_MS_SAFE_QUERY);
   search.delete(PAYER_MS_TX_QUERY);

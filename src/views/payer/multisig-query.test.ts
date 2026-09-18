@@ -28,6 +28,7 @@ describe("waiting URL restore", () => {
     const search = new URLSearchParams(path.split("?")[1]);
     expect(parseWaitingMultisig(search)).toEqual({
       swapId: "swap-1",
+      deadline: "",
       proposal: evmProposal,
     });
   });
@@ -38,7 +39,22 @@ describe("waiting URL restore", () => {
     expect(search.get("sessionId")).toBe("sess-1");
     expect(parseWaitingMultisig(search)).toEqual({
       swapId: "swap-2",
+      deadline: "",
       proposal: solanaProposal,
+    });
+  });
+
+  it("round-trips a quote deadline through the waiting path", () => {
+    const path = payerWaitingPath("link-1", {
+      swapId: "swap-1",
+      proposal: evmProposal,
+      deadline: "2026-09-18T12:00:00.000Z",
+    });
+    const search = new URLSearchParams(path.split("?")[1]);
+    expect(parseWaitingMultisig(search)).toEqual({
+      swapId: "swap-1",
+      deadline: "2026-09-18T12:00:00.000Z",
+      proposal: evmProposal,
     });
   });
 
@@ -53,6 +69,7 @@ describe("waiting URL restore", () => {
     dropWaitingMultisig(search);
     expect(parseWaitingMultisig(search)).toBeNull();
     expect(search.get(PAYER_PAYMENT_QUERY)).toBe("pay-1");
+    expect(search.get("deadline")).toBeNull();
   });
 
   it("rejects an incomplete query", () => {

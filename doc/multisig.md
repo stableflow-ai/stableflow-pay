@@ -24,7 +24,7 @@ Copy:
 
 `transferToDepositAddress` returns `pending-multisig`. Navigate to waiting and put the proposal on the **URL query** (not `location.state` as the only source). Refreshing the same waiting URL continues the watch. Closing the tab discards it.
 
-Query keys (next to `sessionId` / `paymentId`): `swapId`, `msKind=evm|near|solana`, plus `msSafe` / `msTx` / `msChain`, `msDao` / `msProposal`, or `msVault` / `msPda` / `msIndex`. Helpers: `src/views/payer/config.ts`, `src/views/payer/multisig-query.ts`.
+Query keys (next to `sessionId` / `paymentId`): `swapId`, `deadline`, `msKind=evm|near|solana`, plus `msSafe` / `msTx` / `msChain`, `msDao` / `msProposal`, or `msVault` / `msPda` / `msIndex`. Helpers: `src/views/payer/config.ts`, `src/views/payer/multisig-query.ts`.
 
 Waiting stays if it has `paymentId` **or** a valid multisig query (paylink no longer depends on `awaitingSubmit` state alone).
 
@@ -47,9 +47,9 @@ Waiting copy:
 - Subtitle: `n / m signed` when known; empty until the first snapshot
 - After submit: title `Waiting for Payment...`, subtitle `This can take 0-3 minutes`
 
-On **success**, always `POST /v1/pay/swap/submit` with `txHash` set to the on-chain hash or `""`. Then `replace` the URL with `paymentId` and drop `ms*` / `swapId`, and poll `GET /payments/{id}`. `txHash` is optional on the backend; empty string is allowed. On **failed**, show the failed waiting card and do not submit.
+On **success**, always `POST /v1/pay/swap/submit` with `txHash` set to the on-chain hash or `""`. Then `replace` the URL with `paymentId` and drop `ms*` / `swapId` / `deadline`, and poll `GET /payments/{id}`. `txHash` is optional on the backend; empty string is allowed. On **failed**, show the failed waiting card and do not submit. If the quote `deadline` passes while still pending, stop the watch, show the failed waiting card, and do not submit. Older waiting URLs without `deadline` keep polling.
 
-SquadsX has no vault transaction index: skip the watch, submit `txHash: ""` immediately after landing on waiting.
+SquadsX has no vault transaction index: skip the watch, submit `txHash: ""` immediately after landing on waiting unless the quote has already expired.
 
 There is no listen toast on v3; Waiting is Toast 2. Confirm toast (Toast 1) may still be visible while waiting.
 
