@@ -3,7 +3,8 @@ import type { IntentsToken } from "@/stores/intents-tokens";
 import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
-import { SOLANA_EXPIRED_MESSAGE } from "@/wallet/solana/config";
+import { SAFE_REQUEST_EXPIRED_MESSAGE } from "@/wallet/evm/safe/config";
+import { SOLANA_EXPIRED_MESSAGE, SOLANA_INSUFFICIENT_SOL_MESSAGE } from "@/wallet/solana/config";
 import { solanaWalletErrorMessage } from "@/wallet/solana/utils";
 import {
   CHECKOUT_SUCCESS_STATUS,
@@ -138,6 +139,8 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
     }
   }
   if (/No liquidity available/i.test(message)) return "No liquidity available";
+  if (/request expired/i.test(message)) return SAFE_REQUEST_EXPIRED_MESSAGE;
+  if (/insufficient lamports/i.test(message)) return SOLANA_INSUFFICIENT_SOL_MESSAGE;
   if (/block height exceeded|blockhash not found|blockhash.*expired/i.test(message)) {
     return SOLANA_EXPIRED_MESSAGE;
   }
