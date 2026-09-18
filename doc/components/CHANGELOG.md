@@ -2,6 +2,10 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-19
+
+- **Dialog / Drawer:** Optional `elevated` places the overlay in the wallet-portal `z-index` band (`10000` plus the overlay stack offset) so Ledger connect dialogs stay above TokenSelect and other app dialogs. Escape still follows the overlay stack.
+
 ## 2026-09-18
 
 - **Dialog / Overlay:** Desktop close fades the panel first, then the mask (`OVERLAY_DIALOG_PANEL_FADE_SECONDS`). Open still fades mask and panel together. Narrow viewports keep the bottom Drawer slide.
