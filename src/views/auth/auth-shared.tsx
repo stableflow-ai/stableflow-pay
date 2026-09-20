@@ -4,7 +4,7 @@ import { ApiError } from "@/lib/api-error";
 import { IconAlert, IconEye, IconEyeHidden } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import {
-  AUTH_CARD_CLASS,
+  AUTH_FORM_CLASS,
   AUTH_INPUT_CLASS,
   AUTH_LABEL_CLASS,
 } from "./config";
@@ -53,11 +53,11 @@ export function AuthField({
   className?: string;
 }) {
   return (
-    <div className={cn("mt-5", className)}>
+    <div className={cn("relative leading-[100%]", className)}>
       <label htmlFor={id} className={AUTH_LABEL_CLASS}>
         {label}
       </label>
-      <div className="relative mt-2.5">
+      <div className="relative mt-3">
         <input
           id={id}
           type={type}
@@ -130,4 +130,4 @@ export function authErrorMessage(error: unknown, fallback = "Something went wron
   return fallback;
 }
 
-export { AUTH_CARD_CLASS };
+export { AUTH_FORM_CLASS };
