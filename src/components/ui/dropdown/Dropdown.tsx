@@ -143,6 +143,7 @@ export function Dropdown(props: DropdownProps) {
         className={cn(
           "inline-flex h-9 w-full min-w-0 items-center justify-between gap-2 overflow-hidden rounded-[6px] border border-[#E3E3E3] bg-white px-3 font-montserrat text-sm font-medium text-black outline-none",
           disabled && "cursor-not-allowed opacity-30",
+          !selectedOption && "text-[#606060]",
           triggerClassName,
         )}
       >
@@ -182,7 +183,7 @@ export function Dropdown(props: DropdownProps) {
                       selectValue(option.value);
                     }}
                     className={cn(
-                      "flex w-full px-3 py-2 text-left text-sm font-medium text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-30",
+                      "flex w-full px-3 py-2 text-left text-xs font-medium text-black hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-30",
                       selected && "bg-black/5",
                     )}
                   >

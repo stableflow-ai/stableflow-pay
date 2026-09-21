@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { toast, type Id } from "react-toastify";
 import Toast, { ToastType } from "@/components/ui/toast/Toast";
 
-const TOAST_POSITION = "top-right" as const;
-const TOAST_CLASSNAME = "decash-toast decash-toast-top-right";
+const TOAST_POSITION = "bottom-right" as const;
+const TOAST_CLASSNAME = "decash-toast decash-toast-bottom-right";
 
 export interface ToastParams {
   title: ReactNode;

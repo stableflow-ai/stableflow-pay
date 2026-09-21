@@ -9,8 +9,9 @@ import type { IconProps } from "@/components/icons/types";
 import { PRIVACY_TRANSFER_PATH, PRIVACY_TRANSFER_TITLE } from "@/views/privacy-transfer/config";
 
 export const SIDEBAR_WIDTH_PX = 220;
-export const SIDEBAR_NAV_ACTIVE_COLOR = "#3F8AFB";
-export const SIDEBAR_AVATAR_SRC = "/layout/avatar.svg";
+export const DOCS_PATH = "/docs";
+export const TERMS_PATH = "/terms";
+export const STABLEFLOW_ABOUT_URL = "https://app.stableflow.ai/about";
 
 export type SidebarIcon = ComponentType<IconProps>;
 

@@ -48,11 +48,11 @@ src/
     docs/                 # Checkout API documentation at /docs
     privacy-transfer/     # Authenticated /privacy-transfer (not in the sidebar)
     placeholder/          # Sidebar routes without product UI yet (Terms)
-  layouts/                # AppLayout (sidebar + title + outlet)
+  layouts/                # AppLayout (sidebar + 65px title + footer + outlet)
   components/
     ui/                   # Public, non-business UI (see doc/components)
     icons/                # Shared icon components (inline SVG TSX, re-export from index.tsx)
-    layout/               # AppSidebar, AccountMenu, sidebar config
+    layout/               # AppSidebar, AppNav, AccountMenu, AppFooter, sidebar config
     WalletConnect.tsx     # Wallet connect dialog (business)
     safe/                 # SafeMultisigBadge (wraps MultisigBadge), showSafeProposalToast
     multisig/             # MultisigBadge, confirm toast, PayFromSquadSection

@@ -1,58 +1,56 @@
 import { Suspense, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AccountMenu } from "@/components/layout/AccountMenu";
+import { AppFooter } from "@/components/layout/AppFooter";
+import { AppNav, AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
 import { Drawer } from "@/components/ui/drawer/Drawer";
 import { DRAWER_SIDE } from "@/components/ui/drawer/config";
-import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { IconMenu } from "@/components/icons";
 
 export function AppLayout() {
   const { pathname } = useLocation();
-  const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const title = pageTitleForPath(pathname);
-  const closeSidebar = () => setSidebarOpen(false);
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className="flex h-svh overflow-hidden bg-[#f6f6f6]">
-      {isDesktop ? <AppSidebar /> : null}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 items-center gap-3 px-3 pt-[18px] pr-4 pb-2 md:px-10">
-          <h1 className="min-w-0 flex-1 truncate font-montserrat text-[26px] font-semibold leading-normal text-black">
+    <div className="flex h-svh flex-col overflow-hidden bg-[#f6f6f6] lg:flex-row">
+      <div className="flex shrink-0 items-center gap-3 border-b border-black/10 px-2 py-3 md:px-5 lg:hidden">
+        <a href="/" className="shrink-0">
+          <img src="/logo.svg" alt="PAY. Stableflow" className="h-[30px] w-auto" />
+        </a>
+        <div className="flex flex-1 items-center justify-end gap-3">
+          <div className="min-w-0">
+            <AccountMenu />
+          </div>
+          <button
+            type="button"
+            aria-label="Menu"
+            onClick={() => setMenuOpen(true)}
+            className="shrink-0 text-black"
+          >
+            <IconMenu className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+      <AppSidebar />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="relative flex h-[65px] shrink-0 items-center border-b border-black/10 px-2 md:px-5 lg:px-[26px]">
+          <h1 className="min-w-0 truncate font-montserrat text-[20px] font-medium text-black">
             {title}
           </h1>
-          {isDesktop ? null : (
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="font-montserrat text-sm font-medium text-[#606060]"
-            >
-              <IconMenu className="h-6 w-6" />
-            </button>
-          )}
         </header>
-        <main className="min-h-0 flex-1 overflow-auto px-3 py-4 md:px-10 md:py-5">
+        <main className="min-h-0 flex-1 overflow-y-auto px-2 py-5 md:px-5 lg:px-[26px]">
           <Suspense fallback={null}>
             <Outlet />
           </Suspense>
         </main>
+        <AppFooter />
       </div>
-      {isDesktop ? null : (
-        <Drawer
-          open={sidebarOpen}
-          onClose={closeSidebar}
-          side={DRAWER_SIDE.Right}
-          title=""
-          ariaLabel="Main navigation"
-          panelClassName="w-[220px]"
-          cardClassName="h-full w-full gap-0 rounded-r-none p-0 [&>div:first-child]:hidden"
-          contentClassName="overflow-x-hidden"
-        >
-          <AppSidebar onNavigate={closeSidebar} />
-        </Drawer>
-      )}
+      <Drawer open={menuOpen} onClose={closeMenu} side={DRAWER_SIDE.Top} title="" ariaLabel="Main navigation">
+        <AppNav onNavigate={closeMenu} />
+      </Drawer>
     </div>
   );
 }
