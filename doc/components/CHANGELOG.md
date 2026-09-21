@@ -2,6 +2,13 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-20
+
+- **Toast:** Card is 316px, `#fdfdfd` with `#e0e0e0` border, Montserrat, and 14px status dots from public icons. Container is bottom-right (`decash-toast-bottom-right`), oldest toward the top.
+- **Dropdown:** Unselected trigger uses `#606060`. Option rows are `text-xs`.
+- **OverlayPanel:** Close control no longer draws a focus ring.
+- **Switch:** Optional `loading` shows `IconLoading` on the thumb; track opacity stays 1.
+
 ## 2026-09-19
 
 - **Dialog / Drawer:** Optional `elevated` places the overlay in the wallet-portal `z-index` band (`10000` plus the overlay stack offset) so Ledger connect dialogs stay above TokenSelect and other app dialogs. Escape still follows the overlay stack.

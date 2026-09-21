@@ -6,11 +6,11 @@ Generic surface. Dialog, Drawer, and Table reuse these defaults.
 
 ## Defaults
 
-- `border-radius: 20px`
+- `border-radius: 14px` below `md`, `20px` from `md` up
 - `border: 1px solid #FFF`
 - `background: #FDFDFD`
 - `box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.06)`
-- `padding: 20px`
+- `padding: 16px` below `md`, `20px` from `md` up
 
 `className` is merged last and can override any default.
 

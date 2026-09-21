@@ -100,7 +100,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
       style={style}
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="relative flex shrink-0 items-center gap-3">
         <h2
           id={hasTitle ? titleId : undefined}
           className={cn(
@@ -116,7 +116,7 @@ export function OverlayPanel(props: OverlayPanelProps) {
           aria-label="Close"
           onClick={onClose}
           className={cn(
-            "ml-auto shrink-0 cursor-pointer rounded-sm text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6284f5]/60",
+            "ml-auto shrink-0 cursor-pointer text-black",
             closeClassName,
           )}
         >

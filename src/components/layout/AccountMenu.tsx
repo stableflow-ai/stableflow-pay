@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { IconArrowDown } from "@/components/icons/arrow-down";
 import { IconLogout } from "@/components/icons/logout";
-import { IconMenu } from "@/components/icons/menu";
 import { IconResetPassword } from "@/components/icons/reset-password";
+import { EmailAvatar } from "@/components/recipient-avatar/EmailAvatar";
 import {
   FLOATING_ALIGN,
   FLOATING_SIDE,
   useFloatingPosition,
 } from "@/components/ui/overlay/use-floating-position";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { ResetPasswordDialog } from "@/views/auth/ResetPasswordDialog";
 import { RESET_PASSWORD_VARIANT } from "@/views/auth/config";
-import { SIDEBAR_AVATAR_SRC } from "./config";
 
-export function AccountMenu() {
+export function AccountMenu({ className }: { className?: string }) {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -26,7 +27,7 @@ export function AccountMenu() {
     open,
     triggerRef,
     panelRef,
-    side: FLOATING_SIDE.Top,
+    side: FLOATING_SIDE.Bottom,
     align: FLOATING_ALIGN.Start,
     offset: 8,
   });
@@ -66,49 +67,49 @@ export function AccountMenu() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <div className="flex h-[42px] w-[148px] items-center gap-1.5 rounded-[25px] border border-black/20 bg-white pr-3 pl-1.5 shadow-[0_0_6px_rgba(0,0,0,0.06)]">
-          <img
-            src={SIDEBAR_AVATAR_SRC}
-            alt=""
-            className="size-[30px] shrink-0 rounded-full object-cover"
-          />
-          <p className="min-w-0 truncate font-montserrat text-sm font-medium capitalize text-black">
-            {user?.name}
-          </p>
-        </div>
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-label="Account menu"
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={() => setOpen((current) => !current)}
-          className="inline-flex size-5 shrink-0 items-center justify-center text-[#aaa]"
-        >
-          <IconMenu />
-        </button>
-      </div>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className={cn("inline-flex w-full min-w-0 items-center gap-2.5", className)}
+      >
+        <EmailAvatar
+          email={user.email ?? ""}
+          name={user.name ?? ""}
+          className="size-5 shrink-0 rounded-[15px] text-[8px]"
+        />
+        <span className="min-w-0 flex-1 truncate text-left font-montserrat text-sm font-medium text-black">
+          {user.name}
+        </span>
+        <IconArrowDown
+          className={cn(
+            "h-1 w-2.5 shrink-0 text-black translate-y-0.5 duration-150",
+            open ? "rotate-180" : "",
+          )}
+        />
+      </button>
       {open && typeof document !== "undefined"
         ? createPortal(
             <div
               ref={panelRef}
               role="menu"
               style={panelStyle}
-              className="z-1200 w-[249px] overflow-hidden rounded-[12px] border border-[#E0E0E0] bg-[#fdfdfd] shadow-[0_0_20px_rgba(0,0,0,0.06)]"
+              className="z-1100 w-[249px] overflow-hidden rounded-[12px] border border-[#E0E0E0] bg-[#fdfdfd] shadow-[0_0_20px_rgba(0,0,0,0.06)]"
             >
               <div className="flex h-[70px] items-center gap-2 px-4">
-                <img
-                  src={SIDEBAR_AVATAR_SRC}
-                  alt=""
-                  className="size-10 rounded-full object-cover"
+                <EmailAvatar
+                  email={user.email ?? ""}
+                  name={user.name ?? ""}
+                  className="size-10 text-sm"
                 />
                 <div className="min-w-0">
                   <p className="truncate font-montserrat text-base font-medium text-black">
-                    {user?.name}
+                    {user.name}
                   </p>
                   <p className="truncate font-montserrat text-sm font-normal text-black">
-                    {user?.email}
+                    {user.email}
                   </p>
                 </div>
               </div>

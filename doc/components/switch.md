@@ -12,6 +12,7 @@ Pill toggle. The thumb slides with Motion; the track color tweens between off an
 - Off track `#F6F6F6`, on track `#6284F5`, 1px border `#E3E3E3`
 - Thumb `15px` white circle, 1px border `#D9D9D9`, 13px travel
 - Disabled: `opacity: 0.3` and `cursor: not-allowed` (`pointer-events: none`)
+- Loading: `IconLoading` with `animate-spin` replaces the white thumb at the current on/off position. Track color stays on `checked`. Clicks are ignored and opacity stays 1 (unlike `disabled`)
 
 ## Props
 
@@ -24,6 +25,7 @@ Omits native `onChange` / `role` / `aria-checked` / `children`, plus Motion `ani
 | `onCheckedChange` | `(checked: boolean) => void` | — | Fires after a toggle |
 | `className` | `string` | — | Track (`<button>`) overrides |
 | `disabled` | `boolean` | — | Same visual treatment as Button |
+| `loading` | `boolean` | `false` | Spinner on the thumb; does not change `checked` by itself |
 
 Constants: `SWITCH_TRACK_OFF_BG`, `SWITCH_TRACK_ON_BG`, `SWITCH_THUMB_TRAVEL_PX` in `./config`.
 
