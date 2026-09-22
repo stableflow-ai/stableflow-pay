@@ -45,21 +45,34 @@ src/
     settings/             # Settings page at /settings (profile + webhooks)
     api-keys/             # Merchant API-key list at /api-keys
     reports/              # Merchant reports at /reports
-    docs/                 # Checkout API documentation at /docs
+    docs/                 # Public Checkout API documentation at /docs
     placeholder/          # Sidebar routes without product UI yet (Terms)
-  layouts/                # AppLayout (sidebar + title + outlet)
+  layouts/                # AppLayout (sidebar + 65px title + footer + outlet)
   components/
     ui/                   # Public, non-business UI (see doc/components)
     icons/                # Shared icon components (inline SVG TSX, re-export from index.tsx)
-    layout/               # AppSidebar, AccountMenu, sidebar config
+    layout/               # AppSidebar, AppNav, AccountMenu, AppFooter, sidebar config
     WalletConnect.tsx     # Wallet connect dialog (business)
-    safe/                 # SafeMultisigBadge, showSafeProposalToast
+    safe/                 # SafeMultisigBadge (wraps MultisigBadge), showSafeProposalToast
+    multisig/             # MultisigBadge, confirm toast, PayFromSquadSection
   hooks/                  # Shared hooks
   wallet/                 # Multi-chain wallet adapters and providers
-    evm/safe/             # Safe proposal helpers (no execution poller):
+    evm/safe/             # Safe proposal helpers:
                           # abi.ts, bundle.ts, config.ts, detect.ts, info.ts,
-                          # send.ts, types.ts, use-safe-info.ts, use-safe-mode.ts
-  stores/                 # Zustand stores (auth persist, wallet, intents, commit queues)
+                          # send.ts, types.ts, use-safe-info.ts, use-safe-mode.ts,
+                          # watch.ts (n/m + status snapshot; see doc/multisig.md)
+    near/multisig/        # SputnikDAO / Trezu helpers:
+                          # config.ts, detect.ts, policy.ts, info.ts,
+                          # proposal.ts, types.ts, use-near-dao-info.ts,
+                          # use-near-multisig-mode.ts,
+                          # watch.ts (n/m + status snapshot; see doc/multisig.md)
+    solana/               # adapter, balance, transfer, session
+    solana/multisig/      # SquadsX wrap + Squads SDK proposal helpers:
+                          # access.ts, config.ts, detect.ts, info.ts, resolve.ts,
+                          # result.ts, send.ts, send-sdk.ts, types.ts, watch.ts,
+                          # use-squads-info.ts, use-squads-mode.ts
+    multisig/             # Cross-chain confirm toast + watch contract (doc/multisig.md)
+  stores/                 # Zustand stores (auth persist, wallet, intents, squads-sdk, commit queues)
   api/                    # Backend wrappers by domain
   types/                  # Shared API / domain types
   mocks/                  # UI fixtures while an API contract is missing — see doc/mocks.md

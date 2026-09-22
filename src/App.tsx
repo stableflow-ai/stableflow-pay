@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useEffect } from "react";
 import { useProfileQuery } from "@/hooks/use-auth-api";
+import { usePayConfigQuery } from "@/hooks/use-pay-config";
 import { queryClient } from "@/lib/query-client";
 /** Hydrates the session and registers HTTP 401 → logout. */
 import { AUTH_SESSION_STORAGE_NAME, useAuthStore } from "@/stores/auth";
@@ -9,6 +10,7 @@ import { router } from "./router";
 
 function SessionBootstrap() {
   useProfileQuery();
+  usePayConfigQuery();
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key !== AUTH_SESSION_STORAGE_NAME) return;
@@ -27,12 +29,12 @@ export default function App() {
       <SessionBootstrap />
       <RouterProvider router={router} />
       <ToastContainer
-        position="top-right"
+        position="bottom-right"
         autoClose={5000}
         hideProgressBar
         theme="light"
         toastStyle={{ backgroundColor: "transparent", boxShadow: "none" }}
-        newestOnTop
+        newestOnTop={false}
         rtl={false}
         pauseOnFocusLoss
         closeButton={false}

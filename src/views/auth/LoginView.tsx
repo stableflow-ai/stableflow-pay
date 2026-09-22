@@ -11,7 +11,7 @@ import {
   AuthField,
   AuthPasswordField,
   authErrorMessage,
-  AUTH_CARD_CLASS,
+  AUTH_FORM_CLASS,
 } from "./auth-shared";
 import {
   AUTH_LINK_ACCENT_CLASS,
@@ -54,11 +54,10 @@ export function LoginView() {
 
   return (
     <AuthShell panelTop={<AuthBetaBanner />}>
-      <form onSubmit={submit} className={AUTH_CARD_CLASS}>
-        <h1 className="text-center font-montserrat text-xl font-semibold text-black">
-          Welcome to Pay. Stableflow
-        </h1>
-
+      <h1 className="text-center font-montserrat text-xl font-semibold text-black">
+        Welcome to Pay. Stableflow
+      </h1>
+      <form onSubmit={submit} className={AUTH_FORM_CLASS}>
         <AuthField
           id="email"
           label="Sign in by Email"
@@ -78,31 +77,35 @@ export function LoginView() {
           placeholder="At least 8 characters"
           autoComplete="current-password"
           maxLength={PASSWORD_MAX_LENGTH}
+          className="mt-5"
         />
-
-        <Button
-          type="submit"
-          size="lg"
-          loading={loginMutation.isPending}
-          className="mt-6 w-full"
-        >
-          Sign in
-        </Button>
 
         <button
           type="button"
           onClick={() => setResetOpen(true)}
-          className="mt-5 inline-flex w-full items-center justify-center font-montserrat text-sm font-medium text-[#3f8afb] hover:text-[#3f8afb]/90"
+          className="mt-2.5 inline-flex items-center font-montserrat text-xs font-medium text-[#909090] hover:text-[#606060]"
         >
           Forgot Password?
           <Icon2Right className="ml-1" />
         </button>
 
+        <Button
+          type="submit"
+          size="lg"
+          loading={loginMutation.isPending}
+          className="mt-7.5 w-full"
+        >
+          Sign in
+        </Button>
+
         <p className={`block ${AUTH_LINK_CLASS}`}>
           New to Pay. Stableflow?{" "}
-          <Link to={registerPathWithReturnTo(returnTo)} className={`inline-flex items-center ${AUTH_LINK_ACCENT_CLASS}`}>
+          <Link
+            to={registerPathWithReturnTo(returnTo)}
+            className={`inline-flex items-center ${AUTH_LINK_ACCENT_CLASS}`}
+          >
             Create an account
-            <Icon2Right className="ml-1" />
+            <Icon2Right className="ml-1 text-[#606060]" />
           </Link>
         </p>
       </form>

@@ -11,7 +11,7 @@ import { Tooltip } from "@/components/ui/tooltip/Tooltip";
 import { useDefaultAddressesQuery, usePaymentLinkMutations } from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
+import type { IntentsToken } from "@/stores/intents-tokens";
 import { isAddressValid, isHttpUrl } from "@/utils";
 import {
   CREATE_LINK_AMOUNT_MAX_DECIMALS,
@@ -41,7 +41,6 @@ export function CreateLinkForm({
   const { createMutation } = usePaymentLinkMutations();
   const defaultsQuery = useDefaultAddressesQuery();
   const defaultAddresses = defaultsQuery.data;
-  const ensureFresh = useIntentsTokensStore((state) => state.ensureFresh);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,10 +52,6 @@ export function CreateLinkForm({
   const [saveAsDefault, setSaveAsDefault] = useState(false);
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
-
-  useEffect(() => {
-    void ensureFresh();
-  }, [ensureFresh]);
 
   useEffect(() => {
     if (!token || !defaultAddresses) return;
@@ -291,6 +286,7 @@ export function CreateLinkForm({
         onClose={() => setTokenDialogOpen(false)}
         selectedAssetId={token?.assetId}
         showBalances={false}
+        requireSupport="receive"
         onSelect={({ token: next }) => {
           handleSelectToken(next);
         }}

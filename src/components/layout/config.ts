@@ -8,8 +8,9 @@ import { IconSettings } from "@/components/icons/settings";
 import type { IconProps } from "@/components/icons/types";
 
 export const SIDEBAR_WIDTH_PX = 220;
-export const SIDEBAR_NAV_ACTIVE_COLOR = "#3F8AFB";
-export const SIDEBAR_AVATAR_SRC = "/layout/avatar.svg";
+export const DOCS_PATH = "/docs";
+export const TERMS_PATH = "/terms";
+export const STABLEFLOW_ABOUT_URL = "https://app.stableflow.ai/about";
 
 export type SidebarIcon = ComponentType<IconProps>;
 

@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { IconLogout } from "@/components/icons/logout";
 import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
-import { PAYER_BLOCKCHAINS } from "@/config/chains";
 import { useTokenBalance } from "@/hooks/use-token-balances";
 import { useConnectedWallets } from "@/hooks/use-wallet";
 import { chainLogoUrl } from "@/lib/logo";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
-import { SafeMultisigBadge } from "@/components/safe/SafeMultisigBadge";
+import { MultisigBadge } from "@/components/multisig/MultisigBadge";
+import { PayFromSquadSection } from "@/components/multisig/PayFromSquadSection";
 import { formatAddress, formatAmount } from "@/utils";
 import { useSafeMode } from "@/wallet/evm/safe";
+import { useSquadsMode } from "@/wallet/solana/multisig";
 import { TokenSelectButton } from "@/views/payment-links/components/create/TokenSelectButton";
 import { ORIGIN_BALANCE_POLL_MS } from "../config";
 
@@ -19,6 +20,7 @@ export function YouPaySection(props: {
   originToken: IntentsToken | null;
   onOriginTokenChange: (token: IntentsToken) => void;
   walletAddress: string | null;
+  signerAddress?: string | null;
   walletConnected: boolean;
   walletIcon?: string | null;
   connecting: boolean;
@@ -31,6 +33,7 @@ export function YouPaySection(props: {
     originToken,
     onOriginTokenChange,
     walletAddress,
+    signerAddress,
     walletConnected,
     walletIcon,
     connecting,
@@ -42,7 +45,17 @@ export function YouPaySection(props: {
   const fetchOneBalance = useTokenBalancesStore((s) => s.fetchOne);
   const originBalance = useTokenBalance(walletAddress, originToken?.assetId);
   const isEvmOrigin = originToken?.chain.chainKind === "evm";
+  const isNearOrigin = originToken?.chain.chainKind === "near";
+  const isSolanaOrigin = originToken?.chain.chainKind === "solana";
+  const originKind = originToken?.chain.chainKind;
   const safeApp = useSafeMode().mode === "app";
+  const squads = useSquadsMode();
+  const signer = signerAddress || walletAddress;
+  const fund = walletAddress;
+  const showFund = Boolean(signer && fund && signer !== fund);
+  const ownersForBalances = fund && isSolanaOrigin
+    ? { ...balanceOwners, solana: fund }
+    : balanceOwners;
   const chainIcon = originToken ? chainLogoUrl(originToken.blockchain) : "";
   const connectedIcon = walletIcon?.trim() || chainIcon;
 
@@ -66,9 +79,12 @@ export function YouPaySection(props: {
                 <img src={connectedIcon} alt="" className="size-3 shrink-0 rounded-[2px] object-cover" />
               ) : null}
               <p className="truncate font-montserrat text-xs text-[#606060]">
-                {formatAddress(walletAddress)}
+                {formatAddress(signer || walletAddress)}
+                {showFund && fund ? ` · Vault ${formatAddress(fund)}` : ""}
               </p>
-              {isEvmOrigin ? <SafeMultisigBadge /> : null}
+              {(isEvmOrigin || isNearOrigin || isSolanaOrigin) && originKind ? (
+                <MultisigBadge chainKind={originKind} />
+              ) : null}
               {/* Inside the Safe App the connection is the host iframe, so there is
                   nothing this page can disconnect from. */}
               {isEvmOrigin && safeApp ? null : (
@@ -118,17 +134,21 @@ export function YouPaySection(props: {
           </span>
         </p>
       </div>
+      {isSolanaOrigin && walletConnected && !squads.isSquadsX ? (
+        <PayFromSquadSection visible />
+      ) : null}
       <TokenSelectDialog
         open={originDialogOpen}
         onClose={() => setOriginDialogOpen(false)}
         selectedAssetId={originToken?.assetId}
         showBalances
-        balanceOwners={balanceOwners}
-        allowedBlockchains={PAYER_BLOCKCHAINS}
+        balanceOwners={ownersForBalances}
+        requireSupport="payment"
         onSelect={({ token }) => {
           onOriginTokenChange(token);
-          const kind = token.chain.chainKind;
-          const owner = balanceOwners[kind];
+          const owner = token.chain.chainKind === "solana" && fund
+            ? fund
+            : ownersForBalances[token.chain.chainKind];
           if (owner) void fetchOneBalance(owner, token);
         }}
       />

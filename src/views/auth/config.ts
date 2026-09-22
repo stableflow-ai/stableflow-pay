@@ -1,16 +1,15 @@
 export const AUTH_BRAND_BG = "#3F8AFB";
 export const AUTH_PANEL_BG = "#F6F6F6";
 
-export const AUTH_CARD_CLASS =
-  "flex w-full max-w-[420px] flex-col rounded-[20px] border border-white bg-[#fdfdfd] px-7 pt-8 pb-8 shadow-[0_0_20px_rgba(0,0,0,0.06)]";
+export const AUTH_FORM_CLASS = "flex w-full max-w-[400px] flex-col mt-15";
 
-export const AUTH_LABEL_CLASS = "font-montserrat text-[14px] font-medium text-[#909090]";
+export const AUTH_LABEL_CLASS = "font-montserrat text-[14px] font-medium text-[#909090] leading-[100%]";
 
 export const AUTH_INPUT_CLASS =
-  "h-[42px] w-full rounded-[6px] border border-[#e3e3e3] bg-[#f6f6f6] px-4 font-montserrat text-sm font-medium text-black outline-none placeholder:text-black/30 focus:border-[#c8c8c8]";
+  "h-[42px] w-full rounded-[6px] border border-[#e3e3e3] bg-white px-4 font-montserrat text-sm font-medium text-black outline-none placeholder:text-black/30 focus:border-[#c8c8c8]";
 
 export const AUTH_LINK_CLASS =
-  "mt-5 text-center font-montserrat text-sm font-medium text-[#909090]";
+  "mt-6.5 text-center font-montserrat text-sm font-medium text-[#909090]";
 
 export const AUTH_LINK_ACCENT_CLASS = "text-[#3f8afb] hover:text-[#3f8afb]/90";
 
@@ -33,7 +32,7 @@ export const RESET_PASSWORD_VARIANT = {
 export type ResetPasswordVariant =
   (typeof RESET_PASSWORD_VARIANT)[keyof typeof RESET_PASSWORD_VARIANT];
 export const RESET_PASSWORD_DIALOG_CARD_CLASS =
-  "w-[min(100%,420px)] rounded-[20px] border-white bg-[#fdfdfd] px-7 py-8 shadow-[0_0_20px_rgba(0,0,0,0.06)]";
+  "md:w-[min(100%,420px)] gap-4 rounded-[20px] border-white bg-[#fdfdfd] px-7 py-8 shadow-[0_0_20px_rgba(0,0,0,0.06)]";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

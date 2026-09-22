@@ -3,7 +3,7 @@ import { PAY_API_PREFIX } from "@/api/config";
 import { getPayAnalytics } from "@/api/analytics";
 import { apiNumber, apiText, asRecord } from "@/api/map";
 import { ApiError } from "@/lib/api-error";
-import type { PayPaymentDetail } from "@/types/pay";
+import type { PayPaymentDetail, PayPaymentStatus } from "@/types/pay";
 import type {
   PayBatchQuoteParam,
   PayBatchQuoteResp,
@@ -73,7 +73,7 @@ export function mapPaymentItem(raw: unknown): PayPaymentItem {
     destinationNetwork: apiText(row.destination_network ?? row.destinationNetwork),
     destinationTxHash: apiText(row.destination_txHash ?? row.destination_tx_hash ?? row.destinationTxHash),
     txHash: apiText(row.tx_hash ?? row.txHash),
-    status: apiText(row.status).toLowerCase(),
+    status: apiText(row.status).toLowerCase() as PayPaymentStatus,
     submittedAt: apiText(row.submitted_at ?? row.submittedAt),
     paidAt: apiText(row.paid_at ?? row.paidAt),
     memo: memo || null,
@@ -161,6 +161,10 @@ export function mapPaymentDetail(raw: unknown): PayPaymentDetail {
   const row = asRecord(raw) ?? {};
   return {
     amount: apiText(row.amount),
+    amountInUsd: apiText(row.volume ?? row.amount_in_usd ?? row.amountInUsd),
+    amountOutUsd: apiText(
+      row.destination_volume ?? row.destinationVolume ?? row.amount_out_usd ?? row.amountOutUsd,
+    ),
     destinationAmount: apiText(row.destination_amount ?? row.destinationAmount),
     destinationNetwork: apiText(row.destination_network ?? row.destinationNetwork),
     destinationSymbol: apiText(row.destination_symbol ?? row.destinationSymbol ?? row.destination_token),
@@ -171,7 +175,7 @@ export function mapPaymentDetail(raw: unknown): PayPaymentDetail {
     payer: apiText(row.payer),
     paymentsId: apiText(row.payments_id ?? row.paymentsId),
     recipient: apiText(row.recipient),
-    status: apiText(row.status).toLowerCase(),
+    status: apiText(row.status).toLowerCase() as PayPaymentStatus,
     submittedAt: apiText(row.submitted_at ?? row.submittedAt),
     symbol: apiText(row.symbol ?? row.token),
     txHash: apiText(row.tx_hash ?? row.txHash),

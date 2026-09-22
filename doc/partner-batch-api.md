@@ -33,7 +33,7 @@ Tokens: **USDT** and **USDC** only, for both origin and destination.
 
 ### Payer (`network`)
 
-Origin / paying chain. Only `payerEnabled` chains. All of them are EVM today.
+Origin / paying chain. Every chain from payroll config.
 
 | Code | Name | Chain ID |
 | --- | --- | --- |

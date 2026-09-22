@@ -20,8 +20,9 @@ The panel is `position: fixed`. `useFloatingPosition` measures it off-flow (hidd
 
 - Height 36px, `border-radius: 6px`
 - Border `#E3E3E3`, background `#FFF`
-- Montserrat Medium 14px / `#000`
+- Montserrat Medium 14px / `#000`; unselected placeholder is `#606060`
 - Trigger is `overflow-hidden`; label and value truncate so the chevron stays inside when the control is narrow.
+- Options in the panel are Montserrat Medium 12px (`text-xs`)
 
 ## Props
 

@@ -2,6 +2,22 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-20
+
+- **Toast:** Card is 316px, `#fdfdfd` with `#e0e0e0` border, Montserrat, and 14px status dots from public icons. Container is bottom-right (`decash-toast-bottom-right`), oldest toward the top.
+- **Dropdown:** Unselected trigger uses `#606060`. Option rows are `text-xs`.
+- **OverlayPanel:** Close control no longer draws a focus ring.
+- **Switch:** Optional `loading` shows `IconLoading` on the thumb; track opacity stays 1.
+
+## 2026-09-19
+
+- **Dialog / Drawer:** Optional `elevated` places the overlay in the wallet-portal `z-index` band (`10000` plus the overlay stack offset) so Ledger connect dialogs stay above TokenSelect and other app dialogs. Escape still follows the overlay stack.
+
+## 2026-09-18
+
+- **Dialog / Overlay:** Desktop close fades the panel first, then the mask (`OVERLAY_DIALOG_PANEL_FADE_SECONDS`). Open still fades mask and panel together. Narrow viewports keep the bottom Drawer slide.
+- **OverlayPanel:** Focus move/restore uses `{ preventScroll: true }` so opening a bottom Drawer does not `scrollIntoView` and interrupt the slide-in.
+
 ## 2026-09-16
 
 - **Toast:** `title` / `text` accept `ReactNode`. `useToast()` methods return a `ToastHandle` (`id`, `update`, `dismiss`) so a persistent toast can close itself from an in-body link. Container `z-index` is `100000001` so a toast stays above the near-connect wallet popup.

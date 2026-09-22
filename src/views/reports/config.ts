@@ -1,5 +1,3 @@
-import { PAYOUT_SYMBOLS } from "@/stores/intents-tokens";
-
 export const REPORT_FILTER_ALL = "all";
 
 export const REPORT_SOURCE = {
@@ -33,8 +31,6 @@ export const REPORT_AMOUNT_OPTIONS = [
   { value: REPORT_AMOUNT_FILTER.From1kTo10k, label: "1,000-10,000" },
   { value: REPORT_AMOUNT_FILTER.Over10k, label: ">10,000" },
 ] as const;
-
-export const REPORT_TOKENS = PAYOUT_SYMBOLS;
 
 export const REPORT_PAGE_SIZE = 12;
 

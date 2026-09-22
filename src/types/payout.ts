@@ -1,3 +1,5 @@
+import type { PayPaymentStatus } from "@/types/pay";
+
 export interface PaySingleQuoteParam {
   amount: string;
   destinationAddress: string;
@@ -101,7 +103,7 @@ export interface PayPaymentItem {
   destinationNetwork: string;
   destinationTxHash: string;
   txHash: string;
-  status: string;
+  status: PayPaymentStatus;
   submittedAt: string;
   paidAt: string;
   memo?: string | null;

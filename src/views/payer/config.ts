@@ -1,10 +1,27 @@
+import {
+  PAY_CHECKOUT_SESSION_STATUS,
+  PAY_PAYMENT_STATUS,
+} from "@/types/pay";
+import type { PendingMultisigBroadcast } from "@/wallet/types";
+
+export { PAY_CHECKOUT_SESSION_STATUS, PAY_PAYMENT_STATUS };
+
 export const PAYER_PATH_PREFIX = "/paylink";
 export const CHECKOUT_PATH = "/checkout";
 export const CHECKOUT_WAITING_PATH = "/checkout/waiting";
 export const CHECKOUT_SESSION_QUERY = "sessionId";
 export const PAYER_PAYMENT_QUERY = "paymentId";
-export const PAYER_FEES_QUERY = "feesUsd";
-export const PAYER_PAYOUT_QUERY = "payoutUsd";
+export const PAYER_SWAP_QUERY = "swapId";
+export const PAYER_MS_KIND_QUERY = "msKind";
+export const PAYER_MS_SAFE_QUERY = "msSafe";
+export const PAYER_MS_TX_QUERY = "msTx";
+export const PAYER_MS_CHAIN_QUERY = "msChain";
+export const PAYER_MS_DAO_QUERY = "msDao";
+export const PAYER_MS_PROPOSAL_QUERY = "msProposal";
+export const PAYER_MS_VAULT_QUERY = "msVault";
+export const PAYER_MS_PDA_QUERY = "msPda";
+export const PAYER_MS_INDEX_QUERY = "msIndex";
+export const PAYER_DEADLINE_QUERY = "deadline";
 export const CHECKOUT_SUCCESS_STATUS = "success";
 export const CHECKOUT_REDIRECT_SECONDS = 10;
 
@@ -43,37 +60,54 @@ export const PAYER_WAIT_STATUS = {
 
 export type PayerWaitStatus = (typeof PAYER_WAIT_STATUS)[keyof typeof PAYER_WAIT_STATUS];
 
-export const PAY_CHECKOUT_SESSION_STATUS = {
-  Created: "created",
-  Processing: "processing",
-  Completed: "completed",
-  Failed: "failed",
-  Expired: "expired",
-} as const;
-
-export const PAY_PAYMENT_STATUS = {
-  Submitted: "submitted",
-  Completed: "completed",
-  Failed: "failed",
-} as const;
-
 export function payerPath(id: string): string {
   return `${PAYER_PATH_PREFIX}/${id}`;
 }
 
 export interface PayerWaitingQuery {
-  feesUsd?: string;
   paymentId?: string;
-  payoutUsd?: string;
+  swapId?: string;
+  proposal?: PendingMultisigBroadcast;
+  deadline?: string;
+}
+
+export function applyWaitingMultisig(
+  params: URLSearchParams,
+  input: { swapId: string; proposal: PendingMultisigBroadcast; deadline?: string },
+) {
+  params.set(PAYER_SWAP_QUERY, input.swapId);
+  params.set(PAYER_MS_KIND_QUERY, input.proposal.chainKind);
+  const deadline = input.deadline?.trim() ?? "";
+  if (deadline) params.set(PAYER_DEADLINE_QUERY, deadline);
+  if (input.proposal.chainKind === "evm") {
+    params.set(PAYER_MS_SAFE_QUERY, input.proposal.safeAddress);
+    params.set(PAYER_MS_TX_QUERY, input.proposal.safeTxHash);
+    params.set(PAYER_MS_CHAIN_QUERY, String(input.proposal.chainId));
+    return;
+  }
+  if (input.proposal.chainKind === "near") {
+    params.set(PAYER_MS_DAO_QUERY, input.proposal.daoId);
+    params.set(PAYER_MS_PROPOSAL_QUERY, String(input.proposal.proposalId));
+    return;
+  }
+  params.set(PAYER_MS_VAULT_QUERY, input.proposal.vaultAddress);
+  if (input.proposal.multisigPda) params.set(PAYER_MS_PDA_QUERY, input.proposal.multisigPda);
+  if (input.proposal.transactionIndex != null) {
+    params.set(PAYER_MS_INDEX_QUERY, input.proposal.transactionIndex.toString());
+  }
 }
 
 function applyWaitingQuery(params: URLSearchParams, query?: PayerWaitingQuery) {
   const paymentId = query?.paymentId?.trim() ?? "";
-  const feesUsd = query?.feesUsd?.trim() ?? "";
-  const payoutUsd = query?.payoutUsd?.trim() ?? "";
   if (paymentId) params.set(PAYER_PAYMENT_QUERY, paymentId);
-  if (feesUsd) params.set(PAYER_FEES_QUERY, feesUsd);
-  if (payoutUsd) params.set(PAYER_PAYOUT_QUERY, payoutUsd);
+  const swapId = query?.swapId?.trim() ?? "";
+  if (swapId && query?.proposal) {
+    applyWaitingMultisig(params, {
+      swapId,
+      proposal: query.proposal,
+      deadline: query.deadline,
+    });
+  }
 }
 
 export function payerWaitingPath(id: string, query?: PayerWaitingQuery): string {

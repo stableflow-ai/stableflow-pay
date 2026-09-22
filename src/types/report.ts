@@ -1,3 +1,5 @@
+import type { PayPaymentStatus } from "@/types/pay";
+
 export type ReportPaymentType = "api_key" | "link";
 
 export interface ReportAnalyticsQuery {
@@ -54,7 +56,7 @@ export interface ReportPaymentItem {
   destinationNetwork: string;
   destinationTxHash: string;
   txHash: string;
-  status: string;
+  status: PayPaymentStatus;
   submittedAt: string;
   paidAt: string;
 }

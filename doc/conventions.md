@@ -53,7 +53,8 @@ One pattern only. Do not mix `public/` SVGs, a separate `svgs/` folder, and inli
 
 - There is no mobile design. Adapt the desktop frame. Do not invent a separate mobile visual system.
 - Narrow viewport is below `768px` (Tailwind `md`), matching Dialog.
-- Use the existing [Drawer](components/drawer.md) for sidebar, account menu, and filters on narrow viewports. Do not build a second mobile nav.
+- The authenticated sidebar uses Tailwind `lg` (`1024px`): it is a left column from `lg` up, and a top Drawer below that. Do not invent a second mobile nav.
+- Use the existing [Drawer](components/drawer.md) for menus and filters on narrow viewports.
 - Tables may scroll horizontally. Do not invent a second information architecture for narrow screens unless the user has approved it.
 
 ## Figma MCP

@@ -3,8 +3,10 @@ import type { IntentsToken } from "@/stores/intents-tokens";
 import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
-import { SOLANA_EXPIRED_MESSAGE } from "@/wallet/solana/config";
+import { SAFE_REQUEST_EXPIRED_MESSAGE } from "@/wallet/evm/safe/config";
+import { SOLANA_EXPIRED_MESSAGE, SOLANA_INSUFFICIENT_SOL_MESSAGE } from "@/wallet/solana/config";
 import { solanaWalletErrorMessage } from "@/wallet/solana/utils";
+import { tronWalletErrorMessage } from "@/wallet/tron/utils";
 import {
   CHECKOUT_SUCCESS_STATUS,
   PAY_CHECKOUT_SESSION_STATUS,
@@ -114,6 +116,7 @@ function extractEmbeddedMessage(text: string): string | null {
   return null;
 }
 
+/** `decimals` is the destination token decimals (1Click EXACT_OUTPUT min amounts). */
 export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
   const raw = error instanceof ApiError
     ? error.message
@@ -122,6 +125,8 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
       : String(error ?? "");
   const text = raw || "Quote failed";
   const message = extractEmbeddedMessage(text) || text;
+  const tronMapped = tronWalletErrorMessage(message);
+  if (tronMapped) return tronMapped;
   const ledgerLocked = solanaWalletErrorMessage(message);
   if (ledgerLocked) return ledgerLocked;
   if (isUserRejectedError(message)) {
@@ -137,6 +142,8 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
     }
   }
   if (/No liquidity available/i.test(message)) return "No liquidity available";
+  if (/request expired/i.test(message)) return SAFE_REQUEST_EXPIRED_MESSAGE;
+  if (/insufficient lamports/i.test(message)) return SOLANA_INSUFFICIENT_SOL_MESSAGE;
   if (/block height exceeded|blockhash not found|blockhash.*expired/i.test(message)) {
     return SOLANA_EXPIRED_MESSAGE;
   }
@@ -209,11 +216,11 @@ export function payerWaitDetailsFromSources(input: {
   fallbackAmount?: string;
   fallbackSymbol?: string;
   fallbackNetwork?: string;
-  feesUsd?: string;
-  payoutUsd?: string;
 }): PayerWaitDetails {
   const checkout = input.checkout;
   const payment = input.payment;
+  const amountInUsd = payment?.amountInUsd.trim() || "";
+  const amountOutUsd = payment?.amountOutUsd.trim() || "";
   return {
     recipientAddress: payment?.recipient.trim() || checkout?.recipient.trim() || input.fallbackRecipient?.trim() || "",
     requestAmount: payment?.destinationAmount.trim()
@@ -227,8 +234,8 @@ export function payerWaitDetailsFromSources(input: {
     originNetwork: payment?.network.trim() || "",
     payerAddress: payment?.payer.trim() || "",
     paidAt: payment?.paidAt.trim() || "",
-    feesUsd: input.feesUsd?.trim() || "",
-    payoutUsd: input.payoutUsd?.trim() || "",
+    feesUsd: amountInUsd && amountOutUsd ? usdFee(amountInUsd, amountOutUsd) ?? "" : "",
+    payoutUsd: amountOutUsd,
   };
 }
 

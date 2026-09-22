@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button/Button";
+import { Icon2Right } from "@/components/icons/to-right";
 import { useRegisterMutation } from "@/hooks/use-auth-api";
 import useToast from "@/hooks/use-toast";
 import { AuthShell } from "./AuthShell";
@@ -9,7 +10,7 @@ import {
   AuthField,
   AuthPasswordField,
   authErrorMessage,
-  AUTH_CARD_CLASS,
+  AUTH_FORM_CLASS,
 } from "./auth-shared";
 import {
   AUTH_LINK_ACCENT_CLASS,
@@ -61,11 +62,10 @@ export function RegisterView() {
 
   return (
     <AuthShell panelTop={<AuthBetaBanner />}>
-      <form onSubmit={submit} className={AUTH_CARD_CLASS}>
-        <h1 className="text-center font-montserrat text-xl font-semibold text-black">
-          Create account
-        </h1>
-
+      <h1 className="text-center font-montserrat text-xl font-semibold text-black">
+        Create account
+      </h1>
+      <form onSubmit={submit} className={AUTH_FORM_CLASS}>
         <AuthField
           id="name"
           label="Your name"
@@ -85,6 +85,7 @@ export function RegisterView() {
           placeholder="you@company.com"
           autoComplete="email"
           maxLength={EMAIL_MAX_LENGTH}
+          className="mt-5"
         />
         <AuthPasswordField
           id="password"
@@ -94,6 +95,7 @@ export function RegisterView() {
           placeholder={`${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} characters`}
           autoComplete="new-password"
           maxLength={PASSWORD_MAX_LENGTH}
+          className="mt-5"
         />
         <AuthPasswordField
           id="confirm-password"
@@ -103,6 +105,7 @@ export function RegisterView() {
           placeholder="Keep the same with the password"
           autoComplete="new-password"
           maxLength={PASSWORD_MAX_LENGTH}
+          className="mt-5"
         />
         <AuthField
           id="invite-code"
@@ -112,21 +115,26 @@ export function RegisterView() {
           placeholder="Invite code"
           autoComplete="off"
           maxLength={INVITE_CODE_MAX_LENGTH}
+          className="mt-5"
         />
 
         <Button
           type="submit"
           size="lg"
           loading={registerMutation.isPending}
-          className="mt-6 w-full"
+          className="mt-7.5 w-full"
         >
           Create account
         </Button>
 
         <p className={`block ${AUTH_LINK_CLASS}`}>
           Already have an account?{" "}
-          <Link to={loginPathWithReturnTo(returnTo)} className={AUTH_LINK_ACCENT_CLASS}>
+          <Link
+            to={loginPathWithReturnTo(returnTo)}
+            className={`inline-flex items-center ${AUTH_LINK_ACCENT_CLASS}`}
+          >
             Sign in
+            <Icon2Right className="ml-1 text-[#606060]" />
           </Link>
         </p>
       </form>

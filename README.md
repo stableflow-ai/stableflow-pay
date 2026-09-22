@@ -2,7 +2,7 @@
 
 A crypto payment gateway supporting multi-currency cross-chain payments
 
-The public payer flow (`/paylink/pl_xxx` and `checkout?sessionId=cs_xxx`) does not require login. Authenticated merchants get Overview, Payment Links, API Keys, Webhooks, Reports, and Developer Docs.
+The public payer flow (`/paylink/pl_xxx` and `checkout?sessionId=cs_xxx`) does not require login. `/docs` is public Checkout API documentation. Authenticated merchants get Overview, Payment Links, API Keys, Webhooks, and Reports.
 
 ## Stack
 
@@ -46,6 +46,7 @@ pnpm preview
 | --- | --- | --- |
 | `/login`, `/register` | guest | Email + password |
 | `/howitworks` | public | Marketing |
+| `/docs` | public | Checkout API documentation |
 | `/` | merchant | Overview (`GET /v1/pay/overview`, `GET /v1/pay/payments/analytics`) |
 | `/payment-links` | merchant | Link list API |
 | `/payment-links/create` | merchant | Create + preview |
@@ -55,7 +56,6 @@ pnpm preview
 | `/api-keys` | merchant | API keys API |
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
-| `/docs` | merchant | Checkout API documentation |
 | `/terms` | merchant | Placeholder |
 
 Overview still uses fixtures in `src/mocks/` until that backend contract exists. Payment Links, API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.

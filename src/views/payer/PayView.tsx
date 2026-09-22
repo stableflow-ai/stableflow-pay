@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/api/query-keys";
 import { paySwapSubmit } from "@/api/pay";
-import { showSafeProposalToast } from "@/components/safe/safe-proposal-toast";
+import { showMultisigConfirmToast } from "@/components/multisig/multisig-proposal-toast";
 import { useCheckoutSessionQuery } from "@/hooks/use-checkout-session";
 import { usePayOriginToken } from "@/hooks/use-pay-origin-token";
 import { usePaymentLinkQuery } from "@/hooks/use-payment-link";
@@ -18,6 +18,8 @@ import { useTokenBalancesStore } from "@/stores/token-balances";
 import { PAY_SWAP_TYPE, type PaySwapParam } from "@/types/pay";
 import { formatAmount } from "@/utils";
 import { transferToDepositAddress } from "@/wallet/transfer-deposit";
+import { resolveMultisigConfirmToast } from "@/wallet/multisig";
+import type { BroadcastResult } from "@/wallet/types";
 import { assertSafeOriginChain } from "@/wallet/evm/safe";
 import { assertNativeZecSpendable, zecSpendableGateMessage } from "@/wallet/zec/balance";
 import { ZCASH_TRANSPARENT_REFUND_MESSAGE } from "@/wallet/zec/config";
@@ -83,7 +85,6 @@ export function PayView() {
   const guestAuth = { auth: Boolean(token) };
   const toast = useToast();
   const queryClient = useQueryClient();
-  const ensureFresh = useIntentsTokensStore((s) => s.ensureFresh);
   const tokens = useIntentsTokensStore((s) => s.tokens);
   const findByChainAndSymbol = useIntentsTokensStore((s) => s.findByChainAndSymbol);
   const { originToken, setOriginToken } = usePayOriginToken();
@@ -99,10 +100,6 @@ export function PayView() {
     && (!quotePayer || !quoteRefundTo);
   const [openAmount, setOpenAmount] = useState("");
   const [phase, setPhase] = useState<"idle" | "sending">("idle");
-
-  useEffect(() => {
-    void ensureFresh();
-  }, [ensureFresh]);
 
   const payment = useMemo(() => {
     if (isCheckout) {
@@ -221,7 +218,7 @@ export function PayView() {
   const quoteError = zecQuoteBlocked
     ? ZCASH_TRANSPARENT_REFUND_MESSAGE
     : swapQuery.isError
-      ? formatQuoteErrorMessage(swapQuery.error, 2)
+      ? formatQuoteErrorMessage(swapQuery.error, destToken?.decimals ?? 6)
       : null;
   const amountInDisplay = swap?.amountInFormatted
     ? formatAmount(swap.amountInFormatted, { prefix: "", maxDecimals: AMOUNT_MAX_DECIMALS })
@@ -273,7 +270,7 @@ export function PayView() {
             throw new BalanceGateError(title);
           }
         } else {
-          const balance = await fetchOneBalance(paymentWalletAddress, originToken);
+          const balance = await fetchOneBalance(quotePayer || paymentWalletAddress, originToken);
           if (!balance || balance.status !== "success" || balance.raw == null) {
             toast.fail({ title: "Could not read wallet balance" });
             throw new BalanceGateError("Could not read wallet balance");
@@ -289,20 +286,35 @@ export function PayView() {
       // have reached the network, and 1Click keeps a second transfer to the
       // same deposit address.
       markSwapConsumed(swap.swapId);
-      const result = await transferToDepositAddress({
-        token: originToken,
-        depositAddress,
-        amountIn,
-      });
-      // A Safe proposal has no transaction hash until the owners execute it, so the
-      // payer stays on this page with a persistent toast. The consumed marker stays
-      // either way: this deposit address must never be paid twice.
-      if (result.kind === "pending-multisig") {
-        showSafeProposalToast(toast, {
-          chainId: result.chainId,
-          safeAddress: result.safeAddress,
+      const confirmCopy = await resolveMultisigConfirmToast(originKind);
+      const confirmToast = confirmCopy ? showMultisigConfirmToast(toast, confirmCopy) : undefined;
+      let result: BroadcastResult;
+      try {
+        result = await transferToDepositAddress({
+          token: originToken,
+          depositAddress,
+          amountIn,
         });
-        setPhase("idle");
+      } catch (error) {
+        confirmToast?.dismiss();
+        throw error;
+      }
+      confirmToast?.dismiss();
+      // A Safe / Trezu / Squads proposal is watched on waiting via URL params.
+      // The consumed marker stays either way: this deposit address must never
+      // be paid twice.
+      if (result.kind === "pending-multisig") {
+        const waitingQuery = {
+          swapId: swap.swapId,
+          proposal: result,
+          deadline: swap.deadline,
+        };
+        if (payment.kind === PAYER_KIND.Checkout) {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
+          navigate(checkoutWaitingPath(payment.id, waitingQuery), { replace: true });
+          return;
+        }
+        navigate(payerWaitingPath(payment.id, waitingQuery), { replace: true });
         return;
       }
       const txHash = result.txHash;
@@ -316,17 +328,13 @@ export function PayView() {
       } catch {
         // Submit is one-shot; waiting still proceeds without payments_id.
       }
-      const quoteQuery = {
-        feesUsd: feeUsd ?? "",
-        payoutUsd: swap.amountOutUsd.trim() || "0",
-        ...(paymentsId ? { paymentId: paymentsId } : {}),
-      };
+      const waitingQuery = paymentsId ? { paymentId: paymentsId } : undefined;
       if (payment.kind === PAYER_KIND.Checkout) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.checkout.session(payment.id) });
-        navigate(checkoutWaitingPath(payment.id, quoteQuery), { replace: true });
+        navigate(checkoutWaitingPath(payment.id, waitingQuery), { replace: true });
         return;
       }
-      navigate(payerWaitingPath(payment.id, quoteQuery), {
+      navigate(payerWaitingPath(payment.id, waitingQuery), {
         replace: true,
         state: PAYER_WAITING_STATE,
       });
@@ -334,7 +342,7 @@ export function PayView() {
     onError: (err) => {
       setPhase("idle");
       if (err instanceof BalanceGateError) return;
-      toast.fail({ title: formatQuoteErrorMessage(err, 2) });
+      toast.fail({ title: formatQuoteErrorMessage(err, destToken?.decimals ?? 6) });
     },
   });
 
@@ -413,7 +421,8 @@ export function PayView() {
         fiatDisplay={fiatDisplay}
         originToken={originToken}
         onOriginTokenChange={setOriginToken}
-        walletAddress={connectedAddress}
+        walletAddress={quotePayer || connectedAddress}
+        signerAddress={connectedAddress}
         walletConnected={wallet.isConnected}
         walletIcon={originKind === "evm" ? paymentWallet.walletInfo.icon : null}
         connecting={wallet.isConnecting}

@@ -18,30 +18,19 @@ function tokenLine(amount: string, symbol: string, network: string) {
 
 export function WaitingCard(props: {
   status: PayerWaitStatus;
+  title: string;
+  subtitle: string | null;
   details: PayerWaitDetails;
   explorerUrl: string | null;
   redirectIn?: number | null;
   onBack: () => void;
 }) {
-  const { status, details, explorerUrl, redirectIn, onBack } = props;
+  const { status, title, subtitle, details, explorerUrl, redirectIn, onBack } = props;
 
   const toast = useToast();
 
   const isSuccess = status === PAYER_WAIT_STATUS.Success;
   const isFailed = status === PAYER_WAIT_STATUS.Failed;
-  const isSuspended = status === PAYER_WAIT_STATUS.Suspended;
-  const title = isSuccess
-    ? "Payment Successful!"
-    : isFailed
-      ? "Payment Failed"
-      : isSuspended
-        ? "Payment Suspended"
-        : "Waiting for Payment...";
-  const subtitle = isSuspended
-    ? "This payment has expired."
-    : isSuccess || isFailed
-      ? null
-      : "This can take 0-3 minutes";
   const tilde = isSuccess ? "" : "~";
 
   const handleCopy = async (value: string) => {

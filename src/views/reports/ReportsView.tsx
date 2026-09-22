@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table/Table";
-import { FIXED_CHAINS, txExplorerUrl } from "@/config/chains";
+import { getRuntimeChains, txExplorerUrl } from "@/config/chains";
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import { usePaymentLinksInfiniteQuery } from "@/hooks/use-payment-links-api";
 import {
@@ -27,6 +27,7 @@ import {
   useReportPaymentsQuery,
 } from "@/hooks/use-report-api";
 import useToast from "@/hooks/use-toast";
+import { getPayoutSymbols, useIntentsTokensStore } from "@/stores/intents-tokens";
 import { formatAmount, formatDate } from "@/utils";
 import { ReportsAddressCell } from "./components/ReportsAddressCell";
 import { ReportsAssetCell } from "./components/ReportsAssetCell";
@@ -39,7 +40,6 @@ import {
   REPORT_SOURCE,
   REPORT_TABLE_COLUMNS,
   REPORT_TIME_PRESET,
-  REPORT_TOKENS,
   type ReportSource,
 } from "./config";
 import {
@@ -53,16 +53,6 @@ import {
   reportPaymentsListQuery,
   reportsError,
 } from "./utils";
-
-const NETWORK_OPTIONS = [
-  { value: REPORT_FILTER_ALL, label: "All" },
-  ...FIXED_CHAINS.map((chain) => ({ value: chain.blockchain, label: chain.chainName })),
-];
-
-const TOKEN_OPTIONS = [
-  { value: REPORT_FILTER_ALL, label: "All" },
-  ...REPORT_TOKENS.map((symbol) => ({ value: symbol, label: symbol })),
-];
 
 function chartNumber(value: string): number {
   const parsed = Number(value);
@@ -88,6 +78,24 @@ export function ReportsView() {
   const [tableSource, setTableSource] = useState<ReportSource>(REPORT_SOURCE.ApiKey);
   const [tableApiKey, setTableApiKey] = useState(REPORT_FILTER_ALL);
   const [tableLinkId, setTableLinkId] = useState(REPORT_FILTER_ALL);
+  const configChains = useIntentsTokensStore((state) => state.chains);
+  const configSymbols = useIntentsTokensStore((state) => state.symbols);
+
+  const networkOptions = useMemo(() => {
+    const chains = configChains.length > 0 ? configChains : getRuntimeChains();
+    return [
+      { value: REPORT_FILTER_ALL, label: "All" },
+      ...chains.map((chain) => ({ value: chain.blockchain, label: chain.chainName })),
+    ];
+  }, [configChains]);
+
+  const tokenOptions = useMemo(() => {
+    const symbols = configSymbols.length > 0 ? configSymbols : getPayoutSymbols();
+    return [
+      { value: REPORT_FILTER_ALL, label: "All" },
+      ...symbols.map((symbol) => ({ value: symbol, label: symbol })),
+    ];
+  }, [configSymbols]);
 
   const apiKeyOptions = useMemo(() => {
     return [
@@ -221,7 +229,7 @@ export function ReportsView() {
           label="Networks"
           value={network}
           onChange={setNetwork}
-          options={NETWORK_OPTIONS}
+          options={networkOptions}
           className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
           triggerClassName="w-full"
         />
@@ -326,7 +334,7 @@ export function ReportsView() {
                   setSourceNetwork(value);
                   resetPage();
                 }}
-                options={NETWORK_OPTIONS}
+                options={networkOptions}
                 className="min-w-0 w-full"
                 triggerClassName="w-full"
               />
@@ -337,7 +345,7 @@ export function ReportsView() {
                   setSourceToken(value);
                   resetPage();
                 }}
-                options={TOKEN_OPTIONS}
+                options={tokenOptions}
                 className="min-w-0 w-full"
                 triggerClassName="w-full"
               />
@@ -348,7 +356,7 @@ export function ReportsView() {
                   setDestNetwork(value);
                   resetPage();
                 }}
-                options={NETWORK_OPTIONS}
+                options={networkOptions}
                 className="min-w-0 w-full"
                 triggerClassName="w-full"
               />
@@ -359,7 +367,7 @@ export function ReportsView() {
                   setDestToken(value);
                   resetPage();
                 }}
-                options={TOKEN_OPTIONS}
+                options={tokenOptions}
                 className="min-w-0 w-full"
                 triggerClassName="w-full"
               />

@@ -6,8 +6,6 @@ function chain(partial: Pick<ChainConfig, "blockchain" | "chainName" | "chainKin
   return {
     ...partial,
     logo: "",
-    payerEnabled: true,
-    batchEnabled: true,
     txExplorer: "",
   };
 }

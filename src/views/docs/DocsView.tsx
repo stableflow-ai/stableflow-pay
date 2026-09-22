@@ -1,5 +1,6 @@
 import { useState, type PropsWithChildren, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { IconArrowDown } from "@/components/icons/arrow-down";
 import { Card } from "@/components/ui/card/Card";
 import { Button } from "@/components/ui/button/Button";
 import { Drawer } from "@/components/ui/drawer/Drawer";
@@ -124,7 +125,26 @@ const bodyListClassName =
 const docsLinkClassName =
   "font-medium text-[#1F6FD6] underline decoration-[#1F6FD6]/30 underline-offset-2 hover:decoration-current focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50";
 
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 font-montserrat text-[16px] font-medium text-black transition-opacity hover:opacity-70"
+    >
+      <span
+        className="inline-flex size-7 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white"
+        aria-hidden
+      >
+        <IconArrowDown className="size-3 rotate-90 text-black" />
+      </span>
+      Back
+    </button>
+  );
+}
+
 export function DocsView() {
+  const navigate = useNavigate();
   const { activeId, navigateTo } = useDocsToc();
   const [tocOpen, setTocOpen] = useState(false);
 
@@ -133,14 +153,31 @@ export function DocsView() {
     navigateTo(id);
   };
 
-  return (
-    <div className="mx-auto grid w-full max-w-[1240px] items-start gap-6 lg:grid-cols-[232px_minmax(0,1fr)]">
-      <aside className="sticky top-6 hidden min-w-0 lg:block">
-        <DocsTableOfContents activeId={activeId} onNavigate={navigateTo} />
-      </aside>
+  const goBack = () => {
+    const idx = (window.history.state as { idx?: number } | null)?.idx;
+    if (typeof idx === "number" && idx > 0) {
+      navigate(-1);
+      return;
+    }
+    navigate("/login");
+  };
 
-      <article className="min-w-0 space-y-6">
-        <Button
+  return (
+    <div className="min-h-svh bg-[#f6f6f6] text-black">
+      <div className="mx-auto w-full max-w-[1240px] px-2.5 pb-12 pt-2.5 sm:px-4 md:px-6 lg:px-2.5">
+        <div className="grid w-full items-start gap-6 lg:grid-cols-[232px_minmax(0,1fr)]">
+          <aside className="sticky top-6 hidden min-w-0 lg:block">
+            <div className="mb-4">
+              <BackButton onClick={goBack} />
+            </div>
+            <DocsTableOfContents activeId={activeId} onNavigate={navigateTo} />
+          </aside>
+
+          <article className="min-w-0 space-y-6">
+            <div className="lg:hidden">
+              <BackButton onClick={goBack} />
+            </div>
+            <Button
           variant="normal"
           size="lg"
           className="w-full justify-between focus-visible:ring-2 focus-visible:ring-primary/50 lg:hidden"
@@ -574,6 +611,8 @@ export function DocsView() {
           </DocsCallout>
         </DocsSection>
       </article>
+        </div>
+      </div>
     </div>
   );
 }

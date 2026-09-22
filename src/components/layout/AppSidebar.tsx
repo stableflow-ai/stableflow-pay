@@ -3,35 +3,16 @@ import { cn } from "@/lib/utils";
 import { AccountMenu } from "./AccountMenu";
 import {
   SIDEBAR_FOOTER_ITEMS,
-  SIDEBAR_NAV_ACTIVE_COLOR,
   SIDEBAR_NAV_ITEMS,
   type SidebarNavItem,
 } from "./config";
 
-export function AppSidebar({
-  onNavigate,
-}: {
-  onNavigate?: () => void;
-}) {
-  return (
-    <aside className="flex h-full min-h-0 w-[220px] shrink-0 flex-col overflow-y-auto border-r border-black/10">
-      <a href="/" className="block px-[27px] pt-[21px]">
-        <img src="/logo.svg" alt="PAY. Stableflow" className="h-[29px] w-[95px]" />
-      </a>
-      <nav className="mt-8 flex flex-col items-center gap-1.5 px-2.5">
-        {SIDEBAR_NAV_ITEMS.map((item) => (
-          <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
-        ))}
-      </nav>
-      <div className="mt-auto flex flex-col items-center gap-1.5 px-2.5 pb-3">
-        {SIDEBAR_FOOTER_ITEMS.map((item) => (
-          <SidebarLink key={item.to} item={item} onNavigate={onNavigate} muted />
-        ))}
-      </div>
-      <div className="px-[23px] pb-[23px]">
-        <AccountMenu />
-      </div>
-    </aside>
+function navLinkClass(active: boolean, muted: boolean) {
+  return cn(
+    "inline-flex h-10 w-full shrink-0 items-center gap-2.5 rounded-[8px] px-3.5 font-montserrat text-sm whitespace-nowrap duration-150",
+    muted ? "font-normal" : "font-medium",
+    "hover:bg-[#EEE]",
+    active ? "bg-white text-[#06f] shadow-[0_0_20px_0_rgba(0,0,0,0.06)]" : "text-[#606060]",
   );
 }
 
@@ -50,25 +31,57 @@ function SidebarLink({
       to={item.to}
       end={item.end}
       onClick={onNavigate}
-      className={({ isActive }) =>
-        cn(
-          "flex h-11 w-[200px] items-center gap-2.5 rounded-[8px] px-3 font-montserrat text-sm leading-normal transition-colors",
-          muted ? "font-normal" : "font-medium",
-          isActive
-            ? "border border-white bg-[#fdfdfd] text-black shadow-[0_0_20px_rgba(0,0,0,0.06)]"
-            : "text-[#606060] hover:bg-black/5",
-        )
-      }
+      className={({ isActive }) => navLinkClass(isActive, muted)}
     >
-      {({ isActive }) => (
-        <>
-          <Icon
-            className="size-3.5 shrink-0"
-            style={{ color: isActive ? SIDEBAR_NAV_ACTIVE_COLOR : undefined }}
-          />
-          <span className="truncate">{item.label}</span>
-        </>
-      )}
+      <Icon className="size-3.5 shrink-0" />
+      <span className="truncate">{item.label}</span>
     </NavLink>
+  );
+}
+
+export function AppNav({
+  onNavigate,
+  className,
+}: {
+  onNavigate?: () => void;
+  className?: string;
+}) {
+  return (
+    <nav className={cn("flex flex-col gap-1", className)}>
+      {SIDEBAR_NAV_ITEMS.map((item) => (
+        <SidebarLink key={item.to} item={item} onNavigate={onNavigate} />
+      ))}
+      {SIDEBAR_FOOTER_ITEMS.map((item) => (
+        <SidebarLink key={item.to} item={item} onNavigate={onNavigate} muted />
+      ))}
+    </nav>
+  );
+}
+
+export function AppSidebar() {
+  return (
+    <aside className="hidden shrink-0 flex-col lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-[220px] lg:overflow-y-auto lg:border-r lg:border-black/10">
+      <div className="px-[21px] pt-5 pb-4">
+        <a href="/" className="inline-flex">
+          <img src="/logo.svg" alt="PAY. Stableflow" className="h-[30px] w-auto" />
+        </a>
+        <div className="mt-2.5">
+          <AccountMenu />
+        </div>
+      </div>
+      <div className="h-px w-full bg-black/10" />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <nav className="flex flex-col gap-1 px-2.5 py-5">
+          {SIDEBAR_NAV_ITEMS.map((item) => (
+            <SidebarLink key={item.to} item={item} />
+          ))}
+        </nav>
+        <nav className="mt-auto flex flex-col gap-1 px-2.5 pb-5">
+          {SIDEBAR_FOOTER_ITEMS.map((item) => (
+            <SidebarLink key={item.to} item={item} muted />
+          ))}
+        </nav>
+      </div>
+    </aside>
   );
 }

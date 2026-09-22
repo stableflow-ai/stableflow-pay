@@ -1,8 +1,8 @@
 /**
  * Broadcast a batch swap transaction on the origin chain.
  *
- * Only the EVM branch can return `pending-multisig`: the other chains have no
- * multisig support here, so they always resolve to an executed transaction hash.
+ * EVM Safe and NEAR Trezu / SputnikDAO can return `pending-multisig`. Other
+ * chains always resolve to an executed transaction hash.
  */
 
 import type { PayBatchSwapTransaction } from "@/types/payout";
@@ -11,7 +11,9 @@ import { broadcastBatchPayCallData } from "./broadcast-quick-pay";
 import { executedBroadcast, type BroadcastResult } from "./types";
 import { broadcastNearActions } from "./near/transfer";
 import { broadcastSerializedSolanaTx } from "./solana/transfer";
-import { broadcastTronCallData, waitForTronSuccess } from "./tron/transfer";
+import { readTrc20Allowance } from "./tron/balance";
+import { ensureTronLedgerBlindSigning } from "./tron/ledger-blind-sign";
+import { broadcastTronCallData, waitForTronApproveReady, waitForTronSuccess } from "./tron/transfer";
 
 export async function broadcastBatchPayout(input: {
   token: IntentsToken;
@@ -59,12 +61,17 @@ async function broadcastTron(input: {
   token: IntentsToken;
   transaction: PayBatchSwapTransaction;
   amountIn: bigint;
+  payer: string;
 }): Promise<BroadcastResult> {
   const tx = input.transaction;
   if (!tx.batch_contract?.trim() || !tx.callData?.trim()) {
     throw new Error("Missing batch transaction");
   }
   const native = isNativeToken(input.token);
+  await ensureTronLedgerBlindSigning({
+    callData: tx.callData,
+    callValue: native ? input.amountIn : 0n,
+  });
   for (const approval of tx.approvals ?? []) {
     if (!approval.trim()) continue;
     const tokenAddress = input.token.contractAddress?.trim();
@@ -74,7 +81,19 @@ async function broadcastTron(input: {
       callData: approval,
       callValue: 0n,
     });
-    await waitForTronSuccess(hash);
+    if (native) {
+      await waitForTronSuccess(hash);
+      continue;
+    }
+    await waitForTronApproveReady({
+      txid: hash,
+      requiredAmount: input.amountIn,
+      readAllowance: () => readTrc20Allowance({
+        tokenContract: tokenAddress,
+        owner: input.payer,
+        spender: tx.batch_contract,
+      }),
+    });
   }
   return executedBroadcast(await broadcastTronCallData({
     contract: tx.batch_contract,
@@ -91,10 +110,10 @@ async function broadcastNear(input: {
   if (!receiverId || !tx.actions?.length) {
     throw new Error("Missing batch transaction");
   }
-  return executedBroadcast(await broadcastNearActions({
+  return broadcastNearActions({
     receiverId,
     actions: tx.actions,
-  }));
+  });
 }
 
 async function broadcastSolana(input: {

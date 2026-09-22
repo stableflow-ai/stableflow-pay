@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { PLACEHOLDER_ROUTES } from "@/components/layout/config";
 import { AppLayout } from "@/layouts/AppLayout";
@@ -25,8 +25,8 @@ import { SettingsView } from "@/views/settings/SettingsView";
 import { RedirectIfAuthed, RequireAuth } from "./guards";
 
 // Docs and the guide test step load Shiki (syntax highlighting), so they are
-// code-split to keep the highlighter out of the initial bundle. The chunks are
-// loaded on first visit; AppLayout and GuideView provide the Suspense fallbacks.
+// code-split to keep the highlighter out of the initial bundle. The docs route
+// wraps its own Suspense; GuideView provides the fallback for the test step.
 const DocsView = lazy(() => import("@/views/docs/DocsView").then((m) => ({ default: m.DocsView })));
 const GuideTestView = lazy(() =>
   import("@/views/guide/steps/GuideTestView").then((m) => ({ default: m.GuideTestView })),
@@ -70,6 +70,14 @@ export const router = createBrowserRouter([
     element: <HowItWorksView />,
   },
   {
+    path: "/docs",
+    element: (
+      <Suspense fallback={null}>
+        <DocsView />
+      </Suspense>
+    ),
+  },
+  {
     element: <RequireAuth />,
     children: [
       {
@@ -89,7 +97,6 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           { path: "/", element: <OverviewView /> },
-          { path: "/docs", element: <DocsView /> },
           {
             path: "/payment-links",
             element: <PaymentLinksView />,

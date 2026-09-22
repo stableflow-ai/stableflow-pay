@@ -4,11 +4,12 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import {
+  OVERLAY_DIALOG_PANEL_FADE_SECONDS,
   OVERLAY_EXIT_SECONDS,
   OVERLAY_MASK_FADE_SECONDS,
   OVERLAY_PANEL_SLIDE_SECONDS,
 } from "./config";
-import { isTopOverlay } from "./stack";
+import { isTopOverlay, elevatedOverlayZIndex } from "./stack";
 import { useOverlayLayer } from "./use-overlay-layer";
 
 export type OverlayProps = {
@@ -20,6 +21,7 @@ export type OverlayProps = {
   closeOnMaskClick?: boolean;
   children?: ReactNode;
   className?: string;
+  elevated?: boolean;
 };
 
 export function Overlay(props: OverlayProps) {
@@ -32,6 +34,7 @@ export function Overlay(props: OverlayProps) {
     closeOnMaskClick = true,
     children,
     className,
+    elevated = false,
   } = props;
   const [present, setPresent] = useState(open);
 
@@ -40,6 +43,7 @@ export function Overlay(props: OverlayProps) {
   }, [open]);
 
   const zIndex = useOverlayLayer(open || present);
+  const visualZIndex = elevated ? elevatedOverlayZIndex(zIndex) : zIndex;
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +72,7 @@ export function Overlay(props: OverlayProps) {
         <motion.div
           key="overlay-root"
           className={cn("fixed inset-0 overflow-hidden", !mask && "pointer-events-none", className)}
-          style={{ zIndex }}
+          style={{ zIndex: visualZIndex }}
           role="presentation"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
@@ -88,7 +92,9 @@ export function Overlay(props: OverlayProps) {
               opacity: 0,
               transition: {
                 duration: OVERLAY_MASK_FADE_SECONDS,
-                delay: type === "drawer" ? OVERLAY_PANEL_SLIDE_SECONDS : 0,
+                delay: type === "drawer"
+                  ? OVERLAY_PANEL_SLIDE_SECONDS
+                  : OVERLAY_DIALOG_PANEL_FADE_SECONDS,
               },
             }}
             onClick={closeOnMaskClick ? onClose : undefined}
