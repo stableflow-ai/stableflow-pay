@@ -69,7 +69,9 @@ describe("transferToDepositAddress Solana Squads", () => {
       amountIn: 10n,
     })).resolves.toEqual({ kind: "executed", txHash: "sig" });
     expect(buildSolanaDepositTransfer).toHaveBeenCalledWith(expect.objectContaining({ from: MEMBER }));
-    expect(broadcastSolanaTransaction).toHaveBeenCalledWith(INNER);
+    expect(broadcastSolanaTransaction).toHaveBeenCalledWith(INNER, {
+      rebuild: expect.any(Function),
+    });
     expect(sendViaSquads).not.toHaveBeenCalled();
     expect(sendViaSquadsSdk).not.toHaveBeenCalled();
   });
