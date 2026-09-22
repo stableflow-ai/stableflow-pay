@@ -4,7 +4,7 @@ import type { PayCheckoutSession, PayPaymentDetail } from "@/types/pay";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { Big, formatAmount } from "@/utils";
 import { SAFE_REQUEST_EXPIRED_MESSAGE } from "@/wallet/evm/safe/config";
-import { SOLANA_EXPIRED_MESSAGE, SOLANA_INSUFFICIENT_SOL_MESSAGE } from "@/wallet/solana/config";
+import { SOLANA_ATA_INIT_FAILED_MESSAGE, SOLANA_EXPIRED_MESSAGE, SOLANA_INSUFFICIENT_SOL_MESSAGE } from "@/wallet/solana/config";
 import { solanaWalletErrorMessage } from "@/wallet/solana/utils";
 import { tronWalletErrorMessage } from "@/wallet/tron/utils";
 import {
@@ -144,6 +144,17 @@ export function formatQuoteErrorMessage(error: unknown, decimals = 6): string {
   if (/No liquidity available/i.test(message)) return "No liquidity available";
   if (/request expired/i.test(message)) return SAFE_REQUEST_EXPIRED_MESSAGE;
   if (/insufficient lamports/i.test(message)) return SOLANA_INSUFFICIENT_SOL_MESSAGE;
+  if (/failed to initialize the associated token account/i.test(message)) {
+    return SOLANA_ATA_INIT_FAILED_MESSAGE;
+  }
+  if (
+    /simulation failed/i.test(message)
+    && /transaction simulation failed/i.test(message)
+    && /logs:\s*\[\s*\]/i.test(message)
+    && !/program /i.test(message)
+  ) {
+    return SOLANA_EXPIRED_MESSAGE;
+  }
   if (/block height exceeded|blockhash not found|blockhash.*expired/i.test(message)) {
     return SOLANA_EXPIRED_MESSAGE;
   }

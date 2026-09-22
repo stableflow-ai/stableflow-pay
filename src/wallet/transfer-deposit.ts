@@ -55,16 +55,19 @@ export async function transferToDepositAddress(input: {
 
   if (kind === "solana") {
     if (!native && !token.contractAddress) throw new Error("Missing token mint");
-    const inner = await buildSolanaDepositTransfer({
-      from: solanaDepositFromAddress(),
+    const from = solanaDepositFromAddress();
+    const mint = native ? null : token.contractAddress;
+    const build = () => buildSolanaDepositTransfer({
+      from,
       to,
       amountIn,
-      mint: native ? null : token.contractAddress,
+      mint,
     });
+    const inner = await build();
     const mode = activeSquadsMode();
     if (mode === "squadsx") return sendViaSquads(inner);
     if (mode === "sdk") return sendViaSquadsSdk(inner);
-    const { signature } = await broadcastSolanaTransaction(inner);
+    const { signature } = await broadcastSolanaTransaction(inner, { rebuild: build });
     return executedBroadcast(signature);
   }
 
