@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Dialog } from "@/components/ui/dialog/Dialog";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Dialog } from "@stableflow/pay-ui/dialog";
+import { Dropdown } from "@stableflow/pay-ui/dropdown";
 import useToast from "@/hooks/use-toast";
 import { WEBHOOK_EVENT_TYPE, type WebhookEventType } from "@/types/webhooks";
 import { TEST_PAYLOADS, WEBHOOK_EVENT_OPTIONS } from "../config";

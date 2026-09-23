@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
 import { formatAddress, formatAmount, formatDate } from "@/utils";
 import { formatTokenNetwork } from "@/views/payment-links/utils";
 import { PAYER_WAIT_STATUS, type PayerWaitStatus } from "../config";
@@ -7,7 +7,7 @@ import type { PayerWaitDetails } from "../utils";
 import { CouponShell } from "./CouponShell";
 import { DetailRow, PrivateBadge } from "./DetailRow";
 import { StatusMark } from "./StatusMark";
-import { IconCopy } from "@/components/icons";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
 import useToast from "@/hooks/use-toast";
 
 function tokenLine(amount: string, symbol: string, network: string) {

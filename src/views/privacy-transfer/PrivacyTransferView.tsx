@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { IconDelete } from "@/components/icons/delete";
-import { IconPlus } from "@/components/icons/plus";
-import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
+import { Button, BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Card } from "@stableflow/pay-ui/card";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { IconPlus } from "@stableflow/pay-ui/icons/plus";
+import { InputNumber } from "@stableflow/pay-ui/input-number";
+import { TokenSelectDialog } from "@stableflow/pay-widgets/token-select";
 import { WalletConnectDialog } from "@/components/WalletConnect";
 import { TokenSelectButton } from "@/views/payment-links/components/create/TokenSelectButton";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Card } from "@/components/ui/card/Card";
-import { InputNumber } from "@/components/ui/input-number/InputNumber";
 import { activateConfidentialAccount } from "@/lib/confidential/activate";
 import { toIntentsAccountId } from "@/lib/confidential/to-intents-account-id";
 import {
@@ -27,7 +26,7 @@ import { cn } from "@/lib/utils";
 import { chainLabel } from "@/config/chains";
 import useToast from "@/hooks/use-toast";
 import { useConnectedWallets } from "@/hooks/use-wallet";
-import { useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
+import { intentsTokenForSelection, useIntentsTokensStore, type IntentsToken } from "@/stores/intents-tokens";
 import {
   usePrivacyTransferExecutionStore,
 } from "@/stores/privacy-transfer-execution";
@@ -526,7 +525,9 @@ export function PrivacyTransferView() {
         title="Source token"
         selectedAssetId={sourceToken?.assetId}
         onSelect={({ token }) => {
-          setSourceToken(token);
+          const next = intentsTokenForSelection(token);
+          if (!next) return;
+          setSourceToken(next);
           setPlan(null);
           setTokenPicker(null);
         }}
@@ -535,9 +536,12 @@ export function PrivacyTransferView() {
         open={tokenPicker === "destination"}
         onClose={() => setTokenPicker(null)}
         title="Destination token"
+        role="receiver"
         selectedAssetId={destinationToken?.assetId}
         onSelect={({ token }) => {
-          setDestinationToken(token);
+          const next = intentsTokenForSelection(token);
+          if (!next) return;
+          setDestinationToken(next);
           setPlan(null);
           setTokenPicker(null);
         }}

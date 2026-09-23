@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { IconCopy } from "@/components/icons/copy";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { Dialog } from "@/components/ui/dialog/Dialog";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
+import { Dialog } from "@stableflow/pay-ui/dialog";
 import useToast from "@/hooks/use-toast";
 import { API_KEY_DIALOG_MODE, API_KEY_LABEL_MAX_LENGTH, type ApiKeyDialogMode } from "../config";
 import { apiKeysError } from "../utils";

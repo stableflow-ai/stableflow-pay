@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { IconLogout } from "@/components/icons/logout";
-import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
+import { IconLogout } from "@stableflow/pay-ui/icons/logout";
+import { TokenSelectDialog } from "@stableflow/pay-widgets/token-select";
 import { useTokenBalance } from "@/hooks/use-token-balances";
 import { useConnectedWallets } from "@/hooks/use-wallet";
 import { chainLogoUrl } from "@/lib/logo";
-import type { IntentsToken } from "@/stores/intents-tokens";
+import { intentsTokenForSelection, type IntentsToken } from "@/stores/intents-tokens";
 import { useTokenBalancesStore } from "@/stores/token-balances";
 import { MultisigBadge } from "@/components/multisig/MultisigBadge";
 import { PayFromSquadSection } from "@/components/multisig/PayFromSquadSection";
@@ -141,15 +141,15 @@ export function YouPaySection(props: {
         open={originDialogOpen}
         onClose={() => setOriginDialogOpen(false)}
         selectedAssetId={originToken?.assetId}
-        showBalances
         balanceOwners={ownersForBalances}
-        requireSupport="payment"
         onSelect={({ token }) => {
-          onOriginTokenChange(token);
-          const owner = token.chain.chainKind === "solana" && fund
+          const next = intentsTokenForSelection(token);
+          if (!next) return;
+          onOriginTokenChange(next);
+          const owner = next.chain.chainKind === "solana" && fund
             ? fund
-            : ownersForBalances[token.chain.chainKind];
-          if (owner) void fetchOneBalance(owner, token);
+            : ownersForBalances[next.chain.chainKind];
+          if (owner) void fetchOneBalance(owner, next);
         }}
       />
     </>

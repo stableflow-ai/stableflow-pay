@@ -1,4 +1,4 @@
-import { IconLock } from "@/components/icons/lock";
+import { IconLock } from "@stableflow/pay-ui/icons/lock";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 

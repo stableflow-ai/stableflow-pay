@@ -5,9 +5,9 @@ import { BrandGlow, BrandMark } from "@/components/layout/BrandMark";
 import { AppFooter } from "@/components/layout/AppFooter";
 import { AppNav, AppSidebar } from "@/components/layout/AppSidebar";
 import { pageTitleForPath } from "@/components/layout/config";
-import { Drawer } from "@/components/ui/drawer/Drawer";
-import { DRAWER_SIDE } from "@/components/ui/drawer/config";
-import { IconMenu } from "@/components/icons";
+import { Drawer } from "@stableflow/pay-ui/drawer";
+import { DRAWER_SIDE } from "@stableflow/pay-ui/drawer";
+import { IconMenu } from "@stableflow/pay-ui/icons/menu";
 
 export function AppLayout() {
   const { pathname } = useLocation();

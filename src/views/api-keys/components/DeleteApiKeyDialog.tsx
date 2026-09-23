@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Dialog } from "@/components/ui/dialog/Dialog";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Dialog } from "@stableflow/pay-ui/dialog";
 import type { PayApiKey } from "@/types/api-keys";
 
 export function DeleteApiKeyDialog(props: {

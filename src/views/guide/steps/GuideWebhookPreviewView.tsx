@@ -1,6 +1,6 @@
-import { IconCopy } from "@/components/icons/copy";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
 import useToast from "@/hooks/use-toast";
 import { formatWebhookEvents } from "@/views/settings/utils";
 import { WEBHOOK_SIGNING_SECRET_SUBTITLE } from "@/views/settings/config";

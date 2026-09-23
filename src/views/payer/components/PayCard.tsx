@@ -1,8 +1,8 @@
-import { IconRefresh } from "@/components/icons/refresh";
-import { Button } from "@/components/ui/button/Button";
-import { Skeleton } from "@/components/ui/skeleton/Skeleton";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { InputNumber } from "@/components/ui/input-number/InputNumber";
+import { IconRefresh } from "@stableflow/pay-ui/icons/refresh";
+import { Button } from "@stableflow/pay-ui/button";
+import { Skeleton } from "@stableflow/pay-ui/skeleton";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
+import { InputNumber } from "@stableflow/pay-ui/input-number";
 import { cn } from "@/lib/utils";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { AMOUNT_MAX_DECIMALS, PAYER_CARD_STATE, type PayerCardState } from "../config";
@@ -103,7 +103,7 @@ export function PayCard(props: {
               placeholder="0"
               onNumberChange={props.onAmountChange}
               className={cn(
-                "mt-4 w-full bg-transparent text-center font-montserrat text-[46px] font-semibold leading-none text-black outline-none placeholder:text-[#aaa]",
+                "mt-4 w-full bg-transparent text-center font-montserrat text-[46px] font-semibold leading-none text-black outline-none placeholder:text-[#aaa] border-none",
               )}
             />
           ) : (

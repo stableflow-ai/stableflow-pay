@@ -1,9 +1,9 @@
 import type { MouseEvent } from "react";
-import { IconCopy } from "@/components/icons/copy";
-import { IconOutLink } from "@/components/icons/link";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { Card } from "@/components/ui/card/Card";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
+import { Card } from "@stableflow/pay-ui/card";
 import useToast from "@/hooks/use-toast";
 import { maskApiKey } from "@/views/api-keys/utils";
 import { GuideStepIcon } from "@/views/guide/components/GuideStepIcon";

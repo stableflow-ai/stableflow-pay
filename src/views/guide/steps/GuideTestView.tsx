@@ -1,8 +1,8 @@
 import { Fragment, useState } from "react";
-import { IconCheck2 } from "@/components/icons/check";
-import { IconCopy } from "@/components/icons/copy";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { IconCheck } from "@stableflow/pay-ui/icons/check";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
 import { useCreateCheckoutSessionMutation } from "@/hooks/use-checkout-api";
 import { useCompleteGuideMutation } from "@/hooks/use-guide-api";
 import useToast from "@/hooks/use-toast";
@@ -160,7 +160,7 @@ export function GuideTestView() {
             <p className="font-montserrat text-sm font-medium text-[#aaa]">Test Result</p>
             {passed ? (
               <span className="inline-flex items-center gap-1.5 font-montserrat text-sm font-medium text-[#769400]">
-                <IconCheck2 className="h-[11px] w-3.5" />
+                <IconCheck className="h-[11px] w-3.5" />
                 Running
               </span>
             ) : null}

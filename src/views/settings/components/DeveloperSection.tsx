@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Card } from "@/components/ui/card/Card";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Card } from "@stableflow/pay-ui/card";
 import type { PayWebhook } from "@/types/webhooks";
 import { RECIPIENT_ADDRESS_MAX_LENGTH } from "../config";
 import { WebhookList } from "./WebhookList";

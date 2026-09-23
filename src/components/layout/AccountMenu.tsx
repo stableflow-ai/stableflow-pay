@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { IconArrowDown } from "@/components/icons/arrow-down";
-import { IconLogout } from "@/components/icons/logout";
-import { IconResetPassword } from "@/components/icons/reset-password";
+import { IconArrowDown } from "@stableflow/pay-ui/icons/arrow-down";
+import { IconLogout } from "@stableflow/pay-ui/icons/logout";
+import { IconResetPassword } from "@stableflow/pay-ui/icons/reset-password";
 import { EmailAvatar } from "@/components/recipient-avatar/EmailAvatar";
-import {
-  FLOATING_ALIGN,
-  FLOATING_SIDE,
-  useFloatingPosition,
-} from "@/components/ui/overlay/use-floating-position";
+import { FLOATING_ALIGN, FLOATING_SIDE, useFloatingPosition } from "@stableflow/pay-ui/overlay";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { ResetPasswordDialog } from "@/views/auth/ResetPasswordDialog";

@@ -6,6 +6,7 @@ import { usePayConfigQuery } from "@/hooks/use-pay-config";
 import { queryClient } from "@/lib/query-client";
 /** Hydrates the session and registers HTTP 401 → logout. */
 import { AUTH_SESSION_STORAGE_NAME, useAuthStore } from "@/stores/auth";
+import { PayWidgetsRoot } from "@/components/pay-widgets-root";
 import { router } from "./router";
 
 function SessionBootstrap() {
@@ -25,7 +26,7 @@ function SessionBootstrap() {
 
 export default function App() {
   return (
-    <>
+    <PayWidgetsRoot>
       <SessionBootstrap />
       <RouterProvider router={router} />
       <ToastContainer
@@ -39,6 +40,6 @@ export default function App() {
         pauseOnFocusLoss
         closeButton={false}
       />
-    </>
+    </PayWidgetsRoot>
   );
 }

@@ -1,10 +1,10 @@
 import { useState, type PropsWithChildren, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { IconArrowDown } from "@/components/icons/arrow-down";
-import { Card } from "@/components/ui/card/Card";
-import { Button } from "@/components/ui/button/Button";
-import { Drawer } from "@/components/ui/drawer/Drawer";
-import { DRAWER_SIDE } from "@/components/ui/drawer/config";
+import { IconArrowDown } from "@stableflow/pay-ui/icons/arrow-down";
+import { Card } from "@stableflow/pay-ui/card";
+import { Button } from "@stableflow/pay-ui/button";
+import { Drawer } from "@stableflow/pay-ui/drawer";
+import { DRAWER_SIDE } from "@stableflow/pay-ui/drawer";
 import { cn } from "@/lib/utils";
 import { DocsCodeBlock } from "./components/DocsCodeBlock";
 import { DocsTable } from "./components/DocsTable";

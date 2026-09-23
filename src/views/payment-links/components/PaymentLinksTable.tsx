@@ -1,17 +1,10 @@
-import { IconDelete } from "@/components/icons/delete";
-import { IconLink, IconOutLink } from "@/components/icons/link";
-import { Pagination } from "@/components/ui/pagination/Pagination";
-import { SearchInput } from "@/components/ui/search-input/SearchInput";
-import { Switch } from "@/components/ui/switch/Switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { IconLink, IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Pagination } from "@stableflow/pay-ui/pagination";
+import { SearchInput } from "@stableflow/pay-ui/search-input";
+import { Switch } from "@stableflow/pay-ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { PAYMENT_LINKS_TABLE_COLUMNS, PAYMENT_LINK_TYPE_LABEL } from "../config";
 import {
@@ -21,8 +14,8 @@ import {
   paymentLinkType,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
-import { IconCopy } from "@/components/icons";
-import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
 import { formatAddress, formatAmount } from "@/utils";
 import useToast from "@/hooks/use-toast";
 

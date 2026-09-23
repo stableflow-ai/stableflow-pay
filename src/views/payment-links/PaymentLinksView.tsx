@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Dialog } from "@/components/ui/dialog/Dialog";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Dialog } from "@stableflow/pay-ui/dialog";
 import { usePaymentLinkMutations, usePaymentLinksOverviewQuery, usePaymentLinksQuery } from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import type { PayPaymentLink } from "@/types/payment-links";
