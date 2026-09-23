@@ -83,3 +83,4 @@ import {
 - Header and body must stay inside the same `Table` so they share `columns`.
 - Do not wrap rows in `w-max`. That makes `fr` tracks grow with content and blocks `truncate`.
 - Overflowing cells need `min-w-0` (already on `TableCell`) plus `truncate` on the text node.
+- First load: keep the header and render `TableSkeletonRows` with `cells` equal to the header cell count. Default is 3 rows, one bar per cell. Path: `src/components/ui/table/TableSkeletonRows.tsx`.

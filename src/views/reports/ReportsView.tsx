@@ -10,6 +10,7 @@ import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
 import { Card } from "@/components/ui/card/Card";
 import { Dropdown } from "@/components/ui/dropdown/Dropdown";
 import { Pagination } from "@/components/ui/pagination/Pagination";
+import { Skeleton } from "@/components/ui/skeleton/Skeleton";
 import {
   Table,
   TableBody,
@@ -18,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table/Table";
+import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
 import { getRuntimeChains, txExplorerUrl } from "@/config/chains";
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import { usePaymentLinksInfiniteQuery } from "@/hooks/use-payment-links-api";
@@ -245,19 +247,25 @@ export function ReportsView() {
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Total Volume
           </h2>
-          <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
-            {analyticsQuery.isPending
-              ? "—"
-              : formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true, showDust: true })}
-          </p>
+          {analyticsQuery.isPending ? (
+            <Skeleton className="mt-2 h-8 w-32" />
+          ) : (
+            <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
+              {formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true, showDust: true })}
+            </p>
+          )}
         </section>
         <section>
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Transactions
           </h2>
-          <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
-            {analyticsQuery.isPending ? "—" : (analyticsQuery.data?.transactions ?? 0)}
-          </p>
+          {analyticsQuery.isPending ? (
+            <Skeleton className="mt-2 h-8 w-16" />
+          ) : (
+            <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
+              {analyticsQuery.data?.transactions ?? 0}
+            </p>
+          )}
         </section>
       </Card>
       {analyticsError ? (
@@ -402,9 +410,7 @@ export function ReportsView() {
           <TableHead>Time</TableHead>
         </TableHeader>
         {paymentsQuery.isPending && pageRows.length === 0 ? (
-          <p className="pt-20 text-center font-montserrat text-sm font-medium text-[#aaa] lg:py-[150px]">
-            Loading transactions…
-          </p>
+          <TableSkeletonRows cells={8} />
         ) : paymentsError && pageRows.length === 0 ? (
           <p className="pt-20 text-center font-montserrat text-sm font-medium text-danger lg:py-[150px]">
             {paymentsError}

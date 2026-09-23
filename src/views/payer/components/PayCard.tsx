@@ -1,5 +1,6 @@
 import { IconRefresh } from "@/components/icons/refresh";
 import { Button } from "@/components/ui/button/Button";
+import { Skeleton } from "@/components/ui/skeleton/Skeleton";
 import { BUTTON_SIZE } from "@/components/ui/button/config";
 import { InputNumber } from "@/components/ui/input-number/InputNumber";
 import { cn } from "@/lib/utils";
@@ -51,11 +52,17 @@ export function PayCard(props: {
       <CouponShell
         top={
           <div className="flex min-h-[200px] flex-col items-center justify-center">
-            <p className="text-center font-montserrat text-sm text-[#909090]">
-              {props.state === PAYER_CARD_STATE.Loading
-                ? "Loading…"
-                : "This payment is not available"}
-            </p>
+            {props.state === PAYER_CARD_STATE.Loading ? (
+              <div className="flex w-full flex-col gap-3 px-6" aria-busy="true" aria-label="Loading">
+                <Skeleton className="mx-auto h-8 w-40" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : (
+              <p className="text-center font-montserrat text-sm text-[#909090]">
+                This payment is not available
+              </p>
+            )}
           </div>
         }
         bottom={<div className="min-h-[160px]" />}

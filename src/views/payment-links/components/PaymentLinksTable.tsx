@@ -21,7 +21,8 @@ import {
   paymentLinkType,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
-import { IconCopy, IconLoading } from "@/components/icons";
+import { IconCopy } from "@/components/icons";
+import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
 import { formatAddress, formatAmount } from "@/utils";
 import useToast from "@/hooks/use-toast";
 
@@ -90,15 +91,12 @@ export function PaymentLinksTable({
         <TableHead />
         <TableHead className="last:pr-3" />
       </TableHeader>
+      {loading && links.length === 0 ? (
+        <TableSkeletonRows cells={11} />
+      ) : (
       <TableBody className="flex flex-col gap-3.5 pt-1">
         {links.length === 0 ? (
-          loading ? (
-            <div className="flex justify-center items-center py-10">
-              <IconLoading className="size-4 animate-spin text-[#909090]" />
-            </div>
-          ) : (
-            <ListEmptyState>{emptyCopy}</ListEmptyState>
-          )
+          <ListEmptyState>{emptyCopy}</ListEmptyState>
         ) : (
           links.map((link) => (
             <PaymentLinkRow
@@ -113,6 +111,7 @@ export function PaymentLinksTable({
           ))
         )}
       </TableBody>
+      )}
     </Table>
   );
 }

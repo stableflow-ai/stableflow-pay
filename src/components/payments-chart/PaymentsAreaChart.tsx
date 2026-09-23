@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card } from "@/components/ui/card/Card";
+import { Skeleton } from "@/components/ui/skeleton/Skeleton";
 import { cn } from "@/lib/utils";
 import {
   CHART_METRIC,
@@ -106,9 +107,7 @@ export function PaymentsAreaChart(props: {
       </div>
       <div ref={hostRef} className="mt-6 min-h-0 min-w-0 flex-1">
         {loading ? (
-          <div className="flex h-[300px] items-center justify-center">
-            <p className="font-montserrat text-sm font-medium text-[#aaa]">Loading…</p>
-          </div>
+          <Skeleton className="h-[300px] w-full" />
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData} margin={{ top: 8, right: CHART_PLOT_RIGHT_MARGIN, left: 0, bottom: 4 }}>
