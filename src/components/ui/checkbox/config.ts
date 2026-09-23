@@ -1,2 +1,0 @@
-export const CHECKBOX_UNCHECKED_BG = "#FFFFFF";
-export const CHECKBOX_CHECKED_BG = "#6284F5";

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
 import { useApiKeyMutations, useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import useToast from "@/hooks/use-toast";
 import type { PayApiKey } from "@/types/api-keys";

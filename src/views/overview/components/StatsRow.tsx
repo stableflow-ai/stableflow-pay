@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card/Card";
+import { Card } from "@stableflow/pay-ui/card";
 import type { OverviewStats } from "@/types/overview";
 import { OVERVIEW_LINK_CLASS, OVERVIEW_VALUE_CLASS } from "../config";
 import { splitUsdAmount } from "../utils";

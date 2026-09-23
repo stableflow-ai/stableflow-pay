@@ -1,26 +1,39 @@
-# Public UI Components
+# Public UI
 
-Non-business primitives in `src/components/ui/`. Read the matching doc before using or editing a component.
+Presentational components and shared icons come from `@stableflow/pay-ui`. The token picker comes from `@stableflow/pay-widgets/token-select`. Do not copy those implementations into this repo.
 
-| Component | Path | Doc |
-| --- | --- | --- |
-| Card | `src/components/ui/card/Card.tsx` | [card.md](card.md) |
-| Dialog | `src/components/ui/dialog/Dialog.tsx` | [dialog.md](dialog.md) |
-| Drawer | `src/components/ui/drawer/Drawer.tsx` | [drawer.md](drawer.md) |
-| Button | `src/components/ui/button/Button.tsx` | [button.md](button.md) |
-| Tooltip | `src/components/ui/tooltip/Tooltip.tsx` | [tooltip.md](tooltip.md) |
-| SearchInput | `src/components/ui/search-input/SearchInput.tsx` | [search-input.md](search-input.md) |
-| Skeleton | `src/components/ui/skeleton/Skeleton.tsx` | [skeleton.md](skeleton.md) |
-| Table | `src/components/ui/table/Table.tsx` | [table.md](table.md) |
-| Dropdown | `src/components/ui/dropdown/Dropdown.tsx` | [dropdown.md](dropdown.md) |
-| Toast | `src/components/ui/toast/Toast.tsx` | [toast.md](toast.md) |
-| Pagination | `src/components/ui/pagination/Pagination.tsx` | [pagination.md](pagination.md) |
-| InputNumber | `src/components/ui/input-number/InputNumber.tsx` | [input-number.md](input-number.md) |
-| Switch | `src/components/ui/switch/Switch.tsx` | [switch.md](switch.md) |
-| Checkbox | `src/components/ui/checkbox/Checkbox.tsx` | [checkbox.md](checkbox.md) |
-| DateRangePicker | `src/components/date-range-picker/DateRangePicker.tsx` | [date-range-picker.md](date-range-picker.md) |
-| PaymentsAreaChart | `src/components/payments-chart/PaymentsAreaChart.tsx` | [payments-chart.md](payments-chart.md) |
+`src/styles.css` scans both packages so Tailwind keeps their classes:
 
-`src/components/ui/overlay/` is **internal**. Dialog and Drawer own the public overlay API. Do not import Overlay from feature code unless you are extending those primitives.
+```css
+@source "../node_modules/@stableflow/pay-ui/dist";
+@source "../node_modules/@stableflow/pay-widgets/dist";
+```
 
-When you change a public component, update its doc and [CHANGELOG.md](CHANGELOG.md).
+| Component | Import |
+| --- | --- |
+| Button | `@stableflow/pay-ui/button` |
+| Card | `@stableflow/pay-ui/card` |
+| Checkbox | `@stableflow/pay-ui/checkbox` |
+| DateRangePicker | `@stableflow/pay-ui/date-range-picker` |
+| Dialog | `@stableflow/pay-ui/dialog` |
+| Drawer | `@stableflow/pay-ui/drawer` |
+| Dropdown | `@stableflow/pay-ui/dropdown` |
+| InputNumber | `@stableflow/pay-ui/input-number` |
+| Pagination | `@stableflow/pay-ui/pagination` |
+| SearchInput | `@stableflow/pay-ui/search-input` |
+| Skeleton | `@stableflow/pay-ui/skeleton` |
+| Switch | `@stableflow/pay-ui/switch` |
+| Table | `@stableflow/pay-ui/table` |
+| Toast | `@stableflow/pay-ui/toast` |
+| Tooltip | `@stableflow/pay-ui/tooltip` |
+| Overlay helpers | `@stableflow/pay-ui/overlay` |
+| TokenSelectDialog | `@stableflow/pay-widgets/token-select` |
+| PaymentsAreaChart | `src/components/payments-chart/` — [payments-chart.md](payments-chart.md) |
+
+Each package entry is its own subpath. There is no root barrel.
+
+Icons are imported per file, for example `import { IconClose } from "@stableflow/pay-ui/icons/close"`. This app has no local icon components.
+
+`PayWidgetsRoot` (`src/components/pay-widgets-root.tsx`) is the data boundary for the token picker: wallet, balances, and pay config. `useToast` stays in this app and renders `Toast` from `@stableflow/pay-ui/toast`.
+
+When a shared component or icon changes, change it in `stableflow-pay-ui` and bump the beta here. Append a note to [CHANGELOG.md](CHANGELOG.md) when this app's usage of the package changes.

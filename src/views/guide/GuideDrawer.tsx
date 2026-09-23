@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Drawer } from "@/components/ui/drawer/Drawer";
-import { DRAWER_SIDE } from "@/components/ui/drawer/config";
-import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
+import { Drawer } from "@stableflow/pay-ui/drawer";
+import { DRAWER_SIDE } from "@stableflow/pay-ui/drawer";
+import { DESKTOP_MEDIA_QUERY } from "@stableflow/pay-ui/overlay";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useGuideFlow } from "./guide-flow";
 

@@ -49,9 +49,9 @@ src/
     placeholder/          # Sidebar routes without product UI yet (Terms)
   layouts/                # AppLayout (sidebar + 65px title + footer + outlet)
   components/
-    ui/                   # Public, non-business UI (see doc/components)
-    icons/                # Shared icon components (inline SVG TSX, re-export from index.tsx)
     layout/               # AppSidebar, AppNav, AccountMenu, AppFooter, sidebar config
+    pay-widgets-root.tsx  # PayWidgetsProvider data boundary
+    payments-chart/       # Reports area chart (local business widget)
     WalletConnect.tsx     # Wallet connect dialog (business)
     safe/                 # SafeMultisigBadge (wraps MultisigBadge), showSafeProposalToast
     multisig/             # MultisigBadge, confirm toast, PayFromSquadSection
@@ -86,8 +86,8 @@ doc/                      # Agent-facing docs (English)
 
 | Kind | Location |
 | --- | --- |
-| Public UI primitive | `src/components/ui/<name>/` + `doc/components/<name>.md` |
-| Icon (Figma UI glyph) | `src/components/icons/<kebab-name>.tsx` and re-export from `index.tsx` |
+| Public UI primitive | `@stableflow/pay-ui/<name>` (see doc/components/README.md) |
+| Icon (Figma UI glyph) | `@stableflow/pay-ui/icons/<name>` |
 | Product logo | `public/logo.svg` (light) / `public/logo-white.svg` (dark) |
 | Page illustration / photo | `public/<page-or-area>/<name>.png` — not under `icons/` |
 | Page | `src/views/` + register in `src/router/index.tsx` |
@@ -107,8 +107,8 @@ doc/                      # Agent-facing docs (English)
 Import from the component file (no barrel file):
 
 ```ts
-import { Button } from "@/components/ui/button/Button";
-import { Dialog } from "@/components/ui/dialog/Dialog";
+import { Button } from "@stableflow/pay-ui/button";
+import { Dialog } from "@stableflow/pay-ui/dialog";
 ```
 
 Shared utils use the barrel:

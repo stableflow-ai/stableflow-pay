@@ -1,11 +1,11 @@
 import type { ComponentType } from "react";
-import { IconCode } from "@/components/icons/code";
-import { IconKey } from "@/components/icons/key";
-import { IconLink } from "@/components/icons/link";
-import { IconOverview } from "@/components/icons/overview";
-import { IconRecords2 } from "@/components/icons/records";
-import { IconSettings } from "@/components/icons/settings";
-import type { IconProps } from "@/components/icons/types";
+import { IconCode } from "@stableflow/pay-ui/icons/code";
+import { IconKey } from "@stableflow/pay-ui/icons/key";
+import { IconLink } from "@stableflow/pay-ui/icons/link";
+import { IconOverview } from "@stableflow/pay-ui/icons/overview";
+import { IconRecords2 } from "@stableflow/pay-ui/icons/records";
+import { IconSettings } from "@stableflow/pay-ui/icons/settings";
+import type { IconProps } from "@stableflow/pay-ui/icons/types";
 
 export const SIDEBAR_WIDTH_PX = 220;
 export const DOCS_PATH = "/docs";

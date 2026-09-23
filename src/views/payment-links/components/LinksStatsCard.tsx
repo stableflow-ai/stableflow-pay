@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { Card } from "@/components/ui/card/Card";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
+import { Card } from "@stableflow/pay-ui/card";
 import { CREATE_PAYMENT_LINK_PATH } from "../config";
 
 export function LinksStatsCard({

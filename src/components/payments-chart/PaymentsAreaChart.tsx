@@ -9,8 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card } from "@/components/ui/card/Card";
-import { Skeleton } from "@/components/ui/skeleton/Skeleton";
+import { Card } from "@stableflow/pay-ui/card";
+import { Skeleton } from "@stableflow/pay-ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   CHART_METRIC,

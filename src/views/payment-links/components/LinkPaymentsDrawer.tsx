@@ -1,21 +1,14 @@
 import { useState, type ReactNode } from "react";
-import { IconCheck } from "@/components/icons";
-import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
-import { IconExportLink, IconLink, IconOutLink } from "@/components/icons/link";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Drawer } from "@/components/ui/drawer/Drawer";
-import { DRAWER_SIDE } from "@/components/ui/drawer/config";
-import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
-import { Pagination } from "@/components/ui/pagination/Pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
+import { IconCheck } from "@stableflow/pay-ui/icons/check";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
+import { IconExportLink, IconLink, IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Drawer } from "@stableflow/pay-ui/drawer";
+import { DRAWER_SIDE } from "@stableflow/pay-ui/drawer";
+import { DESKTOP_MEDIA_QUERY } from "@stableflow/pay-ui/overlay";
+import { Pagination } from "@stableflow/pay-ui/pagination";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   useExportPaymentLinkPaymentsMutation,

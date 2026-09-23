@@ -1,16 +1,9 @@
-import { IconCopy } from "@/components/icons/copy";
-import { IconDelete } from "@/components/icons/delete";
-import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
-import { IconPen } from "@/components/icons/pen";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
+import { IconPen } from "@stableflow/pay-ui/icons/pen";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import type { PayApiKey } from "@/types/api-keys";
 import { formatDate } from "@/utils";
 import { API_KEY_TABLE_COLUMNS } from "../config";

@@ -1,5 +1,5 @@
 import { differenceInCalendarDays, format, parseISO, startOfDay, subDays } from "date-fns";
-import type { DateRangeValue } from "@/components/date-range-picker/utils";
+import type { DateRangeValue } from "@stableflow/pay-ui/date-range-picker";
 import { ApiError } from "@/lib/api-error";
 import type { ReportPaymentType, ReportPaymentsExportQuery } from "@/types/report";
 import {

@@ -1,6 +1,6 @@
-import { IconLink, IconOutLink } from "@/components/icons/link";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
+import { IconLink, IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
 import useToast from "@/hooks/use-toast";
 import { GUIDE_STEP, GUIDE_STEP_PATH, GUIDE_STEPS } from "../config";
 import { GuideDrawer } from "../GuideDrawer";

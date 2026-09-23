@@ -1,9 +1,11 @@
 # Public Component Changelog
 
-Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
+Record changes to how this app uses `@stableflow/pay-ui`, `@stableflow/pay-widgets`, or a local widget such as PaymentsAreaChart.
 
 ## 2026-09-23
 
+- **pay-ui:** Shared components, overlay helpers, and package icons now import from `@stableflow/pay-ui` subpaths. Token select imports `@stableflow/pay-widgets/token-select` through `PayWidgetsRoot`. Local copies of those components and icons are removed. Reports payment-link dropdowns load remaining pages while the link filter is visible, because the package Dropdown has no `onReachEnd`.
+- **Icons:** `IconDuration2` imports `@stableflow/pay-ui/icons/duration`. `IconCheck` imports `@stableflow/pay-ui/icons/check`. This app has no local icon components.
 - **Skeleton:** Pulse block (`#e8e8e8`) for a section that has not loaded yet.
 - **PaymentsAreaChart:** First load uses a skeleton block instead of the "Loading…" label.
 - **Table:** `TableSkeletonRows` renders 3 body rows inside an existing `Table`. Each cell is its own bar. Infinite-scroll footers stay on `IconLoading`.
