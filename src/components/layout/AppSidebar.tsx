@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { BrandGlow, BrandMark } from "./BrandMark";
 import { AccountMenu } from "./AccountMenu";
 import {
   SIDEBAR_FOOTER_ITEMS,
@@ -61,9 +62,10 @@ export function AppNav({
 export function AppSidebar() {
   return (
     <aside className="hidden shrink-0 flex-col lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-[220px] lg:overflow-y-auto lg:border-r lg:border-black/10">
-      <div className="px-[21px] pt-5 pb-4">
-        <a href="/" className="inline-flex">
-          <img src="/logo.svg" alt="PAY. Stableflow" className="h-[30px] w-auto" />
+      <div className="relative overflow-hidden px-[13px] pt-4 pb-4">
+        <BrandGlow />
+        <a href="/" className="relative inline-flex">
+          <BrandMark />
         </a>
         <div className="mt-2.5">
           <AccountMenu />
