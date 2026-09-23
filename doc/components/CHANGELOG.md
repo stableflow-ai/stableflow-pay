@@ -2,6 +2,12 @@
 
 Record every create/update of components under `src/components/ui/` so other agents can discover new APIs.
 
+## 2026-09-23
+
+- **Skeleton:** Pulse block (`#e8e8e8`) for a section that has not loaded yet.
+- **PaymentsAreaChart:** First load uses a skeleton block instead of the "Loading…" label.
+- **Table:** `TableSkeletonRows` renders 3 body rows inside an existing `Table`. Each cell is its own bar. Infinite-scroll footers stay on `IconLoading`.
+
 ## 2026-09-20
 
 - **Toast:** Card is 316px, `#fdfdfd` with `#e0e0e0` border, Montserrat, and 14px status dots from public icons. Container is bottom-right (`decash-toast-bottom-right`), oldest toward the top.

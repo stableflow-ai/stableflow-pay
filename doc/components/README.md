@@ -10,6 +10,7 @@ Non-business primitives in `src/components/ui/`. Read the matching doc before us
 | Button | `src/components/ui/button/Button.tsx` | [button.md](button.md) |
 | Tooltip | `src/components/ui/tooltip/Tooltip.tsx` | [tooltip.md](tooltip.md) |
 | SearchInput | `src/components/ui/search-input/SearchInput.tsx` | [search-input.md](search-input.md) |
+| Skeleton | `src/components/ui/skeleton/Skeleton.tsx` | [skeleton.md](skeleton.md) |
 | Table | `src/components/ui/table/Table.tsx` | [table.md](table.md) |
 | Dropdown | `src/components/ui/dropdown/Dropdown.tsx` | [dropdown.md](dropdown.md) |
 | Toast | `src/components/ui/toast/Toast.tsx` | [toast.md](toast.md) |

@@ -27,9 +27,6 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
   { label: "Payment Links", to: "/payment-links", icon: IconLink },
   { label: "API Keys", to: "/api-keys", icon: IconKey },
   { label: "Reports", to: "/reports", icon: IconRecords2 },
-];
-
-export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
   { label: "Settings", to: "/settings", icon: IconSettings },
   { label: "Developer Docs", to: "/docs", icon: IconCode },
 ];
@@ -40,7 +37,7 @@ export function pageTitleForPath(pathname: string): string {
   if (pathname === PRIVACY_TRANSFER_PATH || pathname.startsWith(`${PRIVACY_TRANSFER_PATH}/`)) {
     return PRIVACY_TRANSFER_TITLE;
   }
-  const item = [...SIDEBAR_NAV_ITEMS, ...SIDEBAR_FOOTER_ITEMS].find((entry) => {
+  const item = SIDEBAR_NAV_ITEMS.find((entry) => {
     if (entry.end || entry.to === "/") return pathname === entry.to;
     return pathname === entry.to || pathname.startsWith(`${entry.to}/`);
   });

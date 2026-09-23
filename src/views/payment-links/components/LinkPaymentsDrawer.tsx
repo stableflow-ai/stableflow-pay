@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { IconCheck, IconLoading } from "@/components/icons";
+import { IconCheck } from "@/components/icons";
+import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
 import { IconExportLink, IconLink, IconOutLink } from "@/components/icons/link";
 import { Button } from "@/components/ui/button/Button";
 import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
@@ -172,12 +173,11 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
           <TableHead>Paid Value</TableHead>
           <TableHead>Status</TableHead>
         </TableHeader>
+        {paymentsQuery.isPending ? (
+          <TableSkeletonRows cells={6} />
+        ) : (
         <TableBody>
-          {paymentsQuery.isPending ? (
-            <div className="flex items-center justify-center py-10">
-              <IconLoading className="size-4 animate-spin text-[#909090]" />
-            </div>
-          ) : rows.length === 0 ? (
+          {rows.length === 0 ? (
             <ListEmptyState>No transactions yet</ListEmptyState>
           ) : (
             rows.map((row) => {
@@ -222,6 +222,7 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
             })
           )}
         </TableBody>
+        )}
       </Table>
     </div>
   );

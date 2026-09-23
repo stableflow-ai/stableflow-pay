@@ -1,6 +1,6 @@
 import { IconCopy } from "@/components/icons/copy";
 import { IconDelete } from "@/components/icons/delete";
-import { IconLoading } from "@/components/icons/loading";
+import { TableSkeletonRows } from "@/components/ui/table/TableSkeletonRows";
 import { IconPen } from "@/components/icons/pen";
 import {
   Table,
@@ -44,9 +44,7 @@ export function ApiKeysTable({
         <TableHead />
       </TableHeader>
       {isPending ? (
-        <div className="flex justify-center py-10">
-          <IconLoading className="size-4 animate-spin text-[#909090]" />
-        </div>
+        <TableSkeletonRows cells={4} />
       ) : isError ? (
         <p className="py-20 text-center font-montserrat text-sm font-medium text-danger md:py-[150px]">
           {errorMessage}
