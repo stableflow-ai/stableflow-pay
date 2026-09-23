@@ -1,4 +1,3 @@
-export const AUTH_BRAND_BG = "#3F8AFB";
 export const AUTH_PANEL_BG = "#F6F6F6";
 
 export const AUTH_FORM_CLASS = "flex w-full max-w-[400px] flex-col mt-15";
@@ -12,9 +11,6 @@ export const AUTH_LINK_CLASS =
   "mt-6.5 text-center font-montserrat text-sm font-medium text-[#909090]";
 
 export const AUTH_LINK_ACCENT_CLASS = "text-[#3f8afb] hover:text-[#3f8afb]/90";
-
-export const AUTH_FEATURE_ICON_KEYS = ["lock", "shield", "node"] as const;
-export type AuthFeatureIconKey = (typeof AUTH_FEATURE_ICON_KEYS)[number];
 
 export const NAME_MAX_LENGTH = 50;
 export const INVITE_CODE_MAX_LENGTH = 10;
