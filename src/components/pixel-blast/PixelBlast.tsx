@@ -409,7 +409,7 @@ const PixelBlast = ({
         uResolution: { value: new Float32Array([0, 0]) },
         uTime: { value: 0 },
         uColor: { value: hexToVec3(color) },
-        uRippleData: { value: new Float32Array(RIPPLE_FLOATS).fill(-1) },
+        uRippleData: { value: Array(RIPPLE_FLOATS).fill(-1) },
         uShapeType: { value: SHAPE_MAP[variant] ?? 0 },
         uPixelSize: { value: pixelSize * renderer.dpr },
         uScale: { value: patternScale },
