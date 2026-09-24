@@ -51,8 +51,8 @@ export function AppNav({
 
 export function AppSidebar() {
   return (
-    <aside className="hidden shrink-0 flex-col lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-[220px] lg:overflow-y-auto lg:border-r lg:border-black/10">
-      <div className="relative overflow-hidden px-[13px] pt-4 pb-4">
+    <aside className="hidden shrink-0 flex-col lg:sticky lg:top-0 lg:flex lg:h-svh lg:w-[220px] lg:overflow-hidden lg:border-r lg:border-black/10">
+      <div className="relative shrink-0 overflow-hidden px-[13px] pt-4 pb-4">
         <BrandGlow />
         <a href="/" className="relative inline-flex">
           <BrandMark />
@@ -61,8 +61,8 @@ export function AppSidebar() {
           <AccountMenu />
         </div>
       </div>
-      <div className="h-px w-full bg-black/10" />
-      <nav className="flex flex-col gap-1 px-2.5 py-5">
+      <div className="h-px w-full shrink-0 bg-black/10" />
+      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-2.5 py-5">
         {SIDEBAR_NAV_ITEMS.map((item) => (
           <SidebarLink key={item.to} item={item} />
         ))}

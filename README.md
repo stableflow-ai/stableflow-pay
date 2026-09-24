@@ -58,7 +58,6 @@ pnpm preview
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
 | `/privacy-transfer` | merchant | Confidential TRANSFER/SWAP; not in the sidebar |
-| `/terms` | merchant | Placeholder |
 
 Overview still uses fixtures in `src/mocks/` until that backend contract exists. Payment Links, API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.
 

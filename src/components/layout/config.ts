@@ -10,7 +10,6 @@ import { PRIVACY_TRANSFER_PATH, PRIVACY_TRANSFER_TITLE } from "@/views/privacy-t
 
 export const SIDEBAR_WIDTH_PX = 220;
 export const DOCS_PATH = "/docs";
-export const TERMS_PATH = "/terms";
 export const STABLEFLOW_ABOUT_URL = "https://app.stableflow.ai/about";
 
 export type SidebarIcon = ComponentType<IconProps>;
@@ -30,8 +29,6 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
   { label: "Settings", to: "/settings", icon: IconSettings },
   { label: "Developer Docs", to: "/docs", icon: IconCode },
 ];
-
-export const PLACEHOLDER_ROUTES = ["/terms"] as const;
 
 export function pageTitleForPath(pathname: string): string {
   if (pathname === PRIVACY_TRANSFER_PATH || pathname.startsWith(`${PRIVACY_TRANSFER_PATH}/`)) {

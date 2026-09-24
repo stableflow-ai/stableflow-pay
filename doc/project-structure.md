@@ -47,7 +47,6 @@ src/
     reports/              # Merchant reports at /reports
     docs/                 # Public Checkout API documentation at /docs
     privacy-transfer/     # Authenticated /privacy-transfer (not in the sidebar)
-    placeholder/          # Sidebar routes without product UI yet (Terms)
   layouts/                # AppLayout (sidebar + 65px title + footer + outlet)
   components/
     layout/               # AppSidebar, AppNav, AccountMenu, AppFooter, sidebar config

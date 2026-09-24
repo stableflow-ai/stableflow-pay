@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { DOCS_PATH, STABLEFLOW_ABOUT_URL, TERMS_PATH } from "./config";
+import { DOCS_PATH, STABLEFLOW_ABOUT_URL } from "./config";
 
 export function AppFooter() {
   return (
@@ -18,7 +18,6 @@ export function AppFooter() {
         </p>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Link to={DOCS_PATH}>Docs</Link>
-          <Link to={TERMS_PATH}>Terms of Service</Link>
           <span>Privacy Policy</span>
         </nav>
       </div>

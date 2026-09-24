@@ -2,7 +2,7 @@
 
 Stableflow Pay v3 is a merchant dashboard for payment links, plus the same multi-chain wallet and payout capability layer as v2. There are **no admin/employee roles**. Recipients of payouts are **wallet addresses**.
 
-Read this before adding pages or navigation. Routes marked *placeholder* are registered with the shared sidebar layout but have no product UI yet.
+Read this before adding pages or navigation.
 
 ## Areas
 
@@ -20,7 +20,6 @@ Read this before adding pages or navigation. Routes marked *placeholder* are reg
 | Settings | `/settings` | shipped | Organization profile (`GET` / `POST /v1/pay/organization`) and webhooks. Recipient Address is a local form only. `/webhooks` redirects here. Wallet connect stays in `WalletConnectDialog` for upcoming payment-link / payout screens. |
 | Developer Docs | `/docs` | shipped | Public Checkout API guide with setup, Session creation, redirects, confirmation, webhooks, supported assets, API reference, and production checklist. No login. |
 | Privacy Transfer | `/privacy-transfer` | shipped | Authenticated. Not in the sidebar. Confidential TRANSFER or SWAP to 1–10 unique addresses. History is local to this browser. |
-| Terms | `/terms` | placeholder | Linked from `AppFooter`. |
 
 Payout / request-payment / Near Intents **APIs, hooks, wallet adapters, and confidential helpers** live in `src/`. Privacy Transfer is at `/privacy-transfer`. Do not add the v2 Home / Pay / Partner page chrome.
 
@@ -42,13 +41,13 @@ Guards live in `src/router/guards.tsx`: `RequireAuth`, `RedirectIfAuthed`. Do no
 
 ## Layout
 
-Dashboard chrome is `AppLayout`: left sidebar (220px) from `lg` (1024px) up, 65px title bar (`text-[20px] font-medium`) with a bottom border, and `AppFooter` (Powered by StableFlow / Docs / Terms of Service / Privacy Policy). Below `lg` the sidebar collapses: a top bar shows the logo, account menu, and a menu button that opens a top Drawer. **Create Payment Link** on Overview `/` only goes to `/payment-links/create` (hidden below 768px). All routes inside this layout, including `/privacy-transfer`, are authenticated. `/privacy-transfer` is not in the sidebar. Login, register, `/howitworks`, `/docs`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
+Dashboard chrome is `AppLayout`: left sidebar (220px) from `lg` (1024px) up, 65px title bar (`text-[20px] font-medium`) with a bottom border, and `AppFooter` (Powered by StableFlow / Docs / Privacy Policy). Below `lg` the sidebar collapses: a top bar shows the logo, account menu, and a menu button that opens a top Drawer. **Create Payment Link** on Overview `/` only goes to `/payment-links/create` (hidden below 768px). All routes inside this layout, including `/privacy-transfer`, are authenticated. `/privacy-transfer` is not in the sidebar. Login, register, `/howitworks`, `/docs`, `/guide`, `/paylink/:linkId`, and `/checkout` do not use this layout. Overview is the home item (`/` with `NavLink` `end`). Nested `/payment-links/*` routes keep **Payment Links** selected in the sidebar.
 
 `/guide` is authenticated but does **not** use `AppLayout`. It has its own logo column and a step drawer.
 
 The sidebar account row sits under the logo and shows `user.name` with a seeded `EmailAvatar`. It opens a downward floating menu: Change Password, Log out. Change Password opens `ResetPasswordDialog` (`variant="authed"`).
 
-Sidebar footer (muted): Settings, Developer Docs. Terms of Service lives in `AppFooter`. There is no Support item and no Webhooks item in the main nav.
+Sidebar footer (muted): Settings, Developer Docs. There is no Support item, no Terms of Use item, and no Webhooks item in the main nav.
 
 Developer Docs at `/docs` is a public page (no login, no AppLayout). It documents the Checkout API, is static, and does not call the backend. Back goes to the previous page or `/login`. The sidebar **Developer Docs** item still links here for signed-in merchants.
 
