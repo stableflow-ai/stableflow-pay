@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog } from "@/components/ui/dialog/Dialog";
+import { Dialog } from "@stableflow/pay-ui/dialog";
 import { WebhookForm } from "./WebhookForm";
 import type { WebhookEventType } from "@/types/webhooks";
 

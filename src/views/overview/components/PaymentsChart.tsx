@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PaymentsAreaChart } from "@/components/payments-chart/PaymentsAreaChart";
 import { CHART_METRIC, type ChartMetric } from "@/components/payments-chart/config";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { Dropdown } from "@stableflow/pay-ui/dropdown";
 import { useOverviewPaymentsAnalyticsQuery } from "@/hooks/use-overview-api";
 import type { OverviewAnalyticsPeriod } from "@/types/overview";
 import { OVERVIEW_RANGE, OVERVIEW_RANGE_OPTIONS } from "../config";

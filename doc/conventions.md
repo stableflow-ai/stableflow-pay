@@ -9,13 +9,10 @@ Rules for humans and agents working in this repository. Anything committed to `s
 
 ## Public components
 
-- Shared, non-business UI lives in `src/components/ui/<component-name>/`.
-- Business widgets stay next to their feature (for example `src/components/WalletConnect.tsx` or a future feature folder). Do not put business logic in `src/components/ui/`.
-- Reuse existing public components. Do not duplicate Card, Dialog, Button, Table, and similar primitives.
-- Constants (enums, breakpoints, copy defaults) belong in a sibling `config.ts` using `UPPER_SNAKE_CASE`.
-- After creating or changing a public component:
-  1. Update `doc/components/<name>.md` (props, examples, caveats).
-  2. Append an entry to `doc/components/CHANGELOG.md` so others can discover the change.
+- Shared, non-business UI is imported from `@stableflow/pay-ui/<name>`. Token select is imported from `@stableflow/pay-widgets/token-select`. Do not add local copies under `src/components/ui/`.
+- Business widgets stay next to their feature (for example `src/components/WalletConnect.tsx` or `src/components/payments-chart/`).
+- Overlay helpers come from `@stableflow/pay-ui/overlay`.
+- After changing how this app uses a package component, update `doc/components/<name>.md` and append an entry to `doc/components/CHANGELOG.md`.
 
 ## Shared utils
 
@@ -32,13 +29,8 @@ Rules for humans and agents working in this repository. Anything committed to `s
 
 ## Icons
 
-One pattern only. Do not mix `public/` SVGs, a separate `svgs/` folder, and inline markup.
-
-- Figma UI glyphs live only in `src/components/icons/<kebab-name>.tsx`.
-- Each file is a React component: `IconProps` (`className`, `style`), inline SVG, `fill="currentColor"`, named export `IconXxx`, re-exported from `src/components/icons/index.tsx`.
-- Before adding an icon, read `src/components/icons/index.tsx` and the matching file. If Figma names differ, compare `path` / `viewBox`. Do not duplicate.
-- **Forbidden:** `src/components/icons/svgs/`, `src/components/icons/assets/`, UI icons under `public/`, new inline SVGs in pages or feature components, third-party icon packs (lucide and similar).
-- Prefer existing icons over drawing new glyphs.
+- Icons are imported from `@stableflow/pay-ui/icons/<name>`. Do not copy them into this repo.
+- **Forbidden:** UI icons under `public/`, new inline SVGs in pages or feature components, third-party icon packs (lucide and similar).
 
 ## Static assets (logo and page art)
 

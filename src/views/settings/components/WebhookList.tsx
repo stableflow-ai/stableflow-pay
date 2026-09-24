@@ -1,11 +1,11 @@
-import { IconDelete } from "@/components/icons/delete";
-import { IconFlask } from "@/components/icons/flask";
-import { IconResetPassword } from "@/components/icons/reset-password";
-import { Switch } from "@/components/ui/switch/Switch";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { IconFlask } from "@stableflow/pay-ui/icons/flask";
+import { IconResetPassword } from "@stableflow/pay-ui/icons/reset-password";
+import { Switch } from "@stableflow/pay-ui/switch";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import type { PayWebhook } from "@/types/webhooks";
 import { formatWebhookEvents, isWebhookEnabled } from "../utils";
-import { IconLoading } from "@/components/icons";
+import { Skeleton } from "@stableflow/pay-ui/skeleton";
 
 export function WebhookList(props: {
   endpoints: PayWebhook[];
@@ -22,8 +22,10 @@ export function WebhookList(props: {
   if (endpoints.length === 0) {
     if (endpointsLoading) {
       return (
-        <div className="flex justify-center items-center py-10">
-          <IconLoading className="size-4 animate-spin text-[#909090]" />
+        <div className="flex flex-col gap-3 py-2" aria-busy="true" aria-label="Loading">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       );
     }

@@ -1,16 +1,9 @@
-import { IconCopy } from "@/components/icons/copy";
-import { IconDelete } from "@/components/icons/delete";
-import { IconLoading } from "@/components/icons/loading";
-import { IconPen } from "@/components/icons/pen";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
+import { IconPen } from "@stableflow/pay-ui/icons/pen";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import type { PayApiKey } from "@/types/api-keys";
 import { formatDate } from "@/utils";
 import { API_KEY_TABLE_COLUMNS } from "../config";
@@ -44,9 +37,7 @@ export function ApiKeysTable({
         <TableHead />
       </TableHeader>
       {isPending ? (
-        <div className="flex justify-center py-10">
-          <IconLoading className="size-4 animate-spin text-[#909090]" />
-        </div>
+        <TableSkeletonRows cells={4} />
       ) : isError ? (
         <p className="py-20 text-center font-montserrat text-sm font-medium text-danger md:py-[150px]">
           {errorMessage}

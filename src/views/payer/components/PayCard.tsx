@@ -1,7 +1,8 @@
-import { IconRefresh } from "@/components/icons/refresh";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
-import { InputNumber } from "@/components/ui/input-number/InputNumber";
+import { IconRefresh } from "@stableflow/pay-ui/icons/refresh";
+import { Button } from "@stableflow/pay-ui/button";
+import { Skeleton } from "@stableflow/pay-ui/skeleton";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
+import { InputNumber } from "@stableflow/pay-ui/input-number";
 import { cn } from "@/lib/utils";
 import type { IntentsToken } from "@/stores/intents-tokens";
 import { AMOUNT_MAX_DECIMALS, PAYER_CARD_STATE, type PayerCardState } from "../config";
@@ -51,11 +52,17 @@ export function PayCard(props: {
       <CouponShell
         top={
           <div className="flex min-h-[200px] flex-col items-center justify-center">
-            <p className="text-center font-montserrat text-sm text-[#909090]">
-              {props.state === PAYER_CARD_STATE.Loading
-                ? "Loading…"
-                : "This payment is not available"}
-            </p>
+            {props.state === PAYER_CARD_STATE.Loading ? (
+              <div className="flex w-full flex-col gap-3 px-6" aria-busy="true" aria-label="Loading">
+                <Skeleton className="mx-auto h-8 w-40" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : (
+              <p className="text-center font-montserrat text-sm text-[#909090]">
+                This payment is not available
+              </p>
+            )}
           </div>
         }
         bottom={<div className="min-h-[160px]" />}
@@ -96,7 +103,7 @@ export function PayCard(props: {
               placeholder="0"
               onNumberChange={props.onAmountChange}
               className={cn(
-                "mt-4 w-full bg-transparent text-center font-montserrat text-[46px] font-semibold leading-none text-black outline-none placeholder:text-[#aaa]",
+                "mt-4 w-full bg-transparent text-center font-montserrat text-[46px] font-semibold leading-none text-black outline-none placeholder:text-[#aaa] border-none",
               )}
             />
           ) : (

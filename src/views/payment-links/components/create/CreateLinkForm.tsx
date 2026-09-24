@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconAlert } from "@/components/icons/alert";
-import { IconQuestion } from "@/components/icons/question";
-import { TokenSelectDialog } from "@/components/token-select-dialog/TokenSelectDialog";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { InputNumber } from "@/components/ui/input-number/InputNumber";
-import { Switch } from "@/components/ui/switch/Switch";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconAlert } from "@stableflow/pay-ui/icons/alert";
+import { IconQuestion } from "@stableflow/pay-ui/icons/question";
+import { TokenSelectDialog } from "@stableflow/pay-widgets/token-select";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { InputNumber } from "@stableflow/pay-ui/input-number";
+import { Switch } from "@stableflow/pay-ui/switch";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import { useDefaultAddressesQuery, usePaymentLinkMutations } from "@/hooks/use-payment-links-api";
 import useToast from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import type { IntentsToken } from "@/stores/intents-tokens";
+import { intentsTokenForSelection, type IntentsToken } from "@/stores/intents-tokens";
 import { isAddressValid, isHttpUrl } from "@/utils";
 import {
   CREATE_LINK_AMOUNT_MAX_DECIMALS,
@@ -285,10 +285,10 @@ export function CreateLinkForm({
         open={tokenDialogOpen}
         onClose={() => setTokenDialogOpen(false)}
         selectedAssetId={token?.assetId}
-        showBalances={false}
-        requireSupport="receive"
-        onSelect={({ token: next }) => {
-          handleSelectToken(next);
+        role="receiver"
+        onSelect={({ token: selected }) => {
+          const next = intentsTokenForSelection(selected);
+          if (next) handleSelectToken(next);
         }}
       />
     </>

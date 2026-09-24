@@ -1,15 +1,14 @@
 import type { ComponentType } from "react";
-import { IconCode } from "@/components/icons/code";
-import { IconKey } from "@/components/icons/key";
-import { IconLink } from "@/components/icons/link";
-import { IconOverview } from "@/components/icons/overview";
-import { IconRecords2 } from "@/components/icons/records";
-import { IconSettings } from "@/components/icons/settings";
-import type { IconProps } from "@/components/icons/types";
+import { IconCode } from "@stableflow/pay-ui/icons/code";
+import { IconKey } from "@stableflow/pay-ui/icons/key";
+import { IconLink } from "@stableflow/pay-ui/icons/link";
+import { IconOverview } from "@stableflow/pay-ui/icons/overview";
+import { IconRecords2 } from "@stableflow/pay-ui/icons/records";
+import { IconSettings } from "@stableflow/pay-ui/icons/settings";
+import type { IconProps } from "@stableflow/pay-ui/icons/types";
 
 export const SIDEBAR_WIDTH_PX = 220;
 export const DOCS_PATH = "/docs";
-export const TERMS_PATH = "/terms";
 export const STABLEFLOW_ABOUT_URL = "https://app.stableflow.ai/about";
 
 export type SidebarIcon = ComponentType<IconProps>;
@@ -26,17 +25,12 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
   { label: "Payment Links", to: "/payment-links", icon: IconLink },
   { label: "API Keys", to: "/api-keys", icon: IconKey },
   { label: "Reports", to: "/reports", icon: IconRecords2 },
-];
-
-export const SIDEBAR_FOOTER_ITEMS: readonly SidebarNavItem[] = [
   { label: "Settings", to: "/settings", icon: IconSettings },
   { label: "Developer Docs", to: "/docs", icon: IconCode },
 ];
 
-export const PLACEHOLDER_ROUTES = ["/terms"] as const;
-
 export function pageTitleForPath(pathname: string): string {
-  const item = [...SIDEBAR_NAV_ITEMS, ...SIDEBAR_FOOTER_ITEMS].find((entry) => {
+  const item = SIDEBAR_NAV_ITEMS.find((entry) => {
     if (entry.end || entry.to === "/") return pathname === entry.to;
     return pathname === entry.to || pathname.startsWith(`${entry.to}/`);
   });

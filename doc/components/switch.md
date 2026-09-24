@@ -1,38 +1,9 @@
 # Switch
 
-Path: `src/components/ui/switch/Switch.tsx`
+Import from `@stableflow/pay-ui/switch`. The component lives in the published package. Do not add a local copy under `src/components`.
 
-Figma: Decash off `392:20554`, on `395:21220`.
-
-Pill toggle. The thumb slides with Motion; the track color tweens between off and on.
-
-## Defaults
-
-- Size `33.333px × 20px`, fully rounded
-- Off track `#F6F6F6`, on track `#6284F5`, 1px border `#E3E3E3`
-- Thumb `15px` white circle, 1px border `#D9D9D9`, 13px travel
-- Disabled: `opacity: 0.3` and `cursor: not-allowed` (`pointer-events: none`)
-- Loading: `IconLoading` with `animate-spin` replaces the white thumb at the current on/off position. Track color stays on `checked`. Clicks are ignored and opacity stays 1 (unlike `disabled`)
-
-## Props
-
-Omits native `onChange` / `role` / `aria-checked` / `children`, plus Motion `animate` / `initial` / `transition`. Other button attributes are forwarded.
-
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `checked` | `boolean` | — | Controlled. Omit for uncontrolled |
-| `defaultChecked` | `boolean` | `false` | Uncontrolled initial value |
-| `onCheckedChange` | `(checked: boolean) => void` | — | Fires after a toggle |
-| `className` | `string` | — | Track (`<button>`) overrides |
-| `disabled` | `boolean` | — | Same visual treatment as Button |
-| `loading` | `boolean` | `false` | Spinner on the thumb; does not change `checked` by itself |
-
-Constants: `SWITCH_TRACK_OFF_BG`, `SWITCH_TRACK_ON_BG`, `SWITCH_THUMB_TRAVEL_PX` in `./config`.
-
-## Example
-
-```tsx
-import { Switch } from "@/components/ui/switch/Switch";
-
-<Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Confidential payments" />
+```ts
+import { Switch } from "@stableflow/pay-ui/switch";
 ```
+
+Props and behavior are defined by `@stableflow/pay-ui`. `src/styles.css` must keep the Tailwind `@source` scan of the package `dist` folders, or the component classes are omitted from the build.

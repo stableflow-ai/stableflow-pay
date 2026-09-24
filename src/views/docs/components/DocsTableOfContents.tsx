@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card/Card";
+import { Card } from "@stableflow/pay-ui/card";
 import { cn } from "@/lib/utils";
 import { DOCS_TOC_ITEMS, type DocsTocId } from "../config";
 

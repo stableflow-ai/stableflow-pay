@@ -69,4 +69,12 @@ describe("formatQuoteErrorMessage", () => {
       ),
     )).toBe("Insufficient SOL for fees. Add SOL and try again.");
   });
+
+  it("maps an empty-log Solana simulation failure to the expired copy", () => {
+    expect(formatQuoteErrorMessage(
+      new Error(
+        "Simulation failed. Message: Transaction simulation failed. Logs: []. Catch the `SendTransactionError` and call `getLogs()` on it for full details.",
+      ),
+    )).toBe("Solana transaction expired. Confirm again to retry.");
+  });
 });

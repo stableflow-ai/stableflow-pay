@@ -1,20 +1,14 @@
 import { useState, type ReactNode } from "react";
-import { IconCheck, IconLoading } from "@/components/icons";
-import { IconExportLink, IconLink, IconOutLink } from "@/components/icons/link";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Drawer } from "@/components/ui/drawer/Drawer";
-import { DRAWER_SIDE } from "@/components/ui/drawer/config";
-import { DESKTOP_MEDIA_QUERY } from "@/components/ui/overlay/config";
-import { Pagination } from "@/components/ui/pagination/Pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
+import { IconCheck } from "@stableflow/pay-ui/icons/check";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
+import { IconExportLink, IconLink, IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Drawer } from "@stableflow/pay-ui/drawer";
+import { DRAWER_SIDE } from "@stableflow/pay-ui/drawer";
+import { DESKTOP_MEDIA_QUERY } from "@stableflow/pay-ui/overlay";
+import { Pagination } from "@stableflow/pay-ui/pagination";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   useExportPaymentLinkPaymentsMutation,
@@ -172,12 +166,11 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
           <TableHead>Paid Value</TableHead>
           <TableHead>Status</TableHead>
         </TableHeader>
+        {paymentsQuery.isPending ? (
+          <TableSkeletonRows cells={6} />
+        ) : (
         <TableBody>
-          {paymentsQuery.isPending ? (
-            <div className="flex items-center justify-center py-10">
-              <IconLoading className="size-4 animate-spin text-[#909090]" />
-            </div>
-          ) : rows.length === 0 ? (
+          {rows.length === 0 ? (
             <ListEmptyState>No transactions yet</ListEmptyState>
           ) : (
             rows.map((row) => {
@@ -222,6 +215,7 @@ function LinkPaymentsDrawerBody({ link }: { link: PayPaymentLink }) {
             })
           )}
         </TableBody>
+        )}
       </Table>
     </div>
   );

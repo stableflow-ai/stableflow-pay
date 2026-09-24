@@ -1,17 +1,10 @@
-import { IconDelete } from "@/components/icons/delete";
-import { IconLink, IconOutLink } from "@/components/icons/link";
-import { Pagination } from "@/components/ui/pagination/Pagination";
-import { SearchInput } from "@/components/ui/search-input/SearchInput";
-import { Switch } from "@/components/ui/switch/Switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
-import { Tooltip } from "@/components/ui/tooltip/Tooltip";
+import { IconDelete } from "@stableflow/pay-ui/icons/delete";
+import { IconLink, IconOutLink } from "@stableflow/pay-ui/icons/link";
+import { Pagination } from "@stableflow/pay-ui/pagination";
+import { SearchInput } from "@stableflow/pay-ui/search-input";
+import { Switch } from "@stableflow/pay-ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
+import { Tooltip } from "@stableflow/pay-ui/tooltip";
 import type { PayPaymentLink } from "@/types/payment-links";
 import { PAYMENT_LINKS_TABLE_COLUMNS, PAYMENT_LINK_TYPE_LABEL } from "../config";
 import {
@@ -21,7 +14,8 @@ import {
   paymentLinkType,
 } from "../utils";
 import { ListEmptyState } from "./ListEmptyState";
-import { IconCopy, IconLoading } from "@/components/icons";
+import { IconCopy } from "@stableflow/pay-ui/icons/copy";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
 import { formatAddress, formatAmount } from "@/utils";
 import useToast from "@/hooks/use-toast";
 
@@ -90,15 +84,12 @@ export function PaymentLinksTable({
         <TableHead />
         <TableHead className="last:pr-3" />
       </TableHeader>
+      {loading && links.length === 0 ? (
+        <TableSkeletonRows cells={11} />
+      ) : (
       <TableBody className="flex flex-col gap-3.5 pt-1">
         {links.length === 0 ? (
-          loading ? (
-            <div className="flex justify-center items-center py-10">
-              <IconLoading className="size-4 animate-spin text-[#909090]" />
-            </div>
-          ) : (
-            <ListEmptyState>{emptyCopy}</ListEmptyState>
-          )
+          <ListEmptyState>{emptyCopy}</ListEmptyState>
         ) : (
           links.map((link) => (
             <PaymentLinkRow
@@ -113,6 +104,7 @@ export function PaymentLinksTable({
           ))
         )}
       </TableBody>
+      )}
     </Table>
   );
 }

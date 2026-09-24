@@ -1,23 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DateRangePicker } from "@/components/date-range-picker/DateRangePicker";
-import { lastNDaysRange, rangeToUnixSeconds } from "@/components/date-range-picker/utils";
+import { useEffect, useMemo, useState } from "react";
+import { DateRangePicker } from "@stableflow/pay-ui/date-range-picker";
+import { lastNDaysRange, rangeToUnixSeconds } from "@stableflow/pay-ui/date-range-picker";
 import { PaymentsAreaChart } from "@/components/payments-chart/PaymentsAreaChart";
 import { CHART_METRIC, type ChartMetric } from "@/components/payments-chart/config";
-import { IconExportLink } from "@/components/icons/link";
-import { Icon2Right } from "@/components/icons/to-right";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE, BUTTON_VARIANT } from "@/components/ui/button/config";
-import { Card } from "@/components/ui/card/Card";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
-import { Pagination } from "@/components/ui/pagination/Pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table/Table";
+import { IconExportLink } from "@stableflow/pay-ui/icons/link";
+import { Icon2Right } from "@stableflow/pay-ui/icons/to-right";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE, BUTTON_VARIANT } from "@stableflow/pay-ui/button";
+import { Card } from "@stableflow/pay-ui/card";
+import { Dropdown } from "@stableflow/pay-ui/dropdown";
+import { Pagination } from "@stableflow/pay-ui/pagination";
+import { Skeleton } from "@stableflow/pay-ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@stableflow/pay-ui/table";
+import { TableSkeletonRows } from "@stableflow/pay-ui/table";
 import { getRuntimeChains, txExplorerUrl } from "@/config/chains";
 import { useApiKeysQuery } from "@/hooks/use-api-keys-api";
 import { usePaymentLinksInfiniteQuery } from "@/hooks/use-payment-links-api";
@@ -115,10 +110,17 @@ export function ReportsView() {
     ];
   }, [linksQuery.data]);
 
-  const loadMoreLinks = useCallback(() => {
-    if (!linksQuery.hasNextPage || linksQuery.isFetchingNextPage) return;
+  useEffect(() => {
+    const linksVisible = reportSource === REPORT_SOURCE.Link || tableSource === REPORT_SOURCE.Link;
+    if (!linksVisible || !linksQuery.hasNextPage || linksQuery.isFetchingNextPage) return;
     void linksQuery.fetchNextPage();
-  }, [linksQuery.fetchNextPage, linksQuery.hasNextPage, linksQuery.isFetchingNextPage]);
+  }, [
+    linksQuery.fetchNextPage,
+    linksQuery.hasNextPage,
+    linksQuery.isFetchingNextPage,
+    reportSource,
+    tableSource,
+  ]);
 
   const times = rangeToUnixSeconds(range);
   const analyticsQuery = useReportAnalyticsQuery({
@@ -218,8 +220,6 @@ export function ReportsView() {
             value={linkId}
             onChange={setLinkId}
             options={linkOptions}
-            onReachEnd={loadMoreLinks}
-            loadingMore={linksQuery.isFetchingNextPage}
             className="min-w-[min(100%,160px)] flex-1 lg:flex-none"
             triggerClassName="w-full"
             panelClassName="max-h-60 overflow-y-auto"
@@ -245,19 +245,25 @@ export function ReportsView() {
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Total Volume
           </h2>
-          <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
-            {analyticsQuery.isPending
-              ? "—"
-              : formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true, showDust: true })}
-          </p>
+          {analyticsQuery.isPending ? (
+            <Skeleton className="mt-2 h-8 w-32" />
+          ) : (
+            <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
+              {formatAmount(analyticsQuery.data?.totalVolume || "0", { padDecimals: true, showDust: true })}
+            </p>
+          )}
         </section>
         <section>
           <h2 className="font-montserrat text-base font-medium capitalize text-black">
             Transactions
           </h2>
-          <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
-            {analyticsQuery.isPending ? "—" : (analyticsQuery.data?.transactions ?? 0)}
-          </p>
+          {analyticsQuery.isPending ? (
+            <Skeleton className="mt-2 h-8 w-16" />
+          ) : (
+            <p className="mt-2 font-montserrat text-[26px] font-medium text-black">
+              {analyticsQuery.data?.transactions ?? 0}
+            </p>
+          )}
         </section>
       </Card>
       {analyticsError ? (
@@ -320,8 +326,6 @@ export function ReportsView() {
                     resetPage();
                   }}
                   options={linkOptions}
-                  onReachEnd={loadMoreLinks}
-                  loadingMore={linksQuery.isFetchingNextPage}
                   className="min-w-0 w-full"
                   triggerClassName="w-full"
                   panelClassName="max-h-60 overflow-y-auto"
@@ -402,9 +406,7 @@ export function ReportsView() {
           <TableHead>Time</TableHead>
         </TableHeader>
         {paymentsQuery.isPending && pageRows.length === 0 ? (
-          <p className="pt-20 text-center font-montserrat text-sm font-medium text-[#aaa] lg:py-[150px]">
-            Loading transactions…
-          </p>
+          <TableSkeletonRows cells={8} />
         ) : paymentsError && pageRows.length === 0 ? (
           <p className="pt-20 text-center font-montserrat text-sm font-medium text-danger lg:py-[150px]">
             {paymentsError}

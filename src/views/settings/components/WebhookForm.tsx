@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox/Checkbox";
-import { Button } from "@/components/ui/button/Button";
-import { BUTTON_SIZE } from "@/components/ui/button/config";
+import { Checkbox } from "@stableflow/pay-ui/checkbox";
+import { Button } from "@stableflow/pay-ui/button";
+import { BUTTON_SIZE } from "@stableflow/pay-ui/button";
 import useToast from "@/hooks/use-toast";
 import type { WebhookEventType } from "@/types/webhooks";
 import { WEBHOOK_EVENT_OPTIONS, WEBHOOK_URL_MAX_LENGTH } from "../config";
