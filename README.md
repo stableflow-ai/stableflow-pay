@@ -56,7 +56,6 @@ pnpm preview
 | `/api-keys` | merchant | API keys API |
 | `/settings` | merchant | Organization profile + webhooks |
 | `/reports` | merchant | Analytics + payments APIs |
-| `/terms` | merchant | Placeholder |
 
 Overview still uses fixtures in `src/mocks/` until that backend contract exists. Payment Links, API Keys, Reports, and Settings call the live API. Webhook test send is still mocked.
 

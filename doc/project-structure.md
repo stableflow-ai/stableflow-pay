@@ -46,7 +46,6 @@ src/
     api-keys/             # Merchant API-key list at /api-keys
     reports/              # Merchant reports at /reports
     docs/                 # Public Checkout API documentation at /docs
-    placeholder/          # Sidebar routes without product UI yet (Terms)
   layouts/                # AppLayout (sidebar + 65px title + footer + outlet)
   components/
     layout/               # AppSidebar, AppNav, AccountMenu, AppFooter, sidebar config

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { PLACEHOLDER_ROUTES } from "@/components/layout/config";
 import { AppLayout } from "@/layouts/AppLayout";
 import { LoginView } from "@/views/auth/LoginView";
 import { RegisterView } from "@/views/auth/RegisterView";
@@ -17,7 +16,6 @@ import { CreatePaymentLinkPreviewView } from "@/views/payment-links/CreatePaymen
 import { CreatePaymentLinkView } from "@/views/payment-links/CreatePaymentLinkView";
 import { ApiKeysView } from "@/views/api-keys/ApiKeysView";
 import { PaymentLinksView } from "@/views/payment-links/PaymentLinksView";
-import { PlaceholderView } from "@/views/placeholder/PlaceholderView";
 import { PayView } from "@/views/payer/PayView";
 import { WaitingView } from "@/views/payer/WaitingView";
 import { ReportsView } from "@/views/reports/ReportsView";
@@ -109,10 +107,6 @@ export const router = createBrowserRouter([
           { path: "/settings", element: <SettingsView /> },
           { path: "/webhooks", element: <Navigate to="/settings" replace /> },
           { path: "/reports", element: <ReportsView /> },
-          ...PLACEHOLDER_ROUTES.map((path) => ({
-            path,
-            element: <PlaceholderView />,
-          })),
         ],
       },
     ],
