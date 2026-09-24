@@ -18,7 +18,6 @@ export function AppFooter() {
         </p>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <Link to={DOCS_PATH}>Docs</Link>
-          <span>Privacy Policy</span>
         </nav>
       </div>
     </footer>
