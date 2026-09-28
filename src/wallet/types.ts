@@ -1,5 +1,5 @@
 /**
- * Multi-chain wallet abstraction for Stableflow Pay.
+ * Multi-chain wallet abstraction for StableFlow Pay.
  *
  * Admins connect a wallet per chain to broadcast backend-prepared payouts.
  * Employees no longer connect a wallet.

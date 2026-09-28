@@ -40,7 +40,7 @@ export function PayerLayout(props: {
           props.footer ? "mt-4" : "mt-auto",
         )}
       >
-        Powered by Pay.Stableflow
+        Powered by Pay.StableFlow
       </p>
     </div>
   );
