@@ -1,4 +1,4 @@
-# Stableflow Pay
+# StableFlow Pay
 
 A crypto payment gateway supporting multi-currency cross-chain payments
 

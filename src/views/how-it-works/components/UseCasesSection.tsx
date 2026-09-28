@@ -7,7 +7,7 @@ function ControlCallout() {
             You stay in control
           </h3>
           <p className="mt-2 font-montserrat text-[14px] leading-normal text-black">
-            Stableflow Pay is non-custodial. You authorize every payment from your own wallet
+            StableFlow Pay is non-custodial. You authorize every payment from your own wallet
             or Safe.
           </p>
         </div>
@@ -44,7 +44,7 @@ function ControlCallout() {
               className="h-[50px] w-[43px] object-contain"
             />
             <p className="font-montserrat text-[12px] leading-normal text-black">
-              Stableflow Pay executes confidentialy
+              StableFlow Pay executes confidentialy
             </p>
           </div>
 

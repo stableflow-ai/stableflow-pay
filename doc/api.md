@@ -1,6 +1,6 @@
 # API Layer
 
-How to call the Stableflow Pay backend. Read this before adding or changing an endpoint.
+How to call the StableFlow Pay backend. Read this before adding or changing an endpoint.
 
 The browser calls `VITE_API_BASE_URL` directly for dashboard APIs. Default: `https://test-api.stableflow.ai`. Product APIs live under `/v1/pay/` and `/v1/nearintents/` and are **GET**, **POST**, or **DELETE**. Guide Step 4 `POST /v1/pay/checkout/sessions` (`x-api-key`) uses a Vite proxy in `pnpm dev` / `pnpm preview` (`sameOrigin`) so the browser stays same-origin. Other routes still hit the API host. Production static hosting has no Vite server unless the deploy layer also proxies that path.
 

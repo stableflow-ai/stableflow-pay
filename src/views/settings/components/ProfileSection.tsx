@@ -28,7 +28,7 @@ export function ProfileSection(props: {
       <div>
         <h2 className="font-montserrat text-xl font-medium capitalize text-black">Profile</h2>
         <p className="mt-2 font-montserrat text-sm font-normal text-[#909090]">
-          Update how your organization appears in Pay.Stableflow
+          Update how your organization appears in Pay.StableFlow
         </p>
       </div>
       <form className="flex flex-col gap-5" onSubmit={onSave}>
