@@ -47,7 +47,7 @@ export function HowItWorksView() {
           <source media="(min-width: 768px)" srcSet="/howitwork/banner.png" />
           <img
             src="/howitwork/banner-mobile.png"
-            alt="Stableflow Pay Confidential Payments."
+            alt="StableFlow Pay Confidential Payments."
             className="h-auto w-full rounded-[20px] object-cover"
           />
         </picture>

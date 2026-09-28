@@ -30,7 +30,7 @@ function GuideViewBody() {
         className="block shrink-0 px-4 pt-[21px] md:px-9"
         href="/"
       >
-        <img src="/logo.svg" alt="PAY. Stableflow" className="h-[29px] w-[95px]" />
+        <img src="/logo.svg" alt="PAY. StableFlow" className="h-[29px] w-[95px]" />
       </a>
       <main className="min-h-0 flex-1 overflow-auto px-4 pb-8 pt-10 md:px-0 md:pt-[120px]">
         <div className="mx-auto w-full max-w-[464px] md:ml-[221px] md:mr-auto">
