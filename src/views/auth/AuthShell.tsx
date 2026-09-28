@@ -5,7 +5,7 @@ import { AUTH_PANEL_BG } from "./config";
 
 const PixelBlast = lazy(() => import("@/components/pixel-blast/PixelBlast"));
 
-const STABLEFLOW_WORDMARK = getLogo("/stableflow/logos/logo-stableflow-full-light.svg");
+const STABLEFLOW_WORDMARK = getLogo("/stableflow/logos/logo-stableflow-full-light-2.svg");
 
 export function AuthShell({
   children,
